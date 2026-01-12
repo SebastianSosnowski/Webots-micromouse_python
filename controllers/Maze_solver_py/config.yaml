@@ -1,0 +1,21 @@
+simulation:
+  mode: SEARCH          # Python enum
+  algorithm: FLOODFILL  # Python enum
+  maze_layout: JAPAN_2011  # Python enum
+  testing: false
+  whole_search: false
+
+robot:
+  axle: 0.0568
+  wheel: 0.02002
+  speed: 4
+
+maze:
+  rows: 16
+  columns: 16
+  start_cell: 0
+  # target_cell można zostawić do wyliczenia w Pythonie na podstawie trybu
+  # target_cell_search: 1
+  # target_cell_speedrun: 136
+  tile_length: 0.12
+  visited_flag: 64
