@@ -2,10 +2,10 @@ from collections import namedtuple
 
 # START Values to change to run program in different modes etc. START
 
-# 1- search, 2 - speeedrun
+# 1- search, 2 - speedrun
 MODE = 1                
 
-# 1 - keyboard/manual, 2 - floodfill, 3 - deep first search (DFS),
+# 1 - keyboard/manual, 2 - floodfill, 3 - depth first search (DFS),
 # 4 - breadth first search (BFS), 5 - A*, 6 - A* modified
 ALGORITHM = 2          
 

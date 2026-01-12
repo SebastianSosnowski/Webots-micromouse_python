@@ -8,7 +8,7 @@ from Constants import *
 # @param robot, ps, tof: variables with robot devices
 # @param number_of_reads: variable which indicates how many times to read sensors
 #
-# @retvals left_wall, front_wall, right_wall, back_wall: variables which indicate respective walls presence. 
+# @retval left_wall, front_wall, right_wall, back_wall: variables which indicate respective walls presence. 
 '''
 def detect_walls(robot, ps, tof, number_of_reads):
     
@@ -62,7 +62,7 @@ def detect_walls(robot, ps, tof, number_of_reads):
 # @brief Add wall according to distance sensors.
 # Depending on robot orientation, value in variable detected_wall 
 # is changed so it match global directions. Then wall is added
-# to maze map on robot field and respective neighbouring field.
+# to maze map on robot field and respective neighboring field.
 #
 # @param maze_map: list with actual maze map with walls
 # @param robot_position: actual robot position in maze
@@ -92,7 +92,7 @@ def add_wall(maze_map, robot_position, robot_orientation, detected_wall):
 
     maze_map[robot_position] = maze_map[robot_position] | detected_wall #add sensed wall
     
-    #add wall in neighbour field
+    #add wall in neighbor field
     if detected_wall == direction.NORTH:
         
         robot_position = robot_position + maze_parameters.COLUMNS   #upper field
@@ -131,7 +131,7 @@ def add_wall(maze_map, robot_position, robot_orientation, detected_wall):
 ''' add_walls_graph_old OLD VERSION, not used anymore, but kept in code :).
 # @brief Substitute for add_wall for graphs.
 # Add connected cells according to detected walls.
-# Then remove connected cells in respective neighbouring fields according to detected walls.
+# Then remove connected cells in respective neighboring fields according to detected walls.
 #
 # @param maze_map: list with current maze map with walls
 # @param robot_position: current robot position in maze
@@ -195,7 +195,7 @@ def add_walls_graph_old(maze_map, robot_position, robot_orientation, detected_wa
                         walls.append(up)
                     elif robot_orientation == direction.WEST:
                         walls.append(right)
-        else: #wall present - remove connected cells in neighbour node
+        else: #wall present - remove connected cells in neighbor node
             match i:
                 case 'front wall':
                     if robot_orientation == direction.NORTH:
@@ -257,7 +257,7 @@ def add_walls_graph_old(maze_map, robot_position, robot_orientation, detected_wa
 
 ''' add_walls_graph
 # @brief Substitute add_wall function for graphs.
-# Remove connected cells in robot position and respective neighbouring cells according to detected walls.
+# Remove connected cells in robot position and respective neighboring cells according to detected walls.
 #
 # @param maze_map: dictionary with current maze map with walls
 # @param robot_position: current robot position in maze
@@ -270,13 +270,13 @@ def add_walls_graph(maze_map, robot_position, robot_orientation, detected_walls)
     
     rows = maze_parameters.ROWS
     
-    #neighbours positions
+    #neighbors positions
     up = robot_position + rows
     down = robot_position - rows
     left = robot_position - 1
     right = robot_position + 1
 
-    #Checks if neighours are in maze graph
+    #Checks if neighbors are in maze graph
     up_in_maze = up in maze_map
     down_in_maze = down in maze_map
     right_in_maze = right in maze_map
@@ -285,7 +285,7 @@ def add_walls_graph(maze_map, robot_position, robot_orientation, detected_walls)
     walls = [up, down, left, right]
     
     for i in detected_walls.keys():
-        if detected_walls[i]: #wall present - remove connected cell in node and respective neighbour
+        if detected_walls[i]: #wall present - remove connected cell in node and respective neighbor
             match i:
                 case 'front wall':
                     if robot_orientation == direction.NORTH:
@@ -397,7 +397,7 @@ def add_walls_graph(maze_map, robot_position, robot_orientation, detected_walls)
 #
 # @param maze_map: list which contains maze map values
 #
-# @retv maze_map: Initialized maze map list
+# @retval maze_map: Initialized maze map list
 '''
 def init_maze_map(maze_map):
     maze_map[0] = maze_map[0] | maze_parameters.VISITED #mark start as visited
@@ -426,7 +426,7 @@ def init_maze_map(maze_map):
 #
 # @params None
 #
-# @retv maze_map: Initialized maze map dictionary
+# @retval maze_map: Initialized maze map dictionary
 '''
 def init_maze_map_graph():
 
@@ -483,9 +483,9 @@ def init_maze_map_graph():
 # Target is 0 for floodfill algorithm working properly.
 #
 # @param distance: list which contains distance values
-# @param target: value which contains targetted cell
+# @param target: value which contains targeted cell
 #
-# @retv distance: Initialized distance list
+# @retval distance: Initialized distance list
 '''
 def init_distance_map(distance, target):
     distance = [maze_parameters.MAZE_SIZE - 1] * maze_parameters.MAZE_SIZE
@@ -500,7 +500,7 @@ def init_distance_map(distance, target):
 # @param list: list which contains map or distance values
 # @param action: value which indicates to print map walls without visited cells
 #
-# @retv None
+# @retval None
 '''
 def print_array(list, action):
 

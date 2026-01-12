@@ -97,7 +97,7 @@ def draw_maze(maze_map, distance):
 
 
 ''' update_maze_speedrun
-# @brief Update maze visualisation with actual robot position and path.
+# @brief Update maze visualization with actual robot position and path.
 #
 # @param size: size: variable with side size of one maze cell
 # @param lines: object with lines that draw robot path
@@ -123,7 +123,7 @@ def update_maze_speedrun(size, lines, robot_position):
 
 
 ''' update_maze_search
-# @brief Update maze visualisation with visited cells and discovered walls and distance values.
+# @brief Update maze visualization with visited cells and discovered walls and distance values.
 # For floodfill distance values are also drawn.
 # For A* costs values are also drawn.
 #
@@ -182,7 +182,7 @@ def update_maze_search(size, visited_cell, text, maze):
 
 
 ''' draw_center
-# @brief Update maze visualisation with center cells at the end accordingly to visited cells.
+# @brief Update maze visualization with center cells at the end according to visited cells.
 #
 # @param size: variable with side size of one maze cell
 # @param maze: object with maze walls
@@ -287,7 +287,7 @@ def write_distance(x, y, distance, t):
 
 
 ''' write_cost
-# @brief Write costs values in maze cell. Used in A* algorithm
+# @brief Write cost values in maze cell. Used in A* algorithm
 #
 # @param x: variable with text x coordinate
 # @param y: variable with text y coordinate
@@ -315,8 +315,8 @@ def write_cost(x, y, cost, t):
 # @brief Draw corresponding walls and values in each field.
 #
 # @param maze_map: list with actual maze map with walls
-# @param x: variable with offest in x direction
-# @param y: variable with offest in y direction
+# @param x: variable with offset in x direction
+# @param y: variable with offset in y direction
 # @param size: value with one field size (for easier change when changing window size)
 # @param t: corresponding turtle object
 #
@@ -376,7 +376,7 @@ def draw_wall(maze_map, x, y, size, t):
 
 ''' graph_walls_convert 
 # @brief Convert edges in node to value which represents walls configuration.
-# Made for compatibility with visualisation which was made for floodfill
+# Made for compatibility with visualization which was made for floodfill
 # which doesn't use graph for a maze map.
 #
 # @param maze_field: list with connected fields to position

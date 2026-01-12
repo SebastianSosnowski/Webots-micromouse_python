@@ -1,4 +1,4 @@
-from controller import Keyboard
+from controller import Keyboard, Robot
 from collections import namedtuple, deque
 from threading import Thread
 #my modules
@@ -14,12 +14,12 @@ import var
 # @brief Main program for floodfill algorithm controller. 
 # 2 approaches are available:
 # 1. Without searching whole maze - every cycle robot calculates shortest path to target
-# and tries to go to it. When target is found it checks if it was the shrotest path
+# and tries to go to it. When target is found it checks if it was the shortest path
 # by comparing paths for 2 mazes: actually discovered and discovered but cells
 # which weren't visited are assumed with 4 walls. If path from actually discovered
 # maze has same length as 2nd one - the shortest path was founded. If not robot makes
 # second run - from target to start cell to search some of unvisited part of maze.
-# Process reapeat's until shortest path is found.
+# Process repeat's until shortest path is found.
 # 2. With searching whole maze - WORKS only for mazes, where ALL cells are accessible.
 # Unrecommended to use.
 #
@@ -44,13 +44,13 @@ def floodfill_main(robot):
     while robot.step(TIME_STEP) != -1:
             
             if mode_params.TESTING:
-                print('sensor tof %.2f'% tof.getValue()) #do usuniecia
+                print('sensor tof %.2f'% tof.getValue()) 
 
             if mode_params.TESTING:
-                print('sensor ps6 left %.2f'% ps[6].getValue()) #do usuniecia
+                print('sensor ps6 left %.2f'% ps[6].getValue()) 
             
             if mode_params.TESTING:
-                print('sensor ps1 right %.2f'% ps[1].getValue()) #do usuniecia
+                print('sensor ps1 right %.2f'% ps[1].getValue()) 
 
             match mode_params.MODE:
                 case mode_params.SEARCH: #search
@@ -154,7 +154,7 @@ def floodfill_main(robot):
 
 
 ''' DFS_main
-# @brief Main program for Deep first search algorithm controller.
+# @brief Main program for Depth first search algorithm controller.
 # Doesn't guarantee the shortest path but usually finds path very fast (micromouse mazes).
 #
 # @param robot: object with robot instance
@@ -256,7 +256,7 @@ def DFS_main(robot):
                 var.main_event.wait()
                 var.main_event.clear()
 
-        case mode_params.SPEEDRUN: #speedrun
+        case mode_params.SPEEDRUN:
 
             if start:
                 path = algorithm_f.read_file(path_file)
@@ -300,7 +300,7 @@ def DFS_main(robot):
 ''' BFS_main
 # @brief Main program for Breadth first search algorithm controller.
 # It was adjusted for robot movement. BFS is a horizontal searching through graph
-# by going by each 'level' of nodes. To avoid unnnecesary back-tracking,
+# by going by each 'level' of nodes. To avoid unnecessary back-tracking,
 # only forks are treated as 'levels',  which means that robot will go back
 # only when it moves to new fork or dead-end. Because of that it doesn't guarantees shortest path.
 #
@@ -391,7 +391,7 @@ def BFS_main(robot):
                 
                 if current_destination not in maze_map[robot_position]: #not adjacent cell e.g. we move back farther than 1 cell      
                     # temp_graph = {}
-                    # for cell in visited:#creaty sub-graph only from visited cells
+                    # for cell in visited: # create sub-graph only from visited cells
                     #     temp_graph[cell] = maze_map[cell]
                     
                     back_path = algorithm_f.get_path_BFS(maze_map_searched, robot_position, current_destination)
@@ -411,7 +411,7 @@ def BFS_main(robot):
                 var.main_event.wait()
                 var.main_event.clear()
 
-        case mode_params.SPEEDRUN: #speedrun
+        case mode_params.SPEEDRUN:
 
             if start:
                 path = algorithm_f.read_file(path_file)
@@ -476,7 +476,7 @@ def A_star_main(robot):
     open = [] #list of unvisited nodes
     closed = [] #list of visited nodes
     cost = {}
-    parent = {} #propably not needed anymore
+    parent = {} #probably not needed anymore
     path = []
     time_sum = 0.0
     current_destination = robot_position
@@ -510,7 +510,7 @@ def A_star_main(robot):
                 open.remove(robot_position)
                 closed.append(robot_position)
                 
-                open, parent, cost = algorithm_f.update_neighbours_costs(maze_map[robot_position], open,  closed, parent, cost, robot_position)
+                open, parent, cost = algorithm_f.update_neighbors_costs(maze_map[robot_position], open,  closed, parent, cost, robot_position)
 
                 var.robot_pos = robot_position
                 var.maze_map_global = maze_map
@@ -532,7 +532,7 @@ def A_star_main(robot):
                 
                 current_destination = algorithm_f.check_possible_routes_A_star(open, cost)
 
-                if current_destination not in maze_map[robot_position]: #not neighbour cell e.g. we move back farther than 1 cell      
+                if current_destination not in maze_map[robot_position]: #not neighbor cell e.g. we move back farther than 1 cell      
                     
                     path = algorithm_f.get_path_A_star(maze_map_searched, robot_position, current_destination)
                     while path:
@@ -623,7 +623,7 @@ def A_star_main_modified(robot):
     open = [] #list of unvisited nodes
     closed = [] #list of visited nodes
     cost = {}
-    parent = {} #propably not needed anymore
+    parent = {} #probably not needed anymore
     path = []
 
     time_sum = 0.0 
@@ -659,7 +659,7 @@ def A_star_main_modified(robot):
                 open.remove(robot_position)
                 closed.append(robot_position)
                 
-                open, parent, cost = algorithm_f.update_neighbours_costs(maze_map[robot_position], open,  closed, parent, cost, robot_position)
+                open, parent, cost = algorithm_f.update_neighbors_costs(maze_map[robot_position], open,  closed, parent, cost, robot_position)
  
                 var.robot_pos = robot_position
                 var.maze_map_global = maze_map
@@ -807,10 +807,8 @@ def keyboard_main(robot):
 # @retval tof: object with distance Tof sensor
 '''   
 def init_devices(robot):
-    
     left_motor = robot.getDevice('left wheel motor')
     right_motor = robot.getDevice('right wheel motor')
-
     left_motor.setVelocity(robot_parameters.SPEED)
     right_motor.setVelocity(robot_parameters.SPEED)
 

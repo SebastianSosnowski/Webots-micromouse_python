@@ -150,7 +150,7 @@ def read_sensors(robot, ps, number_of_reads):
 #
 # @params left_motor, right_motor, robot, ps, ps_left, ps_right: variables with robot devices
 #
-# @retv None
+# @retval None
 '''
 def PID_correction(left_motor, right_motor, robot, ps, ps_left, ps_right):
     
@@ -242,7 +242,7 @@ def PID_correction(left_motor, right_motor, robot, ps, ps_left, ps_right):
 #
 # @params robot, left_motor, right_motor, ps_left, ps_right, ps: variables with robot devices
 #
-# @retv None
+# @retval None
 '''
 def move_1_tile(robot, left_motor, right_motor, ps_left, ps_right, ps):
     
@@ -274,7 +274,7 @@ def move_1_tile(robot, left_motor, right_motor, ps_left, ps_right, ps):
 #
 # @params robot, left_motor, right_motor, tof, ps: variables with robot devices
 #
-# @retv None
+# @retval None
 '''
 def move_front_correct(tof, left_motor, right_motor, robot, ps):
 
@@ -346,7 +346,7 @@ def move_front_correct(tof, left_motor, right_motor, robot, ps):
 # @param move_direction: variable with direction where to move in global directions
 # @params robot, left_motor, right_motor, ps_left, ps_right: variables with robot devices
 #
-# @retv None
+# @retval None
 '''
 def turn(robot, move_direction, left_motor, right_motor, ps_left, ps_right):
 
@@ -389,7 +389,7 @@ def turn(robot, move_direction, left_motor, right_motor, ps_left, ps_right):
 
 
 ''' move_back_DFS
-# @brief Moves robot back to previous valid fork (Deep first search).
+# @brief Moves robot back to previous valid fork (Depth first search).
 # 
 # @param destination: variable with robot destination cell
 # @param maze_map: dictionary with maze map graph
@@ -401,7 +401,7 @@ def turn(robot, move_direction, left_motor, right_motor, ps_left, ps_right):
 # @params robot, ps, tof, left_motor, right_motor, ps_left, ps_right: variables with robot devices
 # @param path: list with actual path from start to current position
 #
-# @retv fork, fork_number, fork_count, path, robot_orientation, robot_position: updated values
+# @retval fork, fork_number, fork_count, path, robot_orientation, robot_position: updated values
 '''
 def move_back_DFS(destination, maze_map, robot_position, fork, fork_number, unused_routes, robot_orientation,\
                robot, ps, tof, left_motor, right_motor, ps_left, ps_right, path):
@@ -428,7 +428,7 @@ def move_back_DFS(destination, maze_map, robot_position, fork, fork_number, unus
 #
 # @params robot, ps_left, ps_right: variables with robot devices
 # 
-# @retv None
+# @retval None
 '''
 def wait_move_end(robot, ps_left, ps_right):
 

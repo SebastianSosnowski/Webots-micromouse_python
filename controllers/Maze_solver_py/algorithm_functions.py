@@ -271,7 +271,7 @@ def get_path_A_star(maze_map, start, target):
         open.remove(current_position)
         closed.append(current_position)
         
-        open, parent, cost = update_neighbours_costs(maze_map[current_position], open, closed, parent, cost, current_position)
+        open, parent, cost = update_neighbors_costs(maze_map[current_position], open, closed, parent, cost, current_position)
         
         if current_position == target:
             while current_position != start:
@@ -304,13 +304,13 @@ def check_possible_routes_A_star(open, cost):
     return current_destination
 
 
-''' update_neighbours_costs  
-# @brief Used in A* algorithm. Assign and/or update costs of neighbour nodes.
-# New cost is assign to node when it's not in open list or new cost is lower than actual.
+''' update_neighbors_costs  
+# @brief Used in A* algorithm. Assign and/or update costs of neighbor nodes.
+# New cost is assigned to node when it's not in open list or new cost is lower than actual.
 # In addition parent of the node is assigned, which allows to create path later.
 # If target is found, function breaks.
 #
-# @param neighbours: list with cells adjacent to current position
+# @param neighbors: list with cells adjacent to current position
 # @param open: list with cells to visit
 # @param closed: list with cells already visited
 # @param parent: dictionary with parent nodes used to create path
@@ -321,22 +321,22 @@ def check_possible_routes_A_star(open, cost):
 # @retval parent: updated dictionary with parent nodes used to create path
 # @retval cost: updated dictionary of costs, which contain Gcost and Hcost
 '''
-def update_neighbours_costs(neighbours, open, closed, parent, cost, current_position):
-    for neighbour in neighbours:
-        if neighbour in closed:
+def update_neighbors_costs(neighbors, open, closed, parent, cost, current_position):
+    for neighbor in neighbors:
+        if neighbor in closed:
             continue
 
-        new_move_to_neighbour_cost = cost[current_position][0] + calc_cost(current_position, neighbour)
+        new_move_to_neighbor_cost = cost[current_position][0] + calc_cost(current_position, neighbor)
 
-        # if (neighbour not in open) or new_cost < (cost[neighbour][0] + cost[neighbour][1]):
-        if (neighbour not in open) or new_move_to_neighbour_cost < cost[neighbour][0]:
-            neighbour_Gcost = new_move_to_neighbour_cost 
-            neighbour_Hcost = calc_cost(neighbour, maze_parameters.TARGET_CELL)
-            cost[neighbour] = [neighbour_Gcost, neighbour_Hcost]
-            parent[neighbour] = current_position
+        # if (neighbor not in open) or new_cost < (cost[neighbor][0] + cost[neighbor][1]):
+        if (neighbor not in open) or new_move_to_neighbor_cost < cost[neighbor][0]:
+            neighbor_Gcost = new_move_to_neighbor_cost 
+            neighbor_Hcost = calc_cost(neighbor, maze_parameters.TARGET_CELL)
+            cost[neighbor] = [neighbor_Gcost, neighbor_Hcost]
+            parent[neighbor] = current_position
             
-            if neighbour not in open:
-                open.append(neighbour)
+            if neighbor not in open:
+                open.append(neighbor)
             
             if neighbour == maze_parameters.TARGET_CELL:
                 break
@@ -364,7 +364,7 @@ def get_back_path_A_star(maze_map, target, robot_position, parent):
     while True: #check path from target
         path_to_target.append(node)
         
-        if node in maze_map[robot_position]: #path founded
+        if node in maze_map[robot_position]: #path found
             return path_to_target
             
         if parent[node] == node: #node is start position 
@@ -375,7 +375,7 @@ def get_back_path_A_star(maze_map, target, robot_position, parent):
     while True: #check path from current position
         path_to_current.append(node)
         
-        if target in maze_map[node]: #path founded
+        if target in maze_map[node]: #path found
             path_to_current.append(target)
             path_to_current.pop(0)
             path_to_current.reverse()
