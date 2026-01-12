@@ -2,3 +2,7 @@ test.py
 test2.py
 *.pkl
 Results/
+__pycache__/
+*.pyc
+*.code-workspace
+.vscode/

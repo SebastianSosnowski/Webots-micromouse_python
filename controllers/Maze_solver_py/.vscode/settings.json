@@ -1,5 +1,0 @@
-{
-    "python.languageServer": "Pylance",
-    "python.analysis.typeCheckingMode": "off",
-    "C_Cpp.errorSquiggles": "disabled"
-}
