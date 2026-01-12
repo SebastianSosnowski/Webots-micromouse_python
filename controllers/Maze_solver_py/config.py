@@ -20,7 +20,7 @@ class Algorithm(Enum):
 
 
 class MazeLayout(Enum):
-    """Maze layout corresponding to simulation wolrd."""
+    """Maze layout corresponding to simulation world."""
 
     FORBOT = 1
     TAIWAN_2015 = 2
