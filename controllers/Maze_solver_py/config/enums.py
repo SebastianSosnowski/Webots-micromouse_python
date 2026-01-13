@@ -45,3 +45,10 @@ class Directions(Enum):
     # EAST = 2  #  00000010
     # SOUTH = 4  #  00000100
     # WEST = 8  #  00001000
+
+
+class Move():
+    FORWARD = "W"
+    LEFT = "A"
+    BACK = "S"
+    RIGHT = "D"
