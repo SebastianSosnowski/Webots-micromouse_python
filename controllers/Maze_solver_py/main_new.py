@@ -14,7 +14,7 @@ from config.enums import Algorithm
 
 def run_robot(robot: MyRobot):
 
-    match robot.algorithm:
+    match robot.sim.algorithm:
         case Algorithm.KEYBOARD:
             main_f.keyboard_main(robot)
         case Algorithm.FLOODFILL:

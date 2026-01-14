@@ -261,8 +261,8 @@ def PID_correction(robot: MyRobot):
             if mode_params.TESTING:
                 print("speed %.3f" % MotorSpeed)
 
-            robot.left_motor.setVelocity(robot.speed + MotorSpeed)
-            robot.right_motor.setVelocity(robot.speed - MotorSpeed)
+            robot.left_motor.setVelocity(robot.robot.speed + MotorSpeed)
+            robot.right_motor.setVelocity(robot.robot.speed - MotorSpeed)
         elif left_wall:
             error = left_angle_sensor - Middle
 
@@ -281,8 +281,8 @@ def PID_correction(robot: MyRobot):
             if mode_params.TESTING:
                 print("speed %.3f" % MotorSpeed)
 
-            robot.left_motor.setVelocity(robot.speed + MotorSpeed)
-            robot.right_motor.setVelocity(robot.speed - MotorSpeed)
+            robot.left_motor.setVelocity(robot.robot.speed + MotorSpeed)
+            robot.right_motor.setVelocity(robot.robot.speed - MotorSpeed)
         elif right_wall:
             error = right_angle_sensor - Middle
 
@@ -301,8 +301,8 @@ def PID_correction(robot: MyRobot):
             if mode_params.TESTING:
                 print("speed %.3f" % MotorSpeed)
 
-            robot.left_motor.setVelocity(robot.speed - MotorSpeed)
-            robot.right_motor.setVelocity(robot.speed + MotorSpeed)
+            robot.left_motor.setVelocity(robot.robot.speed - MotorSpeed)
+            robot.right_motor.setVelocity(robot.robot.speed + MotorSpeed)
 
         distance_left_later = robot.ps_left.getValue()
         distance_right_later = robot.ps_right.getValue()
@@ -325,7 +325,7 @@ def PID_correction(robot: MyRobot):
 
 def move_1_tile(robot: MyRobot):
 
-    revolutions = maze_parameters.TILE_LENGTH / robot.wheel  # rev in radians
+    revolutions = maze_parameters.TILE_LENGTH / robot.robot.wheel  # rev in radians
 
     left_wheel_revolutions = robot.ps_left.getValue()
     right_wheel_revolutions = robot.ps_right.getValue()
@@ -333,8 +333,8 @@ def move_1_tile(robot: MyRobot):
     left_wheel_revolutions += revolutions
     right_wheel_revolutions += revolutions
 
-    robot.left_motor.setVelocity(robot.speed)
-    robot.right_motor.setVelocity(robot.speed)
+    robot.left_motor.setVelocity(robot.robot.speed)
+    robot.right_motor.setVelocity(robot.robot.speed)
 
     robot.left_motor.setPosition(left_wheel_revolutions)
     robot.right_motor.setPosition(right_wheel_revolutions)
@@ -433,13 +433,13 @@ def move_front_correct(tof, left_motor, right_motor, robot, ps):
 
 def turn(robot: MyRobot, move_direction):
 
-    revolutions = (pi / 2) * robot.axle / 2 / robot.wheel  # in radians
+    revolutions = (pi / 2) * robot.robot.axle / 2 / robot.robot.wheel  # in radians
 
     left_wheel_revolutions = robot.ps_left.getValue()
     right_wheel_revolutions = robot.ps_right.getValue()
 
-    robot.left_motor.setVelocity(robot.speed * 0.33)
-    robot.right_motor.setVelocity(robot.speed * 0.33)
+    robot.left_motor.setVelocity(robot.robot.speed * 0.33)
+    robot.right_motor.setVelocity(robot.robot.speed * 0.33)
 
     match move_direction:
         case moves.right:

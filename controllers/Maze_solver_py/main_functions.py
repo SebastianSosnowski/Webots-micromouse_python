@@ -1076,9 +1076,9 @@ def keyboard_main(robot: MyRobot):
     # left_motor, right_motor, ps_left, ps_right, ps, tof = init_devices(robot)
 
     keyboard = Keyboard()
-    keyboard.enable(robot.time_step)
+    keyboard.enable(robot.sim.time_step)
     max_tof = 0
-    while robot.step(robot.time_step) != -1:
+    while robot.step(robot.sim.time_step) != -1:
 
         if mode_params.TESTING:
             avg_front_sensor = 0
@@ -1086,7 +1086,7 @@ def keyboard_main(robot: MyRobot):
 
                 avg_front_sensor += robot.tof.getValue()
 
-                robot.step(robot.time_step)  # simulation update
+                robot.step(robot.sim.time_step)  # simulation update
 
             avg_front_sensor = avg_front_sensor / 3
 

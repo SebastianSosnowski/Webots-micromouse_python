@@ -34,7 +34,7 @@ class MazeLayout(Enum):
     KOR_88 = 10
 
 
-class Directions(Enum):
+class Direction(Enum):
     """Wall value according to its global direction."""
 
     WEST = 1  #  00000001
@@ -47,7 +47,7 @@ class Directions(Enum):
     # WEST = 8  #  00001000
 
 
-class Move():
+class Move:
     FORWARD = "W"
     LEFT = "A"
     BACK = "S"
