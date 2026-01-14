@@ -15,7 +15,6 @@ class SimulationParams:
     algorithm: Algorithm  # Python enum
     maze_layout: MazeLayout  # Python enum
     testing: bool
-    whole_search: bool
     time_step: int = 64
 
 
@@ -23,14 +22,16 @@ class SimulationParams:
 class MazeParams:
     rows: int
     columns: int
+    size: int
     start_cell: int
     target_cell: int
     tile_length: float
-    visited_flag: int
+    visited: int
 
 
 @dataclass
 class RobotState:
     pos: int
+    current_target: int
     start: bool = True
     orientation: Direction = Direction.NORTH

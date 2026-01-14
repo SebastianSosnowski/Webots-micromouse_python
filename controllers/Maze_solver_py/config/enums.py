@@ -1,14 +1,14 @@
-from enum import Enum
+from enum import IntEnum, StrEnum
 
 
-class Mode(Enum):
+class Mode(IntEnum):
     """Run mode."""
 
     SEARCH = 1
     SPEEDRUN = 2
 
 
-class Algorithm(Enum):
+class Algorithm(IntEnum):
     """Algorithm to solve maze."""
 
     KEYBOARD = 1
@@ -19,7 +19,7 @@ class Algorithm(Enum):
     A_STAR_MOD = 6
 
 
-class MazeLayout(Enum):
+class MazeLayout(IntEnum):
     """Maze layout corresponding to simulation world."""
 
     FORBOT = 1
@@ -34,7 +34,7 @@ class MazeLayout(Enum):
     KOR_88 = 10
 
 
-class Direction(Enum):
+class Direction(IntEnum):
     """Wall value according to its global direction."""
 
     WEST = 1  #  00000001
@@ -47,7 +47,7 @@ class Direction(Enum):
     # WEST = 8  #  00001000
 
 
-class Move:
+class Move(StrEnum):
     FORWARD = "W"
     LEFT = "A"
     BACK = "S"

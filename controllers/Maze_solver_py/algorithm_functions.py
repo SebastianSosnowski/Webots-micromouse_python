@@ -1,4 +1,4 @@
-# Algorythm related functions
+# algorithm related functions
 import pickle
 from collections import deque
 
@@ -6,6 +6,8 @@ from Constants import *
 from map_functions import init_distance_map
 import var
 
+from utils.my_robot import MyRobot
+from config.enums import Direction, Move
 
 """ floodfill
 # @brief Floodfill algorithm which calculates shortest path to actual target based on actual maze map.
@@ -27,7 +29,7 @@ def floodfill(maze_map, distance):
         for i in range(0, maze_parameters.MAZE_SIZE):
             if distance[i] < 255:
 
-                if (maze_map[i] & direction.NORTH) != direction.NORTH:
+                if (maze_map[i] & Direction.NORTH) != Direction.NORTH:
                     if distance[i + maze_parameters.COLUMNS] == 255 or (
                         (distance[i] + 1) < distance[i + maze_parameters.COLUMNS]
                     ):
@@ -36,21 +38,17 @@ def floodfill(maze_map, distance):
                         )  # update distance value on north tile
                         search = True
 
-                if (maze_map[i] & direction.EAST) != direction.EAST:
+                if (maze_map[i] & Direction.EAST) != Direction.EAST:
                     if distance[i + 1] == 255 or ((distance[i] + 1) < distance[i + 1]):
-                        distance[i + 1] = (
-                            distance[i] + 1
-                        )  # update distance value on EAST tile
+                        distance[i + 1] = distance[i] + 1  # update distance value on EAST tile
                         search = True
 
-                if (maze_map[i] & direction.WEST) != direction.WEST:
+                if (maze_map[i] & Direction.WEST) != Direction.WEST:
                     if distance[i - 1] == 255 or ((distance[i] + 1) < distance[i - 1]):
-                        distance[i - 1] = (
-                            distance[i] + 1
-                        )  # update distance value on WEST tile
+                        distance[i - 1] = distance[i] + 1  # update distance value on WEST tile
                         search = True
-                # prop unnecessary cuz robot doesnt move backward
-                if (maze_map[i] & direction.SOUTH) != direction.SOUTH:
+                # prop unnecessary cuz robot doesn't move backward
+                if (maze_map[i] & Direction.SOUTH) != Direction.SOUTH:
                     if distance[i - maze_parameters.COLUMNS] == 255 or (
                         (distance[i] + 1) < distance[i - maze_parameters.COLUMNS]
                     ):
@@ -67,7 +65,7 @@ def floodfill(maze_map, distance):
 
 
 """ where_to_move
-# @brief Decide where to move by checking distance values in neighbours cells.
+# @brief Decide where to move by checking distance values in neighbors cells.
 # Depending on robot orientation, value in variable move_direction 
 # is changed so it match global directions. 
 #
@@ -80,58 +78,60 @@ def floodfill(maze_map, distance):
 """
 
 
-def where_to_move(walls, robot_position, distance, robot_orientation):
+def where_to_move(robot: MyRobot, walls, distance):
 
-    best_neighbour = 255
-    move_direction = direction.NORTH
+    position = robot.state.pos
+    orientation = robot.state.orientation
+    best_neighbor = 255
+    move_direction: Direction = Direction.NORTH
 
-    if (walls & direction.NORTH) != direction.NORTH:
+    if (walls & Direction.NORTH) != Direction.NORTH:
 
-        if distance[robot_position + maze_parameters.COLUMNS] <= best_neighbour:
+        if distance[position + maze_parameters.COLUMNS] <= best_neighbor:
 
-            if distance[robot_position + maze_parameters.COLUMNS] < best_neighbour:
+            if distance[position + maze_parameters.COLUMNS] < best_neighbor:
 
-                best_neighbour = distance[robot_position + maze_parameters.COLUMNS]
-                move_direction = direction.NORTH
+                best_neighbor = distance[position + maze_parameters.COLUMNS]
+                move_direction = Direction.NORTH
 
-            elif robot_orientation == direction.NORTH:
-                move_direction = direction.NORTH
+            elif orientation == Direction.NORTH:
+                move_direction = Direction.NORTH
 
-    if (walls & direction.EAST) != direction.EAST:
+    if (walls & Direction.EAST) != Direction.EAST:
 
-        if distance[robot_position + 1] <= best_neighbour:
+        if distance[position + 1] <= best_neighbor:
 
-            if distance[robot_position + 1] < best_neighbour:
+            if distance[position + 1] < best_neighbor:
 
-                best_neighbour = distance[robot_position + 1]
-                move_direction = direction.EAST
+                best_neighbor = distance[position + 1]
+                move_direction = Direction.EAST
 
-            elif robot_orientation == direction.EAST:
-                move_direction = direction.EAST
+            elif orientation == Direction.EAST:
+                move_direction = Direction.EAST
 
-    if (walls & direction.SOUTH) != direction.SOUTH:
+    if (walls & Direction.SOUTH) != Direction.SOUTH:
 
-        if distance[robot_position - maze_parameters.COLUMNS] <= best_neighbour:
+        if distance[position - maze_parameters.COLUMNS] <= best_neighbor:
 
-            if distance[robot_position - maze_parameters.COLUMNS] < best_neighbour:
+            if distance[position - maze_parameters.COLUMNS] < best_neighbor:
 
-                best_neighbour = distance[robot_position - maze_parameters.COLUMNS]
-                move_direction = direction.SOUTH
+                best_neighbor = distance[position - maze_parameters.COLUMNS]
+                move_direction = Direction.SOUTH
 
-            elif robot_orientation == direction.SOUTH:
-                move_direction = direction.SOUTH
+            elif orientation == Direction.SOUTH:
+                move_direction = Direction.SOUTH
 
-    if (walls & direction.WEST) != direction.WEST:
+    if (walls & Direction.WEST) != Direction.WEST:
 
-        if distance[robot_position - 1] <= best_neighbour:
+        if distance[position - 1] <= best_neighbor:
 
-            if distance[robot_position - 1] < best_neighbour:
+            if distance[position - 1] < best_neighbor:
 
-                best_neighbour = distance[robot_position - 1]
-                move_direction = direction.WEST
+                best_neighbor = distance[position - 1]
+                move_direction = Direction.WEST
 
-            elif robot_orientation == direction.WEST:
-                move_direction = direction.WEST
+            elif orientation == Direction.WEST:
+                move_direction = Direction.WEST
 
     return move_direction
 
@@ -153,13 +153,13 @@ def where_to_move_graph(robot_position, current_destination):
     x = current_destination - robot_position
     match x:
         case -16:
-            move_direction = direction.SOUTH
+            move_direction = Direction.SOUTH
         case -1:
-            move_direction = direction.WEST
+            move_direction = Direction.WEST
         case 1:
-            move_direction = direction.EAST
+            move_direction = Direction.EAST
         case 16:
-            move_direction = direction.NORTH
+            move_direction = Direction.NORTH
 
     return move_direction
 
@@ -169,7 +169,7 @@ def where_to_move_graph(robot_position, current_destination):
 # First item in queue is chosen when robot current position is
 # a fork or dead end (breadth first search). Otherwise last item in queue is chosen.
 #
-# @param adjacent_cells: list with cells accesible from current robot position
+# @param adjacent_cells: list with cells accessible from current robot position
 # @param visited: list with cells already added to queue
 # @param queue: queue with cells which will be visited
 # @param fork: bool variable which informs if current cell is a fork
@@ -373,7 +373,7 @@ def update_neighbors_costs(neighbors, open, closed, parent, cost, current_positi
             if neighbor not in open:
                 open.append(neighbor)
 
-            if neighbour == maze_parameters.TARGET_CELL:
+            if neighbor == maze_parameters.TARGET_CELL:
                 break
 
     return open, parent, cost
@@ -533,33 +533,29 @@ def get_path_BFS(graph, start, target):
 """
 
 
-def change_orientation(robot_orientation, action):
+def change_orientation(robot_orientation: Direction, action: Move):
+    orientation_value: int = robot_orientation.value
     match action:
-        case moves.right:  # turn right
-            if robot_orientation == direction.WEST:
-                robot_orientation = direction.NORTH
+        case Move.RIGHT:  # turn right
+            if orientation_value == Direction.WEST:
+                orientation_value = Direction.NORTH
             else:
-                robot_orientation //= 2
-        case moves.left:  # turn left
-            if robot_orientation == direction.NORTH:
-                robot_orientation = direction.WEST
+                orientation_value //= 2
+        case Move.LEFT:  # turn left
+            if orientation_value == Direction.NORTH:
+                orientation_value = Direction.WEST
             else:
-                robot_orientation *= 2
-        case moves.back:  # turn back
-            if (
-                robot_orientation == direction.NORTH
-                or robot_orientation == direction.EAST
-            ):
-                robot_orientation //= 4
+                orientation_value *= 2
+        case Move.BACK:  # turn back
+            if orientation_value == Direction.NORTH or orientation_value == Direction.EAST:
+                orientation_value //= 4
             else:
-                robot_orientation *= 4
-
-    x = direction.index(robot_orientation)
+                orientation_value *= 4
 
     if mode_params.TESTING:
-        print("orientacja:", direction._fields[x])
+        print("Orientation:", Direction(orientation_value))
 
-    return robot_orientation
+    return Direction(orientation_value)
 
 
 """ change_position
@@ -574,15 +570,15 @@ def change_orientation(robot_orientation, action):
 
 def change_position(robot_position, robot_orientation):
 
-    if robot_orientation == direction.NORTH:
+    if robot_orientation == Direction.NORTH:
         robot_position = robot_position + maze_parameters.COLUMNS
 
-    elif robot_orientation == direction.EAST:
+    elif robot_orientation == Direction.EAST:
         robot_position = robot_position + 1
-    elif robot_orientation == direction.SOUTH:
+    elif robot_orientation == Direction.SOUTH:
         robot_position = robot_position - maze_parameters.COLUMNS
 
-    elif robot_orientation == direction.WEST:
+    elif robot_orientation == Direction.WEST:
         robot_position = robot_position - 1
 
     return robot_position
@@ -601,65 +597,42 @@ def change_position(robot_position, robot_orientation):
 """
 
 
-def change_target(maze_map, robot_position, distance, target):
+def change_target(robot: MyRobot, maze_map, distance):
+    distance = init_distance_map(distance, robot.state.current_target)  # reset path
+    distance = floodfill(maze_map, distance)  # path
 
-    match mode_params.WHOLE_SEARCH:
-        case False:
-            distance = init_distance_map(distance, target)  # reset path
-            distance = floodfill(maze_map, distance)  # path
+    # fill unvisited cells with 4 walls to verify if the shortest path was find
+    shortest_path = check_distance(distance, maze_map, robot.state.current_target)
 
-            # fill unvisited cells with 4 walls to verify if the shortest path was find
-            shortest_path = check_distance(distance, maze_map, target)
+    if robot.state.pos == robot.maze.target_cell:
 
-            if robot_position == 136:
+        maze_map = mark_center(maze_map)
 
-                maze_map = mark_center(maze_map)
+        # distance = init_distance_map(distance, target) #reset path
+        # distance = floodfill(maze_map, distance) #path
 
-                # distance = init_distance_map(distance, target) #reset path
-                # distance = floodfill(maze_map, distance) #path
+        # #fill unvisited cells with 4 walls to verify if the shortest path was find
+        # shortest_path = check_distance(distance, maze_map, target)
 
-                # #fill unvisited cells with 4 walls to verify if the shortest path was find
-                # shortest_path = check_distance(distance, maze_map, target)
+        if shortest_path:
+            print("This is the shortest/ one of the shortest paths")
+            var.searching_end = True
+        else:
+            print("There might be a shorter path, keep going")
+            robot.state.current_target = robot.maze.start_cell
 
-                if shortest_path:
-                    print("This is the shortest/ one of the shortest paths")
-                    var.searching_end = True
-                else:
-                    print("There might be a shorter path, keep going")
-                    target = 0
+    elif robot.state.pos == robot.maze.start_cell:
+        # shortest_path = check_distance(distance, maze_map, target)
 
-            elif robot_position == 0:
-                # shortest_path = check_distance(distance, maze_map, target)
+        if shortest_path:
+            print("This is the shortest/ one of the shortest paths")
+            var.searching_end = True
+        else:
+            print("There might be a shorter path, keep going")
 
-                if shortest_path:
-                    print("This is the shortest/ one of the shortest paths")
-                    var.searching_end = True
-                else:
-                    print("There might be a shorter path, keep going")
+        robot.state.current_target = robot.maze.target_cell
 
-                target = 136
-        case True:
-            search = True
-            i = 0
-            while search:  # search to find unvisited cell, otherwise end
-
-                if not (maze_map[i] & maze_parameters.VISITED):
-
-                    target = i
-                    search = False
-                    if mode_params.TESTING:
-                        print("target =", target)
-                else:
-                    i += 1
-
-                if i == 256:
-                    target = 136
-                    search = False
-                    var.searching_end = True
-                    if mode_params.TESTING:
-                        print("target =", target)
-
-    return target, maze_map
+    return maze_map
 
 
 """ mark_center
@@ -680,16 +653,16 @@ def mark_center(maze_map):
             match center_cell:
                 case 119:
                     maze_map[center_cell] = 3
-                    maze_map[center_cell - 1] |= direction.EAST
-                    maze_map[center_cell - 16] |= direction.NORTH
+                    maze_map[center_cell - 1] |= Direction.EAST
+                    maze_map[center_cell - 16] |= Direction.NORTH
                 case 120:
                     maze_map[center_cell] = 6
-                    maze_map[center_cell + 1] |= direction.WEST
-                    maze_map[center_cell - 16] |= direction.NORTH
+                    maze_map[center_cell + 1] |= Direction.WEST
+                    maze_map[center_cell - 16] |= Direction.NORTH
                 case 135:
                     maze_map[center_cell] = 9
-                    maze_map[center_cell - 1] |= direction.EAST
-                    maze_map[center_cell + 16] |= direction.SOUTH
+                    maze_map[center_cell - 1] |= Direction.EAST
+                    maze_map[center_cell + 16] |= Direction.SOUTH
 
     return maze_map
 

@@ -2,6 +2,8 @@ from turtle import *
 import var
 from Constants import *
 
+from config.enums import Direction
+
 
 """ init_maze
 # @brief Init maze window with grid and starting walls
@@ -169,9 +171,7 @@ def update_maze_search(size, visited_cell, text, maze):
                         i += 1
                 var.distance_update = False
         else:  # graphs
-            cell = graph_walls_convert(
-                var.maze_map_global[var.robot_pos], var.robot_pos
-            )
+            cell = graph_walls_convert(var.maze_map_global[var.robot_pos], var.robot_pos)
             draw_wall(cell, xx, yy, size, maze)
 
             if (
@@ -433,12 +433,12 @@ def graph_walls_convert(maze_field, position):  # list, value
         x = position - walls
         match x:
             case -16:
-                cell_value -= direction.NORTH
+                cell_value -= Direction.NORTH
             case -1:
-                cell_value -= direction.EAST
+                cell_value -= Direction.EAST
             case 1:
-                cell_value -= direction.WEST
+                cell_value -= Direction.WEST
             case 16:
-                cell_value -= direction.SOUTH
+                cell_value -= Direction.SOUTH
 
     return cell_value

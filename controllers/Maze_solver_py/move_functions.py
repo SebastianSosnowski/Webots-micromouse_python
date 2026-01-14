@@ -6,7 +6,9 @@ from Constants import *
 from algorithm_functions import change_orientation
 import algorithm_functions as algorithm_f
 import map_functions as map_f
+
 from utils.my_robot import MyRobot
+from config.enums import Direction, Move
 
 """ move_one_position_graph
 # @brief Executes robot movement to next position. Used in graph algorithms.
@@ -34,9 +36,7 @@ def move_one_position_graph(
     ps_right,
 ):
 
-    move_direction = algorithm_f.where_to_move_graph(
-        robot_position, current_destination
-    )
+    move_direction = algorithm_f.where_to_move_graph(robot_position, current_destination)
 
     _, front_wall, _, _ = map_f.detect_walls(robot, ps, tof, 5)
     if front_wall:
@@ -71,43 +71,18 @@ def move_one_position_graph(
 """
 
 
-def move_one_position(
-    walls,
-    distance,
-    robot_position,
-    robot_orientation,
-    robot,
-    ps,
-    tof,
-    left_motor,
-    right_motor,
-    ps_left,
-    ps_right,
-):
+def move_one_position(robot: MyRobot, walls, distance):
 
-    move_direction = algorithm_f.where_to_move(
-        walls, robot_position, distance, robot_orientation
-    )
+    move_direction = algorithm_f.where_to_move(robot, walls, distance)
 
-    _, front_wall, _, _ = map_f.detect_walls(robot, ps, tof, 5)
+    _, front_wall, _, _ = map_f.detect_walls(robot, 5)
 
     if front_wall:
-        move_front_correct(tof, left_motor, right_motor, robot, ps)
+        move_front_correct(robot)
 
-    robot_orientation = drive(
-        robot_orientation,
-        move_direction,
-        robot,
-        left_motor,
-        right_motor,
-        ps_left,
-        ps_right,
-        ps,
-    )
+    drive(robot, move_direction)
 
-    robot_position = algorithm_f.change_position(robot_position, robot_orientation)
-
-    return robot_position, robot_orientation
+    robot.state.pos = algorithm_f.change_position(robot.state.pos, robot.state.orientation)
 
 
 """ drive
@@ -121,54 +96,37 @@ def move_one_position(
 """
 
 
-def drive(
-    robot_orientation,
-    move_direction,
-    robot,
-    left_motor,
-    right_motor,
-    ps_left,
-    ps_right,
-    ps,
-):
-    if robot_orientation == move_direction:  # move forward
+def drive(robot: MyRobot, move_direction):
+    if robot.state.orientation == move_direction:  # move forward
         move_1_tile(robot)
 
     elif (
-        not (
-            (robot_orientation == direction.WEST)
-            and (move_direction == direction.NORTH)
-        )
+        not ((robot.state.orientation == Direction.WEST) and (move_direction == Direction.NORTH))
     ) != (
-        not ((robot_orientation // 2) == move_direction)
+        not ((robot.state.orientation // 2) == move_direction)
     ):  # right, XOR, 'not' to avoid nonzero values
 
-        robot_orientation = change_orientation(robot_orientation, moves.right)
-        turn(robot, moves.right, left_motor, right_motor, ps_left, ps_right)
+        robot.state.orientation = change_orientation(robot.state.orientation, Move.RIGHT)
+        turn(robot, Move.RIGHT)
         move_1_tile(robot)
 
     elif (
-        not (
-            (robot_orientation == direction.NORTH)
-            and (move_direction == direction.WEST)
-        )
+        not ((robot.state.orientation == Direction.NORTH) and (move_direction == Direction.WEST))
     ) != (
-        not ((robot_orientation * 2) == move_direction)
+        not ((robot.state.orientation * 2) == move_direction)
     ):  # left, XOR
 
-        robot_orientation = change_orientation(robot_orientation, moves.left)
-        turn(robot, moves.left, left_motor, right_motor, ps_left, ps_right)
+        robot.state.orientation = change_orientation(robot.state.orientation, Move.LEFT)
+        turn(robot, Move.LEFT)
         move_1_tile(robot)
 
-    elif (not ((robot_orientation * 4) == move_direction)) != (
-        not ((robot_orientation // 4) == move_direction)
+    elif (not ((robot.state.orientation * 4) == move_direction)) != (
+        not ((robot.state.orientation // 4) == move_direction)
     ):  # back, XOR
 
-        robot_orientation = change_orientation(robot_orientation, moves.back)
-        turn(robot, moves.back, left_motor, right_motor, ps_left, ps_right)
+        robot.state.orientation = change_orientation(robot.state.orientation, Move.BACK)
+        turn(robot, Move.BACK)
         move_1_tile(robot)
-
-    return robot_orientation
 
 
 """ read_sensors
@@ -201,7 +159,7 @@ def read_sensors(robot: MyRobot, number_of_reads):
         avg2_right_sensor += robot.ps[2].getValue()
         avg5_left_sensor += robot.ps[5].getValue()
 
-        robot.step(TIME_STEP)  # simulation update
+        robot.step(robot.sim.time_step)  # simulation update
 
     # average score of sensors measurements
     avg1_right_angle_sensor = avg1_right_angle_sensor / number_of_reads
@@ -231,9 +189,7 @@ def PID_correction(robot: MyRobot):
         distance_left_now = robot.ps_left.getValue()
         distance_right_now = robot.ps_right.getValue()
 
-        right_angle_sensor, left_angle_sensor, left_wall, right_wall = read_sensors(
-            robot, 2
-        )
+        right_angle_sensor, left_angle_sensor, left_wall, right_wall = read_sensors(robot, 2)
 
         previous_error = 0.00
         error_integral = 0.00
@@ -357,48 +313,48 @@ def move_1_tile(robot: MyRobot):
 """
 
 
-def move_front_correct(tof, left_motor, right_motor, robot, ps):
+def move_front_correct(robot: MyRobot):
 
-    left_motor.setPosition(float("inf"))
-    right_motor.setPosition(float("inf"))
+    robot.left_motor.setPosition(float("inf"))
+    robot.right_motor.setPosition(float("inf"))
 
-    left = ps[7].getValue()
-    right = ps[0].getValue()
+    left = robot.ps[7].getValue()
+    right = robot.ps[0].getValue()
 
     if left < right:
         while left < right:
 
-            left_motor.setVelocity(robot_parameters.SPEED * 0.1)
-            right_motor.setVelocity(robot_parameters.SPEED * -0.1)
-            robot.step(TIME_STEP)
-            left = ps[7].getValue()
-            right = ps[0].getValue()
+            robot.left_motor.setVelocity(robot.robot.speed * 0.1)
+            robot.right_motor.setVelocity(robot.robot.speed * -0.1)
+            robot.step(robot.sim.time_step)
+            left = robot.ps[7].getValue()
+            right = robot.ps[0].getValue()
             if mode_params.TESTING:
                 print("sensor angle %.2f" % left, "%.2f" % right)
 
     elif left > right:
         while left > right:
 
-            left_motor.setVelocity(robot_parameters.SPEED * -0.1)
-            right_motor.setVelocity(robot_parameters.SPEED * 0.1)
-            robot.step(TIME_STEP)
-            left = ps[7].getValue()
-            right = ps[0].getValue()
+            robot.left_motor.setVelocity(robot.robot.speed * -0.1)
+            robot.right_motor.setVelocity(robot.robot.speed * 0.1)
+            robot.step(robot.sim.time_step)
+            left = robot.ps[7].getValue()
+            right = robot.ps[0].getValue()
             if mode_params.TESTING:
                 print("sensor angle %.2f" % left, "%.2f" % right)
 
-    front = tof.getValue()
+    front = robot.tof.getValue()
     desired_distance = 40.0
 
     if front > desired_distance:
         while front > desired_distance:
 
-            left_motor.setVelocity(robot_parameters.SPEED * 0.1)
-            right_motor.setVelocity(robot_parameters.SPEED * 0.1)
+            robot.left_motor.setVelocity(robot.robot.speed * 0.1)
+            robot.right_motor.setVelocity(robot.robot.speed * 0.1)
 
-            robot.step(TIME_STEP)
+            robot.step(robot.sim.time_step)
 
-            front = tof.getValue()
+            front = robot.tof.getValue()
 
             if mode_params.TESTING:
                 print("sensor tof %.2f" % front)
@@ -406,18 +362,18 @@ def move_front_correct(tof, left_motor, right_motor, robot, ps):
     elif front < desired_distance:
         while front < desired_distance:
 
-            left_motor.setVelocity(robot_parameters.SPEED * -0.1)
-            right_motor.setVelocity(robot_parameters.SPEED * -0.1)
+            robot.left_motor.setVelocity(robot.robot.speed * -0.1)
+            robot.right_motor.setVelocity(robot.robot.speed * -0.1)
 
-            robot.step(TIME_STEP)
+            robot.step(robot.sim.time_step)
 
-            front = tof.getValue()
+            front = robot.tof.getValue()
 
             if mode_params.TESTING:
                 print("sensor tof %.2f" % front)
 
-    left_motor.setVelocity(0)
-    right_motor.setVelocity(0)
+    robot.left_motor.setVelocity(0)
+    robot.right_motor.setVelocity(0)
 
 
 """ turn
@@ -442,7 +398,7 @@ def turn(robot: MyRobot, move_direction):
     robot.right_motor.setVelocity(robot.robot.speed * 0.33)
 
     match move_direction:
-        case moves.right:
+        case Move.RIGHT:
             left_wheel_revolutions += revolutions
             right_wheel_revolutions -= revolutions
             robot.left_motor.setPosition(left_wheel_revolutions)
@@ -450,7 +406,7 @@ def turn(robot: MyRobot, move_direction):
 
             if mode_params.TESTING:
                 print("right")
-        case moves.left:
+        case Move.LEFT:
             left_wheel_revolutions -= revolutions
             right_wheel_revolutions += revolutions
             robot.left_motor.setPosition(left_wheel_revolutions)
@@ -458,7 +414,7 @@ def turn(robot: MyRobot, move_direction):
 
             if mode_params.TESTING:
                 print("left")
-        case moves.back:
+        case Move.BACK:
             revolutions *= 2
             left_wheel_revolutions += revolutions
             right_wheel_revolutions -= revolutions
@@ -548,7 +504,7 @@ def wait_move_end(robot: MyRobot):
         distance_left_now = robot.ps_left.getValue()
         distance_right_now = robot.ps_right.getValue()
 
-        robot.step(TIME_STEP)
+        robot.step(robot.sim.time_step)
 
         distance_left_later = robot.ps_left.getValue()
         distance_right_later = robot.ps_right.getValue()
