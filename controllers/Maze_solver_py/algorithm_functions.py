@@ -796,10 +796,6 @@ def write_file(file_name, values):
     with open(file_name, "wb") as file:
         pickle.dump(values, file)
 
-    if file == None:
-        print("ERROR")
-        exit(1)
-
 
 """ choose_file_path
 # @brief Choose apropiete directory and file name to save results

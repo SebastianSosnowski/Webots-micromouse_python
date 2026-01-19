@@ -34,10 +34,6 @@ from config.enums import Move, Mode, Direction
 
 
 def floodfill_main(robot: MyRobot):
-
-    # left_motor, right_motor, ps_left, ps_right, ps, tof = init_devices(robot)
-    # target, robot_position, start, robot_orientation = init_parameters()
-
     maze_map = [0] * maze_parameters.MAZE_SIZE
     distance = [255] * maze_parameters.MAZE_SIZE
 
