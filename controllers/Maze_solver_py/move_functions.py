@@ -9,6 +9,7 @@ import map_functions as map_f
 
 from utils.my_robot import MyRobot
 from config.enums import Direction, Move
+from config.world import world
 
 """ move_one_position_graph
 # @brief Executes robot movement to next position. Used in graph algorithms.
@@ -159,7 +160,7 @@ def read_sensors(robot: MyRobot, number_of_reads):
         avg2_right_sensor += robot.ps[2].getValue()
         avg5_left_sensor += robot.ps[5].getValue()
 
-        robot.step(robot.sim.time_step)  # simulation update
+        robot.step(world.sim.time_step)  # simulation update
 
     # average score of sensors measurements
     avg1_right_angle_sensor = avg1_right_angle_sensor / number_of_reads
@@ -217,8 +218,8 @@ def PID_correction(robot: MyRobot):
             if mode_params.TESTING:
                 print("speed %.3f" % MotorSpeed)
 
-            robot.left_motor.setVelocity(robot.robot.speed + MotorSpeed)
-            robot.right_motor.setVelocity(robot.robot.speed - MotorSpeed)
+            robot.left_motor.setVelocity(robot.params.speed + MotorSpeed)
+            robot.right_motor.setVelocity(robot.params.speed - MotorSpeed)
         elif left_wall:
             error = left_angle_sensor - Middle
 
@@ -237,8 +238,8 @@ def PID_correction(robot: MyRobot):
             if mode_params.TESTING:
                 print("speed %.3f" % MotorSpeed)
 
-            robot.left_motor.setVelocity(robot.robot.speed + MotorSpeed)
-            robot.right_motor.setVelocity(robot.robot.speed - MotorSpeed)
+            robot.left_motor.setVelocity(robot.params.speed + MotorSpeed)
+            robot.right_motor.setVelocity(robot.params.speed - MotorSpeed)
         elif right_wall:
             error = right_angle_sensor - Middle
 
@@ -257,8 +258,8 @@ def PID_correction(robot: MyRobot):
             if mode_params.TESTING:
                 print("speed %.3f" % MotorSpeed)
 
-            robot.left_motor.setVelocity(robot.robot.speed - MotorSpeed)
-            robot.right_motor.setVelocity(robot.robot.speed + MotorSpeed)
+            robot.left_motor.setVelocity(robot.params.speed - MotorSpeed)
+            robot.right_motor.setVelocity(robot.params.speed + MotorSpeed)
 
         distance_left_later = robot.ps_left.getValue()
         distance_right_later = robot.ps_right.getValue()
@@ -281,7 +282,7 @@ def PID_correction(robot: MyRobot):
 
 def move_1_tile(robot: MyRobot):
 
-    revolutions = maze_parameters.TILE_LENGTH / robot.robot.wheel  # rev in radians
+    revolutions = maze_parameters.TILE_LENGTH / robot.params.wheel  # rev in radians
 
     left_wheel_revolutions = robot.ps_left.getValue()
     right_wheel_revolutions = robot.ps_right.getValue()
@@ -289,8 +290,8 @@ def move_1_tile(robot: MyRobot):
     left_wheel_revolutions += revolutions
     right_wheel_revolutions += revolutions
 
-    robot.left_motor.setVelocity(robot.robot.speed)
-    robot.right_motor.setVelocity(robot.robot.speed)
+    robot.left_motor.setVelocity(robot.params.speed)
+    robot.right_motor.setVelocity(robot.params.speed)
 
     robot.left_motor.setPosition(left_wheel_revolutions)
     robot.right_motor.setPosition(right_wheel_revolutions)
@@ -324,9 +325,9 @@ def move_front_correct(robot: MyRobot):
     if left < right:
         while left < right:
 
-            robot.left_motor.setVelocity(robot.robot.speed * 0.1)
-            robot.right_motor.setVelocity(robot.robot.speed * -0.1)
-            robot.step(robot.sim.time_step)
+            robot.left_motor.setVelocity(robot.params.speed * 0.1)
+            robot.right_motor.setVelocity(robot.params.speed * -0.1)
+            robot.step(world.sim.time_step)
             left = robot.ps[7].getValue()
             right = robot.ps[0].getValue()
             if mode_params.TESTING:
@@ -335,9 +336,9 @@ def move_front_correct(robot: MyRobot):
     elif left > right:
         while left > right:
 
-            robot.left_motor.setVelocity(robot.robot.speed * -0.1)
-            robot.right_motor.setVelocity(robot.robot.speed * 0.1)
-            robot.step(robot.sim.time_step)
+            robot.left_motor.setVelocity(robot.params.speed * -0.1)
+            robot.right_motor.setVelocity(robot.params.speed * 0.1)
+            robot.step(world.sim.time_step)
             left = robot.ps[7].getValue()
             right = robot.ps[0].getValue()
             if mode_params.TESTING:
@@ -349,10 +350,10 @@ def move_front_correct(robot: MyRobot):
     if front > desired_distance:
         while front > desired_distance:
 
-            robot.left_motor.setVelocity(robot.robot.speed * 0.1)
-            robot.right_motor.setVelocity(robot.robot.speed * 0.1)
+            robot.left_motor.setVelocity(robot.params.speed * 0.1)
+            robot.right_motor.setVelocity(robot.params.speed * 0.1)
 
-            robot.step(robot.sim.time_step)
+            robot.step(world.sim.time_step)
 
             front = robot.tof.getValue()
 
@@ -362,10 +363,10 @@ def move_front_correct(robot: MyRobot):
     elif front < desired_distance:
         while front < desired_distance:
 
-            robot.left_motor.setVelocity(robot.robot.speed * -0.1)
-            robot.right_motor.setVelocity(robot.robot.speed * -0.1)
+            robot.left_motor.setVelocity(robot.params.speed * -0.1)
+            robot.right_motor.setVelocity(robot.params.speed * -0.1)
 
-            robot.step(robot.sim.time_step)
+            robot.step(world.sim.time_step)
 
             front = robot.tof.getValue()
 
@@ -389,13 +390,13 @@ def move_front_correct(robot: MyRobot):
 
 def turn(robot: MyRobot, move_direction):
 
-    revolutions = (pi / 2) * robot.robot.axle / 2 / robot.robot.wheel  # in radians
+    revolutions = (pi / 2) * robot.params.axle / 2 / robot.params.wheel  # in radians
 
     left_wheel_revolutions = robot.ps_left.getValue()
     right_wheel_revolutions = robot.ps_right.getValue()
 
-    robot.left_motor.setVelocity(robot.robot.speed * 0.33)
-    robot.right_motor.setVelocity(robot.robot.speed * 0.33)
+    robot.left_motor.setVelocity(robot.params.speed * 0.33)
+    robot.right_motor.setVelocity(robot.params.speed * 0.33)
 
     match move_direction:
         case Move.RIGHT:
@@ -504,7 +505,7 @@ def wait_move_end(robot: MyRobot):
         distance_left_now = robot.ps_left.getValue()
         distance_right_now = robot.ps_right.getValue()
 
-        robot.step(robot.sim.time_step)
+        robot.step(world.sim.time_step)
 
         distance_left_later = robot.ps_left.getValue()
         distance_right_later = robot.ps_right.getValue()

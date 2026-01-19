@@ -10,11 +10,12 @@ import main_functions as main_f
 from config.loader import load_config
 from utils.my_robot import MyRobot
 from config.enums import Algorithm
+from config.world import world
 
 
 def run_robot(robot: MyRobot):
 
-    match robot.sim.algorithm:
+    match world.sim.algorithm:
         case Algorithm.KEYBOARD:
             main_f.keyboard_main(robot)
         case Algorithm.FLOODFILL:
@@ -32,7 +33,8 @@ def run_robot(robot: MyRobot):
 if __name__ == "__main__":
     config_path = Path("config.yaml")
     config = load_config(config_path)
+    world.init(config["simulation"], config["maze"])
 
-    robot = MyRobot(config)
+    robot = MyRobot(config["robot"])
 
     run_robot(robot)

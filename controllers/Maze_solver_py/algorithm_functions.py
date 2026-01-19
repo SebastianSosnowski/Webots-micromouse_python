@@ -9,6 +9,7 @@ import var
 
 from utils.my_robot import MyRobot
 from config.enums import Direction, Move
+from config.world import world
 
 """ floodfill
 # @brief Floodfill algorithm which calculates shortest path to actual target based on actual maze map.
@@ -605,7 +606,7 @@ def change_target(robot: MyRobot, maze_map, distance):
     # fill unvisited cells with 4 walls to verify if the shortest path was find
     shortest_path = check_distance(distance, maze_map, robot.state.current_target)
 
-    if robot.state.pos == robot.maze.target_cell:
+    if robot.state.pos == world.maze.target_cell:
 
         maze_map = mark_center(maze_map)
 
@@ -620,9 +621,9 @@ def change_target(robot: MyRobot, maze_map, distance):
             var.searching_end = True
         else:
             print("There might be a shorter path, keep going")
-            robot.state.current_target = robot.maze.start_cell
+            robot.state.current_target = world.maze.start_cell
 
-    elif robot.state.pos == robot.maze.start_cell:
+    elif robot.state.pos == world.maze.start_cell:
         # shortest_path = check_distance(distance, maze_map, target)
 
         if shortest_path:
@@ -631,7 +632,7 @@ def change_target(robot: MyRobot, maze_map, distance):
         else:
             print("There might be a shorter path, keep going")
 
-        robot.state.current_target = robot.maze.target_cell
+        robot.state.current_target = world.maze.target_cell
 
     return maze_map
 

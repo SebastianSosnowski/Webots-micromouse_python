@@ -2,6 +2,7 @@
 from Constants import *
 from utils.my_robot import MyRobot
 from config.enums import Direction, MazeLayout
+from config.world import world
 
 """ detect_walls
 # @brief Read and process sensors to detect walls
@@ -42,7 +43,7 @@ def detect_walls(robot: MyRobot, number_of_reads):
 
         avg_front_sensor += tof_value
 
-        robot.step(robot.sim.time_step)  # simulation update
+        robot.step(world.sim.time_step)  # simulation update
 
     # average score of sensors measurements
     avg2_right_sensor = avg2_right_sensor / number_of_reads
@@ -102,8 +103,8 @@ def add_wall(robot: MyRobot, maze_map, detected_wall):
     # add wall in neighbor field
     if detected_wall == Direction.NORTH:
 
-        robot_position = robot_position + robot.maze.columns  # upper field
-        check = robot_position in range(0, robot.maze.size)
+        robot_position = robot_position + world.maze.columns  # upper field
+        check = robot_position in range(0, world.maze.size)
 
         if check:
             maze_map[robot_position] = maze_map[robot_position] | Direction.SOUTH
@@ -111,15 +112,15 @@ def add_wall(robot: MyRobot, maze_map, detected_wall):
     if detected_wall == Direction.EAST:
 
         robot_position = robot_position + 1  # left field
-        check = robot_position in range(0, robot.maze.size)
+        check = robot_position in range(0, world.maze.size)
 
         if check:
             maze_map[robot_position] = maze_map[robot_position] | Direction.WEST
 
     if detected_wall == Direction.SOUTH:
 
-        robot_position = robot_position - robot.maze.columns  # lower field
-        check = robot_position in range(0, robot.maze.size)
+        robot_position = robot_position - world.maze.columns  # lower field
+        check = robot_position in range(0, world.maze.size)
 
         if check:
             maze_map[robot_position] = maze_map[robot_position] | Direction.NORTH
@@ -127,7 +128,7 @@ def add_wall(robot: MyRobot, maze_map, detected_wall):
     if detected_wall == Direction.WEST:
 
         robot_position = robot_position - 1  # right field
-        check = robot_position in range(0, robot.maze.size)
+        check = robot_position in range(0, world.maze.size)
 
         if check:
             maze_map[robot_position] = maze_map[robot_position] | Direction.EAST

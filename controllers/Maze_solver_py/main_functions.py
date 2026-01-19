@@ -12,6 +12,7 @@ import var
 
 from utils.my_robot import MyRobot
 from config.enums import Move, Mode, Direction
+from config.world import world
 
 
 """ floodfill_main
@@ -43,7 +44,7 @@ def floodfill_main(robot: MyRobot):
 
     path_file, maze_file = algorithm_f.choose_file_path()
 
-    while robot.step(robot.sim.time_step) != -1:
+    while robot.step(world.sim.time_step) != -1:
 
         if mode_params.TESTING:
             print("sensor tof %.2f" % robot.tof.getValue())
@@ -54,7 +55,7 @@ def floodfill_main(robot: MyRobot):
         if mode_params.TESTING:
             print("sensor ps1 right %.2f" % robot.ps[1].getValue())
 
-        match robot.sim.mode:
+        match world.sim.mode:
             case Mode.SEARCH:  # search
 
                 if robot.state.start:
@@ -108,9 +109,9 @@ def floodfill_main(robot: MyRobot):
                     for i in range(
                         0, maze_parameters.MAZE_SIZE
                     ):  # to make sure path will use only visited cells
-                        if (maze_map[i] & robot.maze.visited) != robot.maze.visited:
+                        if (maze_map[i] & world.maze.visited) != world.maze.visited:
                             maze_map[i] |= 15
-                    robot.state.current_target = robot.maze.target_cell
+                    robot.state.current_target = world.maze.target_cell
                     distance = map_f.init_distance_map(
                         distance, robot.state.current_target
                     )  # reset path
@@ -125,7 +126,7 @@ def floodfill_main(robot: MyRobot):
                     timer = robot.getTime() - timer
                     print("Move time: %.2f" % timer, "s")
 
-                maze_map[robot.state.pos] |= maze_parameters.VISITED  # mark visited tile
+                maze_map[robot.state.pos] |= world.maze.visited  # mark visited tile
 
                 if robot.state.pos == robot.state.current_target:
                     maze_map = algorithm_f.change_target(robot, maze_map, distance)
@@ -194,7 +195,7 @@ def floodfill_main(robot: MyRobot):
 #     visited.append(robot.state.pos)
 #     stack.append(robot.state.pos)
 
-#     match robot.sim.mode:
+#     match world.sim.mode:
 #         case Mode.SEARCH:  # search
 
 #             if robot.state.start:
@@ -213,7 +214,7 @@ def floodfill_main(robot: MyRobot):
 
 #             while stack:
 
-#                 if robot.step(robot.sim.time_step) == -1:
+#                 if robot.step(world.sim.time_step) == -1:
 #                     break
 
 #                 stack.pop()
@@ -355,7 +356,7 @@ def floodfill_main(robot: MyRobot):
 
 #             while path:
 
-#                 if robot.step(robot.sim.time_step) == -1:
+#                 if robot.step(world.sim.time_step) == -1:
 #                     break
 
 #                 current_destination = path.pop()
@@ -426,7 +427,7 @@ def floodfill_main(robot: MyRobot):
 #     visited.append(robot.state.pos)
 #     queue.append(robot.state.pos)
 
-#     match robot.sim.mode:
+#     match world.sim.mode:
 #         case Mode.SEARCH:  # search
 
 #             if robot.state.start:
@@ -444,7 +445,7 @@ def floodfill_main(robot: MyRobot):
 
 #             while queue:
 
-#                 if robot.step(robot.sim.time_step) == -1:
+#                 if robot.step(world.sim.time_step) == -1:
 #                     break
 
 #                 if searching_end:
@@ -560,7 +561,7 @@ def floodfill_main(robot: MyRobot):
 
 #             while path:
 
-#                 if robot.step(robot.sim.time_step) == -1:
+#                 if robot.step(world.sim.time_step) == -1:
 #                     break
 
 #                 current_destination = path.pop()
@@ -629,7 +630,7 @@ def floodfill_main(robot: MyRobot):
 #     parent[robot.state.pos] = robot.state.pos
 #     open.append(robot.state.pos)
 
-#     match robot.sim.mode:
+#     match world.sim.mode:
 #         case Mode.SEARCH:  # search
 
 #             if robot.state.start:
@@ -647,7 +648,7 @@ def floodfill_main(robot: MyRobot):
 
 #             while open:
 
-#                 if robot.step(robot.sim.time_step) == -1:
+#                 if robot.step(world.sim.time_step) == -1:
 #                     break
 
 #                 left_wall, front_wall, right_wall, back_wall = map_f.detect_walls(robot, 5)
@@ -753,7 +754,7 @@ def floodfill_main(robot: MyRobot):
 
 #             while path:
 
-#                 if robot.step(robot.sim.time_step) == -1:
+#                 if robot.step(world.sim.time_step) == -1:
 #                     break
 
 #                 current_destination = path.pop(0)
@@ -830,7 +831,7 @@ def floodfill_main(robot: MyRobot):
 #     parent[robot.state.pos] = robot.state.pos
 #     open.append(robot.state.pos)
 
-#     match robot.sim.mode:
+#     match world.sim.mode:
 #         case Mode.SEARCH:  # search
 
 #             if robot.state.start:
@@ -848,7 +849,7 @@ def floodfill_main(robot: MyRobot):
 
 #             while open:
 
-#                 if robot.step(robot.sim.time_step) == -1:
+#                 if robot.step(world.sim.time_step) == -1:
 #                     break
 
 #                 left_wall, front_wall, right_wall, back_wall = map_f.detect_walls(robot, 5)
@@ -961,7 +962,7 @@ def floodfill_main(robot: MyRobot):
 
 #             while path:
 
-#                 if robot.step(robot.sim.time_step) == -1:
+#                 if robot.step(world.sim.time_step) == -1:
 #                     break
 
 #                 current_destination = path.pop(0)
@@ -1008,9 +1009,9 @@ def keyboard_main(robot: MyRobot):
     # left_motor, right_motor, ps_left, ps_right, ps, tof = init_devices(robot)
 
     keyboard = Keyboard()
-    keyboard.enable(robot.sim.time_step)
+    keyboard.enable(world.sim.time_step)
     max_tof = 0
-    while robot.step(robot.sim.time_step) != -1:
+    while robot.step(world.sim.time_step) != -1:
 
         if mode_params.TESTING:
             avg_front_sensor = 0
@@ -1018,7 +1019,7 @@ def keyboard_main(robot: MyRobot):
 
                 avg_front_sensor += robot.tof.getValue()
 
-                robot.step(robot.sim.time_step)  # simulation update
+                robot.step(world.sim.time_step)  # simulation update
 
             avg_front_sensor = avg_front_sensor / 3
 
@@ -1064,18 +1065,18 @@ def keyboard_main(robot: MyRobot):
 #     right_motor.setVelocity(robot_parameters.SPEED)
 
 #     ps_left = robot.getDevice("left wheel sensor")
-#     ps_left.enable(robot.sim.time_step)
+#     ps_left.enable(world.sim.time_step)
 #     ps_right = robot.getDevice("right wheel sensor")
-#     ps_right.enable(robot.sim.time_step)
+#     ps_right.enable(world.sim.time_step)
 
 #     ps = [""] * 8
 #     ps_names = ("ps0", "ps1", "ps2", "ps3", "ps4", "ps5", "ps6", "ps7")
 #     for i in range(len(ps_names)):
 #         ps[i] = robot.getDevice(ps_names[i])
-#         ps[i].enable(robot.sim.time_step)
+#         ps[i].enable(world.sim.time_step)
 
 #     tof = robot.getDevice("tof")
-#     tof.enable(robot.sim.time_step)
+#     tof.enable(world.sim.time_step)
 
 #     return left_motor, right_motor, ps_left, ps_right, ps, tof
 
