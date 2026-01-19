@@ -1,6 +1,7 @@
 # algorithm related functions
 import pickle
 from collections import deque
+from pathlib import Path
 
 from Constants import *
 from map_functions import init_distance_map
@@ -790,7 +791,8 @@ def read_file(file_name):
 
 
 def write_file(file_name, values):
-
+    path = Path(file_name)
+    path.parent.mkdir(parents=True, exist_ok=True)
     with open(file_name, "wb") as file:
         pickle.dump(values, file)
 
