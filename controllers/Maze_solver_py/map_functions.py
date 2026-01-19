@@ -1,5 +1,4 @@
 # Map updating functions
-from Constants import *
 from utils.my_robot import MyRobot
 from config.enums import Direction, MazeLayout
 from config.world import world
@@ -152,7 +151,7 @@ def add_wall(robot: MyRobot, maze_map, detected_wall):
 
 def add_walls_graph_old(maze_map, robot_position, robot_orientation, detected_walls):
 
-    rows = maze_parameters.ROWS
+    rows = world.maze.rows
 
     up = robot_position + rows
     down = robot_position - rows
@@ -280,7 +279,7 @@ def add_walls_graph_old(maze_map, robot_position, robot_orientation, detected_wa
 
 def add_walls_graph(maze_map, robot_position, robot_orientation, detected_walls):
 
-    rows = maze_parameters.ROWS
+    rows = world.maze.rows
 
     # neighbors positions
     up = robot_position + rows
@@ -416,7 +415,7 @@ def add_walls_graph(maze_map, robot_position, robot_orientation, detected_walls)
 
 
 def init_maze_map(maze_map):
-    maze_map[0] = maze_map[0] | maze_parameters.VISITED  # mark start as visited
+    maze_map[0] = maze_map[0] | world.maze.visited  # mark start as visited
 
     for i in range(0, 16):
         maze_map[i] = maze_map[i] | Direction.SOUTH
@@ -449,8 +448,8 @@ def init_maze_map(maze_map):
 def init_maze_map_graph():
 
     maze_map = {}
-    rows = maze_parameters.ROWS
-    cols = maze_parameters.COLUMNS
+    rows = world.maze.rows
+    cols = world.maze.columns
     size = rows * cols
     left_down_corner = 0
     right_down_corner = rows - 1
@@ -508,7 +507,7 @@ def init_maze_map_graph():
 
 
 def init_distance_map(distance, target):
-    distance = [maze_parameters.MAZE_SIZE - 1] * maze_parameters.MAZE_SIZE
+    distance = [world.maze.size - 1] * world.maze.size
     distance[target] = 0
 
     return distance
@@ -545,7 +544,7 @@ def print_array(list, action):
         list_temp = list.copy()
 
         for index in range(len(list_temp)):
-            if list_temp[index] and maze_parameters.VISITED:
+            if list_temp[index] and world.maze.visited:
                 list_temp[index] -= 64  # version to avoid negative values(errors etc.)
 
         index = 240

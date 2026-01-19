@@ -3,13 +3,12 @@ import pickle
 from collections import deque
 from pathlib import Path
 
-from Constants import *
 from map_functions import init_distance_map
-import var
 
 from utils.my_robot import MyRobot
-from config.enums import Direction, Move
+from config.enums import Direction, Move, Algorithm, MazeLayout
 from config.world import world
+import var
 
 """ floodfill
 # @brief Floodfill algorithm which calculates shortest path to actual target based on actual maze map.
@@ -28,14 +27,14 @@ def floodfill(maze_map, distance):
     while search:
         search = False
 
-        for i in range(0, maze_parameters.MAZE_SIZE):
+        for i in range(0, world.maze.size):
             if distance[i] < 255:
 
                 if (maze_map[i] & Direction.NORTH) != Direction.NORTH:
-                    if distance[i + maze_parameters.COLUMNS] == 255 or (
-                        (distance[i] + 1) < distance[i + maze_parameters.COLUMNS]
+                    if distance[i + world.maze.columns] == 255 or (
+                        (distance[i] + 1) < distance[i + world.maze.columns]
                     ):
-                        distance[i + maze_parameters.COLUMNS] = (
+                        distance[i + world.maze.columns] = (
                             distance[i] + 1
                         )  # update distance value on north tile
                         search = True
@@ -51,10 +50,10 @@ def floodfill(maze_map, distance):
                         search = True
                 # prop unnecessary cuz robot doesn't move backward
                 if (maze_map[i] & Direction.SOUTH) != Direction.SOUTH:
-                    if distance[i - maze_parameters.COLUMNS] == 255 or (
-                        (distance[i] + 1) < distance[i - maze_parameters.COLUMNS]
+                    if distance[i - world.maze.columns] == 255 or (
+                        (distance[i] + 1) < distance[i - world.maze.columns]
                     ):
-                        distance[i - maze_parameters.COLUMNS] = (
+                        distance[i - world.maze.columns] = (
                             distance[i] + 1
                         )  # update distance value on SOUTH tile
                         search = True
@@ -89,11 +88,11 @@ def where_to_move(robot: MyRobot, walls, distance):
 
     if (walls & Direction.NORTH) != Direction.NORTH:
 
-        if distance[position + maze_parameters.COLUMNS] <= best_neighbor:
+        if distance[position + world.maze.columns] <= best_neighbor:
 
-            if distance[position + maze_parameters.COLUMNS] < best_neighbor:
+            if distance[position + world.maze.columns] < best_neighbor:
 
-                best_neighbor = distance[position + maze_parameters.COLUMNS]
+                best_neighbor = distance[position + world.maze.columns]
                 move_direction = Direction.NORTH
 
             elif orientation == Direction.NORTH:
@@ -113,11 +112,11 @@ def where_to_move(robot: MyRobot, walls, distance):
 
     if (walls & Direction.SOUTH) != Direction.SOUTH:
 
-        if distance[position - maze_parameters.COLUMNS] <= best_neighbor:
+        if distance[position - world.maze.columns] <= best_neighbor:
 
-            if distance[position - maze_parameters.COLUMNS] < best_neighbor:
+            if distance[position - world.maze.columns] < best_neighbor:
 
-                best_neighbor = distance[position - maze_parameters.COLUMNS]
+                best_neighbor = distance[position - world.maze.columns]
                 move_direction = Direction.SOUTH
 
             elif orientation == Direction.SOUTH:
@@ -180,31 +179,31 @@ def where_to_move_graph(robot_position, current_destination):
 # @retval current_destination: variable with a cell to which move next
 # @retval visited: updated list with cells already added to queue
 # @retval queue: updated queue with cells which will be visited
-# @retval deadend: bool variable which informs if current cell is a dead end and robot need's to move back
+# @retval dead_end: bool variable which informs if current cell is a dead end and robot need's to move back
 # @retval searching_end: bool variable which informs if target was found i.e. run is ended
 """
 
 
 def check_possible_routes_BFS(adjacent_cells, visited, queue, fork, target):
-    deadend = True
+    dead_end = True
     searching_end = False
     for cell in adjacent_cells:
         if cell not in visited:
             visited.append(cell)
             queue.append(cell)
-            deadend = False
+            dead_end = False
             if cell == target:
                 searching_end = True
                 break
 
     if searching_end:
         current_destination = queue[-1]
-    elif fork or deadend:
+    elif fork or dead_end:
         current_destination = queue[0]
     else:
         current_destination = queue[-1]
 
-    return current_destination, visited, queue, deadend, searching_end
+    return current_destination, visited, queue, dead_end, searching_end
 
 
 """ check_possible_routes_DFS  
@@ -325,7 +324,7 @@ def get_path_A_star(maze_map, start, target):
 def check_possible_routes_A_star(open, cost):
     current_destination = open[
         -1
-    ]  # if there are 2 cells with same Fcost and Hcost, pick last added to open i.e. neighbour
+    ]  # if there are 2 cells with same Fcost and Hcost, pick last added to open i.e. neighbor
     for i in open:
         Fcost_i = cost[i][0] + cost[i][1]
         Fcost_curr = cost[current_destination][0] + cost[current_destination][1]
@@ -368,14 +367,14 @@ def update_neighbors_costs(neighbors, open, closed, parent, cost, current_positi
         # if (neighbor not in open) or new_cost < (cost[neighbor][0] + cost[neighbor][1]):
         if (neighbor not in open) or new_move_to_neighbor_cost < cost[neighbor][0]:
             neighbor_Gcost = new_move_to_neighbor_cost
-            neighbor_Hcost = calc_cost(neighbor, maze_parameters.TARGET_CELL)
+            neighbor_Hcost = calc_cost(neighbor, world.maze.target_cell)
             cost[neighbor] = [neighbor_Gcost, neighbor_Hcost]
             parent[neighbor] = current_position
 
             if neighbor not in open:
                 open.append(neighbor)
 
-            if neighbor == maze_parameters.TARGET_CELL:
+            if neighbor == world.maze.target_cell:
                 break
 
     return open, parent, cost
@@ -554,7 +553,7 @@ def change_orientation(robot_orientation: Direction, action: Move):
             else:
                 orientation_value *= 4
 
-    if mode_params.TESTING:
+    if world.sim.testing:
         print("Orientation:", Direction(orientation_value))
 
     return Direction(orientation_value)
@@ -573,12 +572,12 @@ def change_orientation(robot_orientation: Direction, action: Move):
 def change_position(robot_position, robot_orientation):
 
     if robot_orientation == Direction.NORTH:
-        robot_position = robot_position + maze_parameters.COLUMNS
+        robot_position = robot_position + world.maze.columns
 
     elif robot_orientation == Direction.EAST:
         robot_position = robot_position + 1
     elif robot_orientation == Direction.SOUTH:
-        robot_position = robot_position - maze_parameters.COLUMNS
+        robot_position = robot_position - world.maze.columns
 
     elif robot_orientation == Direction.WEST:
         robot_position = robot_position - 1
@@ -651,7 +650,7 @@ def mark_center(maze_map):
     center = [119, 120, 135]
 
     for center_cell in center:
-        if (maze_map[center_cell] & maze_parameters.VISITED) != maze_parameters.VISITED:
+        if (maze_map[center_cell] & world.maze.visited) != world.maze.visited:
             match center_cell:
                 case 119:
                     maze_map[center_cell] = 3
@@ -683,7 +682,7 @@ def mark_center(maze_map):
 def mark_center_graph(maze_map, path):
 
     center = [119, 120, 135]
-    rows = maze_parameters.ROWS
+    rows = world.maze.rows
 
     for center_cell in center:
         up = center_cell + rows
@@ -720,9 +719,9 @@ def check_distance(distance, maze_map, target):
     distance_check = distance.copy()
     maze_map_check = maze_map.copy()
 
-    for i in range(0, maze_parameters.MAZE_SIZE):
-        if (maze_map_check[i] & maze_parameters.VISITED) != maze_parameters.VISITED:
-            maze_map_check[i] = maze_map_check[i] | 15 | maze_parameters.VISITED
+    for i in range(0, world.maze.size):
+        if (maze_map_check[i] & world.maze.visited) != world.maze.visited:
+            maze_map_check[i] = maze_map_check[i] | 15 | world.maze.visited
 
     distance_check = init_distance_map(distance_check, target)  # reset path
     distance_check = floodfill(maze_map_check, distance_check)  # path
@@ -809,175 +808,175 @@ def write_file(file_name, values):
 
 def choose_file_path():
 
-    match mode_params.MAZE_LAYOUT:
-        case maze.FORBOT:
-            match mode_params.ALGORITHM:
-                case algorithms.FLOODFILL:
+    match world.sim.maze_layout:
+        case MazeLayout.FORBOT:
+            match world.sim.algorithm:
+                case Algorithm.FLOODFILL:
                     path_file = "Results/Forbot/floodfill_path.pkl"
                     maze_file = "Results/Forbot/floodfill_maze.pkl"
-                case algorithms.DFS:
+                case Algorithm.DFS:
                     path_file = "Results/Forbot/DFS_path.pkl"
                     maze_file = "Results/Forbot/DFS_maze.pkl"
-                case algorithms.BFS:
+                case Algorithm.BFS:
                     path_file = "Results/Forbot/BFS_path.pkl"
                     maze_file = "Results/Forbot/BFS_maze.pkl"
-                case algorithms.A_STAR:
+                case Algorithm.A_STAR:
                     path_file = "Results/Forbot/A_star_path.pkl"
                     maze_file = "Results/Forbot/A_star_maze.pkl"
-                case algorithms.A_STAR_MOD:
+                case Algorithm.A_STAR_MOD:
                     path_file = "Results/Forbot/A_star_mod_path.pkl"
                     maze_file = "Results/Forbot/A_star_mod_maze.pkl"
-        case maze.TAIWAN_2015:
-            match mode_params.ALGORITHM:
-                case algorithms.FLOODFILL:
+        case MazeLayout.TAIWAN_2015:
+            match world.sim.algorithm:
+                case Algorithm.FLOODFILL:
                     path_file = "Results/Taiwan2015/floodfill_path.pkl"
                     maze_file = "Results/Taiwan2015/floodfill_maze.pkl"
-                case algorithms.DFS:
+                case Algorithm.DFS:
                     path_file = "Results/Taiwan2015/DFS_path.pkl"
                     maze_file = "Results/Taiwan2015/DFS_maze.pkl"
-                case algorithms.BFS:
+                case Algorithm.BFS:
                     path_file = "Results/Taiwan2015/BFS_path.pkl"
                     maze_file = "Results/Taiwan2015/BFS_maze.pkl"
-                case algorithms.A_STAR:
+                case Algorithm.A_STAR:
                     path_file = "Results/Taiwan2015/A_star_path.pkl"
                     maze_file = "Results/Taiwan2015/A_star_maze.pkl"
-                case algorithms.A_STAR_MOD:
+                case Algorithm.A_STAR_MOD:
                     path_file = "Results/Taiwan2015/A_star_mod_path.pkl"
                     maze_file = "Results/Taiwan2015/A_star_mod_maze.pkl"
-        case maze.APEC_2010:
-            match mode_params.ALGORITHM:
-                case algorithms.FLOODFILL:
+        case MazeLayout.APEC_2010:
+            match world.sim.algorithm:
+                case Algorithm.FLOODFILL:
                     path_file = "Results/Apec2010/floodfill_path.pkl"
                     maze_file = "Results/Apec2010/floodfill_maze.pkl"
-                case algorithms.DFS:
+                case Algorithm.DFS:
                     path_file = "Results/Apec2010/DFS_path.pkl"
                     maze_file = "Results/Apec2010/DFS_maze.pkl"
-                case algorithms.BFS:
+                case Algorithm.BFS:
                     path_file = "Results/Apec2010/BFS_path.pkl"
                     maze_file = "Results/Apec2010/BFS_maze.pkl"
-                case algorithms.A_STAR:
+                case Algorithm.A_STAR:
                     path_file = "Results/Apec2010/A_star_path.pkl"
                     maze_file = "Results/Apec2010/A_star_maze.pkl"
-                case algorithms.A_STAR_MOD:
+                case Algorithm.A_STAR_MOD:
                     path_file = "Results/Apec2010/A_star_mod_path.pkl"
                     maze_file = "Results/Apec2010/A_star_mod_maze.pkl"
-        case maze.UK_2016:
-            match mode_params.ALGORITHM:
-                case algorithms.FLOODFILL:
+        case MazeLayout.UK_2016:
+            match world.sim.algorithm:
+                case Algorithm.FLOODFILL:
                     path_file = "Results/UK2016/floodfill_path.pkl"
                     maze_file = "Results/UK2016/floodfill_maze.pkl"
-                case algorithms.DFS:
+                case Algorithm.DFS:
                     path_file = "Results/UK2016/DFS_path.pkl"
                     maze_file = "Results/UK2016/DFS_maze.pkl"
-                case algorithms.BFS:
+                case Algorithm.BFS:
                     path_file = "Results/UK2016/BFS_path.pkl"
                     maze_file = "Results/UK2016/BFS_maze.pkl"
-                case algorithms.A_STAR:
+                case Algorithm.A_STAR:
                     path_file = "Results/UK2016/A_star_path.pkl"
                     maze_file = "Results/UK2016/A_star_maze.pkl"
-                case algorithms.A_STAR_MOD:
+                case Algorithm.A_STAR_MOD:
                     path_file = "Results/UK2016/A_star_mod_path.pkl"
                     maze_file = "Results/UK2016/A_star_mod_maze.pkl"
-        case maze.HIGASHI_2017:
-            match mode_params.ALGORITHM:
-                case algorithms.FLOODFILL:
+        case MazeLayout.HIGASHI_2017:
+            match world.sim.algorithm:
+                case Algorithm.FLOODFILL:
                     path_file = "Results/Higashi2017_mod/floodfill_path.pkl"
                     maze_file = "Results/Higashi2017_mod/floodfill_maze.pkl"
-                case algorithms.DFS:
+                case Algorithm.DFS:
                     path_file = "Results/Higashi2017_mod/DFS_path.pkl"
                     maze_file = "Results/Higashi2017_mod/DFS_maze.pkl"
-                case algorithms.BFS:
+                case Algorithm.BFS:
                     path_file = "Results/Higashi2017_mod/BFS_path.pkl"
                     maze_file = "Results/Higashi2017_mod/BFS_maze.pkl"
-                case algorithms.A_STAR:
+                case Algorithm.A_STAR:
                     path_file = "Results/Higashi2017_mod/A_star_path.pkl"
                     maze_file = "Results/Higashi2017_mod/A_star_maze.pkl"
-                case algorithms.A_STAR_MOD:
+                case Algorithm.A_STAR_MOD:
                     path_file = "Results/Higashi2017_mod/A_star_mod_path.pkl"
                     maze_file = "Results/Higashi2017_mod/A_star_mod_maze.pkl"
-        case maze.JAPAN_2013EQ:
-            match mode_params.ALGORITHM:
-                case algorithms.FLOODFILL:
+        case MazeLayout.JAPAN_2013EQ:
+            match world.sim.algorithm:
+                case Algorithm.FLOODFILL:
                     path_file = "Results/Japan2013eq/floodfill_path.pkl"
                     maze_file = "Results/Japan2013eq/floodfill_maze.pkl"
-                case algorithms.DFS:
+                case Algorithm.DFS:
                     path_file = "Results/Japan2013eq/DFS_path.pkl"
                     maze_file = "Results/Japan2013eq/DFS_maze.pkl"
-                case algorithms.BFS:
+                case Algorithm.BFS:
                     path_file = "Results/Japan2013eq/BFS_path.pkl"
                     maze_file = "Results/Japan2013eq/BFS_maze.pkl"
-                case algorithms.A_STAR:
+                case Algorithm.A_STAR:
                     path_file = "Results/Japan2013eq/A_star_path.pkl"
                     maze_file = "Results/Japan2013eq/A_star_maze.pkl"
-                case algorithms.A_STAR_MOD:
+                case Algorithm.A_STAR_MOD:
                     path_file = "Results/Japan2013eq/A_star_mod_path.pkl"
                     maze_file = "Results/Japan2013eq/A_star_mod_maze.pkl"
-        case maze.KANKOU_2003:
-            match mode_params.ALGORITHM:
-                case algorithms.FLOODFILL:
+        case MazeLayout.KANKOU_2003:
+            match world.sim.algorithm:
+                case Algorithm.FLOODFILL:
                     path_file = "Results/Kankou2003/floodfill_path.pkl"
                     maze_file = "Results/Kankou2003/floodfill_maze.pkl"
-                case algorithms.DFS:
+                case Algorithm.DFS:
                     path_file = "Results/Kankou2003/DFS_path.pkl"
                     maze_file = "Results/Kankou2003/DFS_maze.pkl"
-                case algorithms.BFS:
+                case Algorithm.BFS:
                     path_file = "Results/Kankou2003/BFS_path.pkl"
                     maze_file = "Results/Kankou2003/BFS_maze.pkl"
-                case algorithms.A_STAR:
+                case Algorithm.A_STAR:
                     path_file = "Results/Kankou2003/A_star_path.pkl"
                     maze_file = "Results/Kankou2003/A_star_maze.pkl"
-                case algorithms.A_STAR_MOD:
+                case Algorithm.A_STAR_MOD:
                     path_file = "Results/Kankou2003/A_star_mod_path.pkl"
                     maze_file = "Results/Kankou2003/A_star_mod_maze.pkl"
-        case maze.JAPAN_2011:
-            match mode_params.ALGORITHM:
-                case algorithms.FLOODFILL:
+        case MazeLayout.JAPAN_2011:
+            match world.sim.algorithm:
+                case Algorithm.FLOODFILL:
                     path_file = "Results/Japan2011/floodfill_path.pkl"
                     maze_file = "Results/Japan2011/floodfill_maze.pkl"
-                case algorithms.DFS:
+                case Algorithm.DFS:
                     path_file = "Results/Japan2011/DFS_path.pkl"
                     maze_file = "Results/Japan2011/DFS_maze.pkl"
-                case algorithms.BFS:
+                case Algorithm.BFS:
                     path_file = "Results/Japan2011/BFS_path.pkl"
                     maze_file = "Results/Japan2011/BFS_maze.pkl"
-                case algorithms.A_STAR:
+                case Algorithm.A_STAR:
                     path_file = "Results/Japan2011/A_star_path.pkl"
                     maze_file = "Results/Japan2011/A_star_maze.pkl"
-                case algorithms.A_STAR_MOD:
+                case Algorithm.A_STAR_MOD:
                     path_file = "Results/Japan2011/A_star_mod_path.pkl"
                     maze_file = "Results/Japan2011/A_star_mod_maze.pkl"
-        case maze.JAPAN_1987:
-            match mode_params.ALGORITHM:
-                case algorithms.FLOODFILL:
+        case MazeLayout.JAPAN_1987:
+            match world.sim.algorithm:
+                case Algorithm.FLOODFILL:
                     path_file = "Results/Japan1987/floodfill_path.pkl"
                     maze_file = "Results/Japan1987/floodfill_maze.pkl"
-                case algorithms.DFS:
+                case Algorithm.DFS:
                     path_file = "Results/Japan1987/DFS_path.pkl"
                     maze_file = "Results/Japan1987/DFS_maze.pkl"
-                case algorithms.BFS:
+                case Algorithm.BFS:
                     path_file = "Results/Japan1987/BFS_path.pkl"
                     maze_file = "Results/Japan1987/BFS_maze.pkl"
-                case algorithms.A_STAR:
+                case Algorithm.A_STAR:
                     path_file = "Results/Japan1987/A_star_path.pkl"
                     maze_file = "Results/Japan1987/A_star_maze.pkl"
-                case algorithms.A_STAR_MOD:
+                case Algorithm.A_STAR_MOD:
                     path_file = "Results/Japan1987/A_star_mod_path.pkl"
                     maze_file = "Results/Japan1987/A_star_mod_maze.pkl"
-        case maze.KOR_88:
-            match mode_params.ALGORITHM:
-                case algorithms.FLOODFILL:
+        case MazeLayout.KOR_88:
+            match world.sim.algorithm:
+                case Algorithm.FLOODFILL:
                     path_file = "Results/Kor88/floodfill_path.pkl"
                     maze_file = "Results/Kor88/floodfill_maze.pkl"
-                case algorithms.DFS:
+                case Algorithm.DFS:
                     path_file = "Results/Kor88/DFS_path.pkl"
                     maze_file = "Results/Kor88/DFS_maze.pkl"
-                case algorithms.BFS:
+                case Algorithm.BFS:
                     path_file = "Results/Kor88/BFS_path.pkl"
                     maze_file = "Results/Kor88/BFS_maze.pkl"
-                case algorithms.A_STAR:
+                case Algorithm.A_STAR:
                     path_file = "Results/Kor88/A_star_path.pkl"
                     maze_file = "Results/Kor88/A_star_maze.pkl"
-                case algorithms.A_STAR_MOD:
+                case Algorithm.A_STAR_MOD:
                     path_file = "Results/Kor88/A_star_mod_path.pkl"
                     maze_file = "Results/Kor88/A_star_mod_maze.pkl"
 

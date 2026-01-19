@@ -1,4 +1,4 @@
-from ..utils.params import SimulationParams, MazeParams
+from utils.params import SimulationParams, MazeParams
 
 
 class World:

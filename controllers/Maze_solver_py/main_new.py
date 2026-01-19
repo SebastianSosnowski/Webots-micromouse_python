@@ -4,13 +4,12 @@ from pathlib import Path
 from controller import Robot
 
 # my modules
-from Constants import *
-import main_functions as main_f
-
 from config.loader import load_config
 from utils.my_robot import MyRobot
 from config.enums import Algorithm
 from config.world import world
+
+import main_functions as main_f
 
 
 def run_robot(robot: MyRobot):

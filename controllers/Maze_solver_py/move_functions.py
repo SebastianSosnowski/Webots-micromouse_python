@@ -2,7 +2,6 @@
 
 from math import pi
 
-from Constants import *
 from algorithm_functions import change_orientation
 import algorithm_functions as algorithm_f
 import map_functions as map_f
@@ -203,7 +202,7 @@ def PID_correction(robot: MyRobot):
 
             error = left_angle_sensor - right_angle_sensor
 
-            if mode_params.TESTING:
+            if world.sim.testing:
                 print("error %.3f" % error)
 
             error_integral += error
@@ -215,7 +214,7 @@ def PID_correction(robot: MyRobot):
             elif MotorSpeed < -0.2:
                 MotorSpeed = -0.2
 
-            if mode_params.TESTING:
+            if world.sim.testing:
                 print("speed %.3f" % MotorSpeed)
 
             robot.left_motor.setVelocity(robot.params.speed + MotorSpeed)
@@ -223,7 +222,7 @@ def PID_correction(robot: MyRobot):
         elif left_wall:
             error = left_angle_sensor - Middle
 
-            if mode_params.TESTING:
+            if world.sim.testing:
                 print("errorL %.3f" % error)
 
             error_integral += error
@@ -235,7 +234,7 @@ def PID_correction(robot: MyRobot):
             elif MotorSpeed < -0.06:
                 MotorSpeed = -0.06
 
-            if mode_params.TESTING:
+            if world.sim.testing:
                 print("speed %.3f" % MotorSpeed)
 
             robot.left_motor.setVelocity(robot.params.speed + MotorSpeed)
@@ -243,7 +242,7 @@ def PID_correction(robot: MyRobot):
         elif right_wall:
             error = right_angle_sensor - Middle
 
-            if mode_params.TESTING:
+            if world.sim.testing:
                 print("errorR %.3f" % error)
 
             error_integral += error
@@ -255,7 +254,7 @@ def PID_correction(robot: MyRobot):
             elif MotorSpeed < -0.06:
                 MotorSpeed = -0.06
 
-            if mode_params.TESTING:
+            if world.sim.testing:
                 print("speed %.3f" % MotorSpeed)
 
             robot.left_motor.setVelocity(robot.params.speed - MotorSpeed)
@@ -282,7 +281,7 @@ def PID_correction(robot: MyRobot):
 
 def move_1_tile(robot: MyRobot):
 
-    revolutions = maze_parameters.TILE_LENGTH / robot.params.wheel  # rev in radians
+    revolutions = world.maze.tile_length / robot.params.wheel  # rev in radians
 
     left_wheel_revolutions = robot.ps_left.getValue()
     right_wheel_revolutions = robot.ps_right.getValue()
@@ -297,7 +296,7 @@ def move_1_tile(robot: MyRobot):
     robot.right_motor.setPosition(right_wheel_revolutions)
     PID_correction(robot)
 
-    if mode_params.TESTING:
+    if world.sim.testing:
         print("forward")
 
     # wait_move_end(robot, ps_left, ps_right)
@@ -330,7 +329,7 @@ def move_front_correct(robot: MyRobot):
             robot.step(world.sim.time_step)
             left = robot.ps[7].getValue()
             right = robot.ps[0].getValue()
-            if mode_params.TESTING:
+            if world.sim.testing:
                 print("sensor angle %.2f" % left, "%.2f" % right)
 
     elif left > right:
@@ -341,7 +340,7 @@ def move_front_correct(robot: MyRobot):
             robot.step(world.sim.time_step)
             left = robot.ps[7].getValue()
             right = robot.ps[0].getValue()
-            if mode_params.TESTING:
+            if world.sim.testing:
                 print("sensor angle %.2f" % left, "%.2f" % right)
 
     front = robot.tof.getValue()
@@ -357,7 +356,7 @@ def move_front_correct(robot: MyRobot):
 
             front = robot.tof.getValue()
 
-            if mode_params.TESTING:
+            if world.sim.testing:
                 print("sensor tof %.2f" % front)
 
     elif front < desired_distance:
@@ -370,7 +369,7 @@ def move_front_correct(robot: MyRobot):
 
             front = robot.tof.getValue()
 
-            if mode_params.TESTING:
+            if world.sim.testing:
                 print("sensor tof %.2f" % front)
 
     robot.left_motor.setVelocity(0)
@@ -405,7 +404,7 @@ def turn(robot: MyRobot, move_direction):
             robot.left_motor.setPosition(left_wheel_revolutions)
             robot.right_motor.setPosition(right_wheel_revolutions)
 
-            if mode_params.TESTING:
+            if world.sim.testing:
                 print("right")
         case Move.LEFT:
             left_wheel_revolutions -= revolutions
@@ -413,7 +412,7 @@ def turn(robot: MyRobot, move_direction):
             robot.left_motor.setPosition(left_wheel_revolutions)
             robot.right_motor.setPosition(right_wheel_revolutions)
 
-            if mode_params.TESTING:
+            if world.sim.testing:
                 print("left")
         case Move.BACK:
             revolutions *= 2
@@ -422,7 +421,7 @@ def turn(robot: MyRobot, move_direction):
             robot.left_motor.setPosition(left_wheel_revolutions)
             robot.right_motor.setPosition(right_wheel_revolutions)
 
-            if mode_params.TESTING:
+            if world.sim.testing:
                 print("back")
 
     wait_move_end(robot)

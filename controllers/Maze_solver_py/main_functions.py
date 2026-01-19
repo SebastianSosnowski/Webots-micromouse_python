@@ -3,16 +3,15 @@ from collections import namedtuple, deque
 from threading import Thread
 
 # my modules
-from Constants import *
 import map_functions as map_f
 import move_functions as move_f
 import algorithm_functions as algorithm_f
 import draw_maze
-import var
 
 from utils.my_robot import MyRobot
 from config.enums import Move, Mode, Direction
 from config.world import world
+import var
 
 
 """ floodfill_main
@@ -35,8 +34,8 @@ from config.world import world
 
 
 def floodfill_main(robot: MyRobot):
-    maze_map = [0] * maze_parameters.MAZE_SIZE
-    distance = [255] * maze_parameters.MAZE_SIZE
+    maze_map = [0] * world.maze.size
+    distance = [255] * world.maze.size
 
     maze_map = map_f.init_maze_map(maze_map)
 
@@ -46,13 +45,13 @@ def floodfill_main(robot: MyRobot):
 
     while robot.step(world.sim.time_step) != -1:
 
-        if mode_params.TESTING:
+        if world.sim.testing:
             print("sensor tof %.2f" % robot.tof.getValue())
 
-        if mode_params.TESTING:
+        if world.sim.testing:
             print("sensor ps6 left %.2f" % robot.ps[6].getValue())
 
-        if mode_params.TESTING:
+        if world.sim.testing:
             print("sensor ps1 right %.2f" % robot.ps[1].getValue())
 
         match world.sim.mode:
@@ -68,7 +67,7 @@ def floodfill_main(robot: MyRobot):
                     Maze_thread.start()
 
                     robot.state.start = False
-                if mode_params.TESTING:
+                if world.sim.testing:
                     timer = robot.getTime()
 
                 left_wall, front_wall, right_wall, back_wall = map_f.detect_walls(robot, 5)
@@ -107,7 +106,7 @@ def floodfill_main(robot: MyRobot):
                     print("Searching time: %.2f" % robot.getTime(), "s")
                     algorithm_f.write_file(maze_file, maze_map)
                     for i in range(
-                        0, maze_parameters.MAZE_SIZE
+                        0, world.maze.size
                     ):  # to make sure path will use only visited cells
                         if (maze_map[i] & world.maze.visited) != world.maze.visited:
                             maze_map[i] |= 15
@@ -122,7 +121,7 @@ def floodfill_main(robot: MyRobot):
 
                 move_f.move_one_position(robot, maze_map[robot.state.pos], distance)
 
-                if mode_params.TESTING:
+                if world.sim.testing:
                     timer = robot.getTime() - timer
                     print("Move time: %.2f" % timer, "s")
 
@@ -209,7 +208,7 @@ def floodfill_main(robot: MyRobot):
 
 #                 robot.state.start = False
 
-#             if mode_params.TESTING:
+#             if world.sim.testing:
 #                 timer = robot.getTime()
 
 #             while stack:
@@ -330,7 +329,7 @@ def floodfill_main(robot: MyRobot):
 #                     ps_right,
 #                 )
 
-#                 if mode_params.TESTING:
+#                 if world.sim.testing:
 #                     timer = robot.getTime() - timer
 #                     print("Move time: %.2f" % timer, "s")
 
@@ -440,7 +439,7 @@ def floodfill_main(robot: MyRobot):
 #                 Maze_thread.start()
 
 #                 robot.state.start = False
-#             if mode_params.TESTING:
+#             if world.sim.testing:
 #                 timer = robot.getTime()
 
 #             while queue:
@@ -538,7 +537,7 @@ def floodfill_main(robot: MyRobot):
 #                         ps_right,
 #                     )
 
-#                 if mode_params.TESTING:
+#                 if world.sim.testing:
 #                     timer = robot.getTime() - timer
 #                     print("Move time: %.2f" % timer, "s")
 
@@ -643,7 +642,7 @@ def floodfill_main(robot: MyRobot):
 #                 Maze_thread.start()
 
 #                 robot.state.start = False
-#             if mode_params.TESTING:
+#             if world.sim.testing:
 #                 timer = robot.getTime()
 
 #             while open:
@@ -731,7 +730,7 @@ def floodfill_main(robot: MyRobot):
 #                         ps_right,
 #                     )
 
-#                 if mode_params.TESTING:
+#                 if world.sim.testing:
 #                     timer = robot.getTime() - timer
 #                     print("Move time: %.2f" % timer, "s")
 
@@ -844,7 +843,7 @@ def floodfill_main(robot: MyRobot):
 #                 Maze_thread.start()
 
 #                 robot.state.start = False
-#             if mode_params.TESTING:
+#             if world.sim.testing:
 #                 timer = robot.getTime()
 
 #             while open:
@@ -939,7 +938,7 @@ def floodfill_main(robot: MyRobot):
 #                         ps_right,
 #                     )
 
-#                 if mode_params.TESTING:
+#                 if world.sim.testing:
 #                     timer = robot.getTime() - timer
 #                     print("Move time: %.2f" % timer, "s")
 
@@ -1013,7 +1012,7 @@ def keyboard_main(robot: MyRobot):
     max_tof = 0
     while robot.step(world.sim.time_step) != -1:
 
-        if mode_params.TESTING:
+        if world.sim.testing:
             avg_front_sensor = 0
             for i in range(0, 3):  # more scans for better accuracy
 
@@ -1028,10 +1027,10 @@ def keyboard_main(robot: MyRobot):
                 max_tof = avg_front_sensor
             print("max tof %.2f" % max_tof)
 
-        if mode_params.TESTING:
+        if world.sim.testing:
             print("sensor ps6 left %.2f" % robot.ps[6].getValue())
 
-        if mode_params.TESTING:
+        if world.sim.testing:
             print("sensor ps1 right %.2f" % robot.ps[1].getValue())
 
         key = keyboard.get_key()
@@ -1095,7 +1094,7 @@ def keyboard_main(robot: MyRobot):
 
 # def init_parameters():
 
-#     target = maze_parameters.TARGET_CELL  # robot start target
+#     target = world.maze.target_cell  # robot start target
 #     robot_position = maze_parameters.START_CELL  # robot start position
 #     start = True  # to open file 1 time
 #     robot_orientation = direction.NORTH  # robot start orientation

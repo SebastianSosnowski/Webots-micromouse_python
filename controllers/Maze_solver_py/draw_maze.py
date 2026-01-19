@@ -1,9 +1,8 @@
 from turtle import *
 import var
-from Constants import *
 
-from config.enums import Direction
-
+from config.enums import Direction, Algorithm, Mode
+from config.world import world
 
 """ init_maze
 # @brief Init maze window with grid and starting walls
@@ -45,7 +44,7 @@ def init_maze(maze_map, distance, size):
     maze.width(5)
     # draw walls
     i = 0
-    if mode_params.ALGORITHM == algorithms.FLOODFILL:
+    if world.sim.algorithm == Algorithm.FLOODFILL:
         for y in range(-480, 480, size):
             for x in range(-480, 480, size):
                 write_distance(x, y, distance[i], text)  # write initial distance values
@@ -54,7 +53,7 @@ def init_maze(maze_map, distance, size):
                 else:
                     draw_wall(maze_map[i] - 64, x, y, size, maze)
                 i += 1
-    else:  # graph algorithms
+    else:  # graph Algorithm
         for y in range(-480, 480, size):
             for x in range(-480, 480, size):
                 cell = graph_walls_convert(maze_map[i], i)
@@ -94,7 +93,7 @@ def draw_maze(maze_map, distance):
     lines.width(4)
     lines.speed(0)
 
-    if mode_params.MODE == mode_params.SEARCH:
+    if world.sim.mode == Mode.SEARCH:
         update_maze_search(size, circles, text, maze)
 
     update_maze_speedrun(size, lines, circles)
@@ -117,7 +116,7 @@ def update_maze_speedrun(size, lines, robot_position):
     last_x, last_y = draw_path(0, 0, size, lines)
     draw_position(size, robot_position)
 
-    while var.robot_pos != maze_parameters.TARGET_CELL:
+    while var.robot_pos != world.maze.target_cell:
 
         var.drawing_event.wait()
         var.drawing_event.clear()
@@ -160,7 +159,7 @@ def update_maze_search(size, visited_cell, text, maze):
         yy = var.robot_pos // 16
         yy = -480 + yy * size
 
-        if mode_params.ALGORITHM == algorithms.FLOODFILL:
+        if world.sim.algorithm == Algorithm.FLOODFILL:
             draw_wall(var.maze_map_global[var.robot_pos] - 64, xx, yy, size, maze)
             if var.distance_update:
                 i = 0
@@ -175,8 +174,8 @@ def update_maze_search(size, visited_cell, text, maze):
             draw_wall(cell, xx, yy, size, maze)
 
             if (
-                mode_params.ALGORITHM == algorithms.A_STAR
-                or mode_params.ALGORITHM == algorithms.A_STAR_MOD
+                world.sim.algorithm == Algorithm.A_STAR
+                or world.sim.algorithm == Algorithm.A_STAR_MOD
             ):
                 text.clear()
                 for key in var.cost_global:
@@ -206,11 +205,9 @@ def update_maze_search(size, visited_cell, text, maze):
 def draw_center(size, maze):
     center = [119, 120, 135]
     for center_cell in center:
-        if mode_params.ALGORITHM == algorithms.FLOODFILL:
-            check = (
-                var.maze_map_global[center_cell] & maze_parameters.VISITED
-            ) != maze_parameters.VISITED
-        else:  # graphs algorithms
+        if world.sim.algorithm == Algorithm.FLOODFILL:
+            check = (var.maze_map_global[center_cell] & world.maze.visited) != world.maze.visited
+        else:  # graphs Algorithm
             check = (
                 len(var.maze_map_global[center_cell]) == 0
             )  # inside unvisited nodes have 4 edges
@@ -289,8 +286,8 @@ def draw_path(last_x, last_y, size, t):
 
 
 def draw_position(size, t):
-    x = var.robot_pos % maze_parameters.COLUMNS
-    y = int(var.robot_pos / maze_parameters.ROWS)
+    x = var.robot_pos % world.maze.columns
+    y = int(var.robot_pos / world.maze.rows)
     t.penup()
     t.goto(-450 + x * size, -450 + y * size - 6)  # last position
     t.pendown()
