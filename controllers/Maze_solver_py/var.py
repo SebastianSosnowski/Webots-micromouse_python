@@ -10,6 +10,7 @@ maze_map_global = [0] * 256  # world.maze.size
 distance_global = [255] * 256  # world.maze.size
 target_global = 136  # world.maze.target_cell
 cost_global = {}
+drawing = True
 
 drawing_event = Event()
 main_event = Event()

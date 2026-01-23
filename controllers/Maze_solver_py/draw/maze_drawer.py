@@ -5,15 +5,38 @@ from config.enums import Direction, Algorithm, Mode
 from config.world import world
 
 from utils.params import DrawState
+from queue import Queue
+from threading import Thread
 
 
-class MazeDrawer:
-    def __init__(self, maze_map, distance) -> None:
+class MazeDrawer(Thread):
+    def __init__(self, maze_map, distance, draw_queue: Queue) -> None:
+        super().__init__(daemon=True)
+        self.draw_queue = draw_queue
+        self.maze_map = maze_map
+        self.distance = distance
         self.size = 60
-        self.text_canvas, self.maze_canvas = self._init_maze(maze_map, distance)
-        self.robot_pos_canvas, self.path_canvas = self._init_canvas()
         self.last_x = 0
         self.last_y = 0
+
+    def start_drawing(self):
+        self.start()
+
+    def run(self):
+        self.text_canvas, self.maze_canvas = self._init_maze(self.maze_map, self.distance)
+        self.robot_pos_canvas, self.path_canvas = self._init_canvas()
+        while var.drawing:
+            var.drawing_event.wait()
+            var.drawing_event.clear()
+
+            if world.sim.mode == Mode.SEARCH:
+                self._draw_search_frame()
+            else:
+
+                self._draw_speedrun_frame()
+
+            var.main_event.set()
+        done()
 
     def _init_canvas(self):
         circles = Turtle()
@@ -29,25 +52,6 @@ class MazeDrawer:
         lines.speed(0)
 
         return circles, lines
-
-    @staticmethod
-    def thread_entry(maze_map, distance):
-        drawer = MazeDrawer(maze_map, distance)
-        drawer.run()
-
-    def run(self):
-        while var.robot_pos != world.maze.target_cell:
-            var.drawing_event.wait()
-            var.drawing_event.clear()
-
-            if world.sim.mode == Mode.SEARCH:
-                self._draw_search_frame()
-            else:
-
-                self._draw_speedrun_frame()
-
-            var.main_event.set()
-        done()
 
     def _init_maze(self, maze_map, distance):
         """

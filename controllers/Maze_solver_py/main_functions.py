@@ -47,7 +47,7 @@ def floodfill_main(robot: MyRobot):
     var.maze_map_global = maze_map
 
     path_file, maze_file = algorithm_f.choose_file_path()
-    # draw_queue = Queue(maxsize=1)
+    draw_queue = Queue(maxsize=1)
     # Thread(target=draw_worker, args=(draw_queue,), daemon=True).start()
 
     while robot.step(world.sim.time_step) != -1:
@@ -66,13 +66,8 @@ def floodfill_main(robot: MyRobot):
 
                 if robot.state.start:
                     # run in another thread to make it possible to look on it during robot run
-                    Maze_thread = Thread(
-                        target=MazeDrawer.thread_entry,
-                        args=(var.maze_map_global, var.distance_global),
-                        daemon=True,
-                    )
-                    Maze_thread.start()
-
+                    drawer = MazeDrawer(var.maze_map_global, var.distance_global, draw_queue)
+                    drawer.start_drawing()
                     robot.state.start = False
                 if world.sim.testing:
                     timer = robot.getTime()
@@ -109,6 +104,7 @@ def floodfill_main(robot: MyRobot):
                 var.drawing_event.set()
 
                 if var.searching_end:
+                    var.drawing = False
                     print("Target reached")
                     print("Searching time: %.2f" % robot.getTime(), "s")
                     algorithm_f.write_file(maze_file, maze_map)
@@ -145,14 +141,8 @@ def floodfill_main(robot: MyRobot):
                 if robot.state.start:
                     distance = algorithm_f.read_file(path_file)
                     maze_map = algorithm_f.read_file(maze_file)
-
-                    # run in another thread to make it possible to look on it during robot run
-                    Maze_thread = Thread(
-                        target=MazeDrawer.thread_entry,
-                        args=(maze_map, distance),
-                        daemon=True,
-                    )
-                    Maze_thread.start()
+                    drawer = MazeDrawer(maze_map, distance, draw_queue)
+                    drawer.start_drawing()
 
                     robot.state.start = False
                 move_f.move_one_position(robot, maze_map[robot.state.pos], distance)
@@ -164,6 +154,7 @@ def floodfill_main(robot: MyRobot):
                 var.main_event.clear()
 
                 if robot.state.pos == robot.state.current_target:
+                    var.drawing = False
                     print("Target reached")
                     print("Speedrun time: %.2f" % robot.getTime(), "s")
                     input("press any key to end")
