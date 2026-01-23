@@ -6,14 +6,15 @@ from threading import Thread
 import map_functions as map_f
 import move_functions as move_f
 import algorithm_functions as algorithm_f
-import draw.draw_maze as draw_maze
+
+# import draw.draw_maze as draw_maze
 
 
 from queue import Queue
 from utils.my_robot import MyRobot
 from config.enums import Move, Mode, Direction
 from config.world import world
-from draw.draw_worker import draw_worker
+from draw.maze_drawer import draw_maze
 import var
 
 
@@ -45,8 +46,8 @@ def floodfill_main(robot: MyRobot):
     var.maze_map_global = maze_map
 
     path_file, maze_file = algorithm_f.choose_file_path()
-    draw_queue = Queue(maxsize=1)
-    Thread(target=draw_worker, args=(draw_queue,), daemon=True).start()
+    # draw_queue = Queue(maxsize=1)
+    # Thread(target=draw_worker, args=(draw_queue,), daemon=True).start()
 
     while robot.step(world.sim.time_step) != -1:
 
@@ -65,7 +66,7 @@ def floodfill_main(robot: MyRobot):
                 if robot.state.start:
                     # run in another thread to make it possible to look on it during robot run
                     Maze_thread = Thread(
-                        target=draw_maze.draw_maze,
+                        target=draw_maze,
                         args=(var.maze_map_global, var.distance_global),
                         daemon=True,
                     )
@@ -146,7 +147,7 @@ def floodfill_main(robot: MyRobot):
 
                     # run in another thread to make it possible to look on it during robot run
                     Maze_thread = Thread(
-                        target=draw_maze.draw_maze,
+                        target=draw_maze,
                         args=(maze_map, distance),
                         daemon=True,
                     )

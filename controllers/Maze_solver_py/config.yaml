@@ -1,5 +1,5 @@
 simulation:
-  mode: SPEEDRUN          # Python enum
+  mode: SEARCH          # Python enum
   algorithm: FLOODFILL  # Python enum
   maze_layout: JAPAN_2011  # Python enum
   testing: false

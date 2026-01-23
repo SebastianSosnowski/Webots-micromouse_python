@@ -35,3 +35,12 @@ class RobotState:
     current_target: int
     start: bool = True
     orientation: Direction = Direction.NORTH
+
+
+@dataclass(frozen=True)
+class DrawState:
+    robot_pos: int
+    robot_orientation: int
+    maze_map: list[int] | None
+    distance: list[int] | None
+    cost_global: dict | None
