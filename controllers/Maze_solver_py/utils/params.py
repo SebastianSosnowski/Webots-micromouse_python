@@ -40,7 +40,6 @@ class RobotState:
 @dataclass(frozen=True)
 class DrawState:
     robot_pos: int
-    robot_orientation: int
-    maze_map: list[int] | None
-    distance: list[int] | None
-    cost_global: dict | None
+    maze_map: list[int]
+    distance: list[int]
+    cost: dict

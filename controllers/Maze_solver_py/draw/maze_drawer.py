@@ -1,5 +1,5 @@
 from turtle import setup, Turtle, tracer, update, done
-import var
+# import var
 
 from config.enums import Direction, Algorithm, Mode
 from config.world import world
@@ -18,6 +18,9 @@ class MazeDrawer(Thread):
         self.size = 60
         self.last_x = 0
         self.last_y = 0
+        self.robot_pos = 0
+        self.distance_update = False
+        self.cost = {}
 
     def start_drawing(self):
         self.start()
@@ -25,17 +28,18 @@ class MazeDrawer(Thread):
     def run(self):
         self.text_canvas, self.maze_canvas = self._init_maze(self.maze_map, self.distance)
         self.robot_pos_canvas, self.path_canvas = self._init_canvas()
-        while var.drawing:
-            var.drawing_event.wait()
-            var.drawing_event.clear()
+
+        while True:
+            msg: DrawState = self.draw_queue.get()
+
+            if msg is None:
+                break
+            self._update_state(msg)
 
             if world.sim.mode == Mode.SEARCH:
                 self._draw_search_frame()
             else:
-
                 self._draw_speedrun_frame()
-
-            var.main_event.set()
         done()
 
     def _init_canvas(self):
@@ -109,6 +113,14 @@ class MazeDrawer(Thread):
 
         return text, maze
 
+    def _update_state(self, msg: DrawState):
+        if msg.distance != self.distance:
+            self.distance_update = True
+            self.distance = msg.distance
+        self.maze_map = msg.maze_map
+        self.cost = msg.cost
+        self.robot_pos = msg.robot_pos
+
     def _draw_search_frame(self):
         """
         @brief Update maze visualization with visited cells and discovered walls and distance values.
@@ -124,23 +136,23 @@ class MazeDrawer(Thread):
         """
         self._draw_position(self.robot_pos_canvas)
 
-        xx = var.robot_pos % 16
+        xx = self.robot_pos % 16
         xx = -480 + xx * self.size
-        yy = var.robot_pos // 16
+        yy = self.robot_pos // 16
         yy = -480 + yy * self.size
 
         if world.sim.algorithm == Algorithm.FLOODFILL:
-            draw_wall(var.maze_map_global[var.robot_pos] - 64, xx, yy, self.size, self.maze_canvas)
-            if var.distance_update:
+            draw_wall(self.maze_map[self.robot_pos] - 64, xx, yy, self.size, self.maze_canvas)
+            if self.distance_update:
                 i = 0
                 self.text_canvas.clear()
                 for y in range(-480, 480, self.size):
                     for x in range(-480, 480, self.size):
-                        write_distance(x, y, var.distance_global[i], self.text_canvas)
+                        write_distance(x, y, self.distance[i], self.text_canvas)
                         i += 1
-                var.distance_update = False
+                self.distance_update = False
         else:  # graphs
-            cell = graph_walls_convert(var.maze_map_global[var.robot_pos], var.robot_pos)
+            cell = graph_walls_convert(self.maze_map[self.robot_pos], self.robot_pos)
             draw_wall(cell, xx, yy, self.size, self.maze_canvas)
 
             if (
@@ -148,14 +160,14 @@ class MazeDrawer(Thread):
                 or world.sim.algorithm == Algorithm.A_STAR_MOD
             ):
                 self.text_canvas.clear()
-                for key in var.cost_global:
+                for key in self.cost:
                     x = key % 16
                     x = -480 + x * self.size
                     y = key // 16
                     y = -480 + y * self.size
-                    write_cost(x, y, var.cost_global[key], self.text_canvas)
+                    write_cost(x, y, self.cost[key], self.text_canvas)
 
-        if var.robot_pos == 136:
+        if self.robot_pos == 136:
             self._draw_center()
 
         update()
@@ -191,13 +203,12 @@ class MazeDrawer(Thread):
         center = [119, 120, 135]
         for center_cell in center:
             if world.sim.algorithm == Algorithm.FLOODFILL:
-                check = (
-                    var.maze_map_global[center_cell] & world.maze.visited
-                ) != world.maze.visited
+                check = (self.maze_map[center_cell] & world.maze.visited) != world.maze.visited
             else:  # graphs Algorithm
-                check = (
-                    len(var.maze_map_global[center_cell]) == 0
-                )  # inside unvisited nodes have 4 edges
+                cell = self.maze_map[center_cell]
+                if isinstance(cell, list):
+                    check = len(cell) == 0  # inside unvisited nodes have 4 edges
+                # check = len(self.maze_map[center_cell]) == 0  # inside unvisited nodes have 4 edges
             if check:
                 x = center_cell % 16
                 x = -480 + x * self.size
@@ -220,8 +231,8 @@ class MazeDrawer(Thread):
 
         @retval None
         """
-        x = var.robot_pos % world.maze.columns
-        y = int(var.robot_pos / world.maze.rows)
+        x = self.robot_pos % world.maze.columns
+        y = int(self.robot_pos / world.maze.rows)
         t.penup()
         t.goto(-450 + x * self.size, -450 + y * self.size - 6)  # last position
         t.pendown()
@@ -242,8 +253,8 @@ class MazeDrawer(Thread):
         @retval next_x: variable with actual robot x coordinate position
         @retval next_y: variable with actual robot y coordinate position
         """
-        next_x = var.robot_pos % 16
-        next_y = int(var.robot_pos / 16)
+        next_x = self.robot_pos % 16
+        next_y = int(self.robot_pos / 16)
         t.penup()
         t.goto(-450 + self.last_x * self.size, -450 + self.last_y * self.size)  # last position
         t.pendown()

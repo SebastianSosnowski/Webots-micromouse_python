@@ -6,7 +6,6 @@ from threading import Thread
 import map_functions as map_f
 import move_functions as move_f
 import algorithm_functions as algorithm_f
-from turtle import done
 
 # import draw.draw_maze as draw_maze
 
@@ -16,8 +15,9 @@ from utils.my_robot import MyRobot
 from config.enums import Move, Mode, Direction
 from config.world import world
 from draw.maze_drawer import MazeDrawer
-import var
 
+# import var
+from utils.params import DrawState
 
 """ floodfill_main
 # @brief Main program for floodfill algorithm controller. 
@@ -44,11 +44,10 @@ def floodfill_main(robot: MyRobot):
 
     maze_map = map_f.init_maze_map(maze_map)
 
-    var.maze_map_global = maze_map
+    shortest_path = False
 
     path_file, maze_file = algorithm_f.choose_file_path()
     draw_queue = Queue(maxsize=1)
-    # Thread(target=draw_worker, args=(draw_queue,), daemon=True).start()
 
     while robot.step(world.sim.time_step) != -1:
 
@@ -66,7 +65,7 @@ def floodfill_main(robot: MyRobot):
 
                 if robot.state.start:
                     # run in another thread to make it possible to look on it during robot run
-                    drawer = MazeDrawer(var.maze_map_global, var.distance_global, draw_queue)
+                    drawer = MazeDrawer(maze_map, distance, draw_queue)
                     drawer.start_drawing()
                     robot.state.start = False
                 if world.sim.testing:
@@ -92,19 +91,10 @@ def floodfill_main(robot: MyRobot):
 
                 distance = algorithm_f.floodfill(maze_map, distance)  # path
 
-                var.robot_pos = robot.state.pos
+                draw_queue.put(DrawState(robot.state.pos, maze_map, distance, {}))
 
-                var.maze_map_global = maze_map
-
-                if var.distance_global != distance:
-                    var.distance_global = distance
-                    var.distance_update = True
-
-                var.target_global = robot.state.current_target
-                var.drawing_event.set()
-
-                if var.searching_end:
-                    var.drawing = False
+                if shortest_path:
+                    draw_queue.put(None)
                     print("Target reached")
                     print("Searching time: %.2f" % robot.getTime(), "s")
                     algorithm_f.write_file(maze_file, maze_map)
@@ -131,10 +121,7 @@ def floodfill_main(robot: MyRobot):
                 maze_map[robot.state.pos] |= world.maze.visited  # mark visited tile
 
                 if robot.state.pos == robot.state.current_target:
-                    maze_map = algorithm_f.change_target(robot, maze_map, distance)
-
-                var.main_event.wait()
-                var.main_event.clear()
+                    maze_map, shortest_path = algorithm_f.change_target(robot, maze_map, distance)
 
             case Mode.SPEEDRUN:  # speedrun
 
@@ -146,15 +133,10 @@ def floodfill_main(robot: MyRobot):
 
                     robot.state.start = False
                 move_f.move_one_position(robot, maze_map[robot.state.pos], distance)
-                var.robot_pos = robot.state.pos
-
-                var.drawing_event.set()
-
-                var.main_event.wait()
-                var.main_event.clear()
+                draw_queue.put(DrawState(robot.state.pos, maze_map, distance, {}))
 
                 if robot.state.pos == robot.state.current_target:
-                    var.drawing = False
+                    draw_queue.put(None)
                     print("Target reached")
                     print("Speedrun time: %.2f" % robot.getTime(), "s")
                     input("press any key to end")
