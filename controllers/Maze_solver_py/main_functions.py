@@ -14,7 +14,7 @@ from queue import Queue
 from utils.my_robot import MyRobot
 from config.enums import Move, Mode, Direction
 from config.world import world
-from draw.maze_drawer import draw_maze
+from draw.maze_drawer import MazeDrawer
 import var
 
 
@@ -66,7 +66,7 @@ def floodfill_main(robot: MyRobot):
                 if robot.state.start:
                     # run in another thread to make it possible to look on it during robot run
                     Maze_thread = Thread(
-                        target=draw_maze,
+                        target=MazeDrawer.thread_entry,
                         args=(var.maze_map_global, var.distance_global),
                         daemon=True,
                     )
@@ -147,7 +147,7 @@ def floodfill_main(robot: MyRobot):
 
                     # run in another thread to make it possible to look on it during robot run
                     Maze_thread = Thread(
-                        target=draw_maze,
+                        target=MazeDrawer.thread_entry,
                         args=(maze_map, distance),
                         daemon=True,
                     )

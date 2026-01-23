@@ -7,27 +7,6 @@ from config.world import world
 from utils.params import DrawState
 
 
-def draw_maze(maze_map, distance):
-    """
-    @brief Draw maze with distance values and discovered walls.
-    For search run also mark visited cells.
-    For speedrun draws robot path and actual position.
-
-    @param maze_map: list with actual maze map with walls
-    @param distance: list with actual distances values/path
-
-    @retval None
-    """
-    md = MazeDrawer(maze_map, distance)
-
-    if world.sim.mode == Mode.SEARCH:
-        md.update_maze_search()
-
-    md.update_maze_speedrun()
-
-    done()
-
-
 class MazeDrawer:
     def __init__(self, maze_map, distance) -> None:
         self.size = 60
@@ -48,6 +27,19 @@ class MazeDrawer:
         lines.speed(0)
 
         return circles, lines
+
+    @staticmethod
+    def thread_entry(maze_map, distance):
+        drawer = MazeDrawer(maze_map, distance)
+        drawer.run()
+
+    def run(self):
+        if world.sim.mode == Mode.SEARCH:
+            self._update_maze_search()
+
+        self._update_maze_speedrun()
+
+        done()
 
     def _init_maze(self, maze_map, distance):
         """
@@ -105,42 +97,7 @@ class MazeDrawer:
 
         return text, maze
 
-    def _draw_maze(self, maze_map, distance):
-        """
-        @brief Draw maze with distance values and discovered walls.
-        For search run also mark visited cells.
-        For speedrun draws robot path and actual position.
-
-        @param maze_map: list with actual maze map with walls
-        @param distance: list with actual distances values/path
-
-        @retval None
-        """
-
-        size = 60
-
-        text, maze = self._init_maze(maze_map, distance, size)
-
-        circles = Turtle()
-        circles.pencolor("red")
-        circles.hideturtle()
-        circles.width(4)
-        circles.speed(0)
-
-        lines = Turtle()
-        lines.pencolor("red")
-        lines.hideturtle()
-        lines.width(4)
-        lines.speed(0)
-
-        if world.sim.mode == Mode.SEARCH:
-            self.update_maze_search(size, circles, text, maze)
-
-        self.update_maze_speedrun(size, lines, circles)
-
-        done()
-
-    def update_maze_search(self):
+    def _update_maze_search(self):
         """
         @brief Update maze visualization with visited cells and discovered walls and distance values.
         For floodfill distance values are also drawn.
@@ -153,14 +110,14 @@ class MazeDrawer:
 
         @retval None
         """
-        self.draw_position(self.visited_canvas)
+        self._draw_position(self.visited_canvas)
 
         while var.robot_pos != var.target_global:
 
             var.drawing_event.wait()
             var.drawing_event.clear()
 
-            self.draw_position(self.visited_canvas)
+            self._draw_position(self.visited_canvas)
 
             xx = var.robot_pos % 16
             xx = -480 + xx * self.size
@@ -196,12 +153,12 @@ class MazeDrawer:
                         write_cost(x, y, var.cost_global[key], self.text_canvas)
 
             if var.robot_pos == 136:
-                self.draw_center()
+                self._draw_center()
 
             update()
             var.main_event.set()
 
-    def update_maze_speedrun(self):
+    def _update_maze_speedrun(self):
         """
         @brief Update maze visualization with actual robot position and path.
 
@@ -211,22 +168,22 @@ class MazeDrawer:
 
         @retval None
         """
-        last_x, last_y = self.draw_path(0, 0, self.path_canvas)
-        self.draw_position(self.visited_canvas)
+        last_x, last_y = self._draw_path(0, 0, self.path_canvas)
+        self._draw_position(self.visited_canvas)
 
         while var.robot_pos != world.maze.target_cell:
 
             var.drawing_event.wait()
             var.drawing_event.clear()
 
-            last_x, last_y = self.draw_path(last_x, last_y, self.path_canvas)
+            last_x, last_y = self._draw_path(last_x, last_y, self.path_canvas)
             self.visited_canvas.clear()
-            self.draw_position(self.visited_canvas)
+            self._draw_position(self.visited_canvas)
 
             update()
             var.main_event.set()
 
-    def draw_center(self):
+    def _draw_center(self):
         """
         @brief Update maze visualization with center cells at the end according to visited cells.
 
@@ -258,7 +215,7 @@ class MazeDrawer:
                     case 135:
                         draw_wall(9, x, y, self.size, self.maze_canvas)
 
-    def draw_position(self, t: Turtle):
+    def _draw_position(self, t: Turtle):
         """
         @brief Draw mark in maze cell where robot is right now.
 
@@ -277,7 +234,7 @@ class MazeDrawer:
         t.circle(6)
         t.end_fill()
 
-    def draw_path(self, last_x, last_y, t: Turtle):
+    def _draw_path(self, last_x, last_y, t: Turtle):
         """draw_path
         @brief Draw robot path.
 
