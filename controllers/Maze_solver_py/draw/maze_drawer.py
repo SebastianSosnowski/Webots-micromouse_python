@@ -11,7 +11,9 @@ class MazeDrawer:
     def __init__(self, maze_map, distance) -> None:
         self.size = 60
         self.text_canvas, self.maze_canvas = self._init_maze(maze_map, distance)
-        self.visited_canvas, self.path_canvas = self._init_canvas()
+        self.robot_pos_canvas, self.path_canvas = self._init_canvas()
+        self.last_x = 0
+        self.last_y = 0
 
     def _init_canvas(self):
         circles = Turtle()
@@ -34,11 +36,17 @@ class MazeDrawer:
         drawer.run()
 
     def run(self):
-        if world.sim.mode == Mode.SEARCH:
-            self._update_maze_search()
+        while var.robot_pos != world.maze.target_cell:
+            var.drawing_event.wait()
+            var.drawing_event.clear()
 
-        self._update_maze_speedrun()
+            if world.sim.mode == Mode.SEARCH:
+                self._draw_search_frame()
+            else:
 
+                self._draw_speedrun_frame()
+
+            var.main_event.set()
         done()
 
     def _init_maze(self, maze_map, distance):
@@ -97,7 +105,7 @@ class MazeDrawer:
 
         return text, maze
 
-    def _update_maze_search(self):
+    def _draw_search_frame(self):
         """
         @brief Update maze visualization with visited cells and discovered walls and distance values.
         For floodfill distance values are also drawn.
@@ -110,55 +118,45 @@ class MazeDrawer:
 
         @retval None
         """
-        self._draw_position(self.visited_canvas)
+        self._draw_position(self.robot_pos_canvas)
 
-        while var.robot_pos != var.target_global:
+        xx = var.robot_pos % 16
+        xx = -480 + xx * self.size
+        yy = var.robot_pos // 16
+        yy = -480 + yy * self.size
 
-            var.drawing_event.wait()
-            var.drawing_event.clear()
+        if world.sim.algorithm == Algorithm.FLOODFILL:
+            draw_wall(var.maze_map_global[var.robot_pos] - 64, xx, yy, self.size, self.maze_canvas)
+            if var.distance_update:
+                i = 0
+                self.text_canvas.clear()
+                for y in range(-480, 480, self.size):
+                    for x in range(-480, 480, self.size):
+                        write_distance(x, y, var.distance_global[i], self.text_canvas)
+                        i += 1
+                var.distance_update = False
+        else:  # graphs
+            cell = graph_walls_convert(var.maze_map_global[var.robot_pos], var.robot_pos)
+            draw_wall(cell, xx, yy, self.size, self.maze_canvas)
 
-            self._draw_position(self.visited_canvas)
+            if (
+                world.sim.algorithm == Algorithm.A_STAR
+                or world.sim.algorithm == Algorithm.A_STAR_MOD
+            ):
+                self.text_canvas.clear()
+                for key in var.cost_global:
+                    x = key % 16
+                    x = -480 + x * self.size
+                    y = key // 16
+                    y = -480 + y * self.size
+                    write_cost(x, y, var.cost_global[key], self.text_canvas)
 
-            xx = var.robot_pos % 16
-            xx = -480 + xx * self.size
-            yy = var.robot_pos // 16
-            yy = -480 + yy * self.size
+        if var.robot_pos == 136:
+            self._draw_center()
 
-            if world.sim.algorithm == Algorithm.FLOODFILL:
-                draw_wall(
-                    var.maze_map_global[var.robot_pos] - 64, xx, yy, self.size, self.maze_canvas
-                )
-                if var.distance_update:
-                    i = 0
-                    self.text_canvas.clear()
-                    for y in range(-480, 480, self.size):
-                        for x in range(-480, 480, self.size):
-                            write_distance(x, y, var.distance_global[i], self.text_canvas)
-                            i += 1
-                    var.distance_update = False
-            else:  # graphs
-                cell = graph_walls_convert(var.maze_map_global[var.robot_pos], var.robot_pos)
-                draw_wall(cell, xx, yy, self.size, self.maze_canvas)
+        update()
 
-                if (
-                    world.sim.algorithm == Algorithm.A_STAR
-                    or world.sim.algorithm == Algorithm.A_STAR_MOD
-                ):
-                    self.text_canvas.clear()
-                    for key in var.cost_global:
-                        x = key % 16
-                        x = -480 + x * self.size
-                        y = key // 16
-                        y = -480 + y * self.size
-                        write_cost(x, y, var.cost_global[key], self.text_canvas)
-
-            if var.robot_pos == 136:
-                self._draw_center()
-
-            update()
-            var.main_event.set()
-
-    def _update_maze_speedrun(self):
+    def _draw_speedrun_frame(self):
         """
         @brief Update maze visualization with actual robot position and path.
 
@@ -168,20 +166,14 @@ class MazeDrawer:
 
         @retval None
         """
-        last_x, last_y = self._draw_path(0, 0, self.path_canvas)
-        self._draw_position(self.visited_canvas)
+        self._draw_path(self.path_canvas)
+        self._draw_position(self.robot_pos_canvas)
 
-        while var.robot_pos != world.maze.target_cell:
+        self._draw_path(self.path_canvas)
+        self.robot_pos_canvas.clear()
+        self._draw_position(self.robot_pos_canvas)
 
-            var.drawing_event.wait()
-            var.drawing_event.clear()
-
-            last_x, last_y = self._draw_path(last_x, last_y, self.path_canvas)
-            self.visited_canvas.clear()
-            self._draw_position(self.visited_canvas)
-
-            update()
-            var.main_event.set()
+        update()
 
     def _draw_center(self):
         """
@@ -234,7 +226,7 @@ class MazeDrawer:
         t.circle(6)
         t.end_fill()
 
-    def _draw_path(self, last_x, last_y, t: Turtle):
+    def _draw_path(self, t: Turtle):
         """draw_path
         @brief Draw robot path.
 
@@ -249,17 +241,16 @@ class MazeDrawer:
         next_x = var.robot_pos % 16
         next_y = int(var.robot_pos / 16)
         t.penup()
-        t.goto(-450 + last_x * self.size, -450 + last_y * self.size)  # last position
+        t.goto(-450 + self.last_x * self.size, -450 + self.last_y * self.size)  # last position
         t.pendown()
         line(
-            -450 + last_x * self.size,
-            -450 + last_y * self.size,
+            -450 + self.last_x * self.size,
+            -450 + self.last_y * self.size,
             -450 + next_x * self.size,
             -450 + next_y * self.size,
             t,
         )
-
-        return next_x, next_y
+        self.last_x, self.last_y = next_x, next_y
 
 
 def line(start_x, start_y, end_x, end_y, t: Turtle):

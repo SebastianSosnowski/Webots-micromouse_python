@@ -6,6 +6,7 @@ from threading import Thread
 import map_functions as map_f
 import move_functions as move_f
 import algorithm_functions as algorithm_f
+from turtle import done
 
 # import draw.draw_maze as draw_maze
 
