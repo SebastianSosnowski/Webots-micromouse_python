@@ -8,6 +8,7 @@ from map_functions import init_distance_map
 from utils.my_robot import MyRobot
 from config.enums import Direction, Move, Algorithm, MazeLayout
 from config.world import world
+
 # import var
 
 """ floodfill
@@ -209,7 +210,7 @@ def check_possible_routes_BFS(adjacent_cells, visited, queue, fork, target):
 # @brief Add possible adjacent cells to stack and then decides to which cell move next.
 # Last item in stack is chosen.
 #
-# @param adjacent_cells: list with cells accesible from current robot position
+# @param adjacent_cells: list with cells accessible from current robot position
 # @param visited: list with cells already added to stack
 # @param stack: stack with cells which will be visited
 # @param target: variable with a cell which is a target
@@ -273,7 +274,7 @@ def check_possible_routes_DFS(adjacent_cells, visited, stack, target):
 # @param start: variable with starting cell number
 # @param target: variable with targeted cell number
 #
-# @retval path: list withpath from start to target
+# @retval path: list with path from start to target
 """
 
 
@@ -731,13 +732,13 @@ def check_distance(distance, maze_map, target):
 
 
 """ calc_cost  
-# @brief Calculates Manhatan's distance which is used
+# @brief Calculates Manhattan's distance which is used
 # as cost in A* algorithm.
 #
 # @param start: variable with first position
 # @param target: variable with second position
 #
-# @retval distance: Manhatan's distance/cost
+# @retval distance: Manhattan's distance/cost
 """
 
 
@@ -768,13 +769,7 @@ def calc_cost(start, target):
 def read_file(file_name):
 
     with open(file_name, "rb") as file:
-        readed = pickle.load(file)
-
-    if file == None:
-        print("ERROR")
-        exit(1)
-
-    return readed
+        return pickle.load(file)
 
 
 """ write_file
@@ -795,7 +790,7 @@ def write_file(file_name, values):
 
 
 """ choose_file_path
-# @brief Choose apropiete directory and file name to save results
+# @brief Choose appropriate directory and file name to save results
 #
 # @param None
 #
