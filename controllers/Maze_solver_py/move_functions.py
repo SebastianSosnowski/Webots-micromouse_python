@@ -12,13 +12,14 @@ from utils.my_robot import MyRobot
 
 
 def move_one_position_graph(robot: MyRobot, current_destination):
-    """move_one_position_graph
-    @brief Executes robot movement to next position. Used in graph algorithms.
+    """Executes robot movement to next position. Used in graph algorithms.
 
-    @param robot: MyRobot object with robot devices
-    @param current_destination: variable with cell to which robot moves
+    Args:
+        robot (MyRobot): MyRobot object with robot devices.
+        current_destination: Variable with cell to which robot moves.
 
-    @retval None
+    Returns:
+        None
     """
 
     move_direction = algorithm_f.where_to_move_graph(robot.state.pos, current_destination)
@@ -33,14 +34,15 @@ def move_one_position_graph(robot: MyRobot, current_destination):
 
 
 def move_one_position(robot: MyRobot, walls, distance):
-    """move_one_position
-    @brief Executes robot movement to next position. Used in floodfill
+    """Executes robot movement to next position. Used in floodfill.
 
-    @param robot: MyRobot object with robot devices
-    @param walls: variable with walls in current robot position
-    @param distance: list with actual distances values/path
+    Args:
+        robot (MyRobot): MyRobot object with robot devices.
+        walls: Variable with walls in current robot position.
+        distance (list): List with actual distances values/path.
 
-    @retval None
+    Returns:
+        None
     """
 
     move_direction = algorithm_f.where_to_move(robot, walls, distance)
@@ -56,13 +58,14 @@ def move_one_position(robot: MyRobot, walls, distance):
 
 
 def drive(robot: MyRobot, move_direction):
-    """drive
-    @brief Drive robot motors etc. to actually move based on its orientation and move direction.
+    """Drive robot motors etc. to actually move based on its orientation and move direction.
 
-    @param robot: MyRobot object with robot devices
-    @param move_direction: variable direction where to move in global directions
+    Args:
+        robot (MyRobot): MyRobot object with robot devices.
+        move_direction: Variable direction where to move in global directions.
 
-    @retval None
+    Returns:
+        None
     """
     if robot.state.orientation == move_direction:  # move forward
         move_1_tile(robot)
@@ -97,16 +100,14 @@ def drive(robot: MyRobot, move_direction):
 
 
 def read_sensors(robot: MyRobot, number_of_reads):
-    """read_sensors
-    @brief Read and process left and right sensors for a PID controller.
+    """Read and process left and right sensors for a PID controller.
 
-    @param robot: MyRobot object with robot devices
-    @param number_of_reads: variable which indicates how many times to read sensors
+    Args:
+        robot (MyRobot): MyRobot object with robot devices.
+        number_of_reads: Variable which indicates how many times to read sensors.
 
-    @retval avg1_right_angle_sensor: variable with right angle sensor value
-    @retval avg6_left_angle_sensor: variable with left angle sensor value
-    @retval left_wall: variable which indicates left wall presence
-    @retval right_wall: variable which indicates right wall presence
+    Returns:
+        tuple[float, float, bool, bool]: Variables with right angle sensor value, left angle sensor value, left wall presence, right wall presence.
     """
 
     avg1_right_angle_sensor = 0  # ps1
@@ -140,12 +141,13 @@ def read_sensors(robot: MyRobot, number_of_reads):
 
 
 def PID_correction(robot: MyRobot):
-    """PID_correction
-    @brief Correct robot position according to distance sensors by changing motors speed.
+    """Correct robot position according to distance sensors by changing motors speed.
 
-    @param robot: MyRobot object with robot devices
+    Args:
+        robot (MyRobot): MyRobot object with robot devices.
 
-    @retval None
+    Returns:
+        None
     """
     while True:
         distance_left_now = robot.ps_left.getValue()
@@ -232,13 +234,13 @@ def PID_correction(robot: MyRobot):
 
 
 def move_1_tile(robot: MyRobot):
-    """move_1_tile
-    @brief Drive robot motors and set encoders position
-    to move forward by distance of exactly one tile.
+    """Drive robot motors and set encoders position to move forward by distance of exactly one tile.
 
-    @param robot: MyRobot object with robot devices
+    Args:
+        robot (MyRobot): MyRobot object with robot devices.
 
-    @retval None
+    Returns:
+        None
     """
 
     revolutions = world.maze.tile_length / robot.params.wheel  # rev in radians
@@ -263,14 +265,15 @@ def move_1_tile(robot: MyRobot):
 
 
 def move_front_correct(robot: MyRobot):
-    """move_front_correct
-    @brief Corrects robot position in reference to front wall.
+    """Corrects robot position in reference to front wall.
     Uses front angles IR sensors to straight up robot
     and front tof sensor to correct distance.
 
-    @param robot: MyRobot object with robot devices
+    Args:
+        robot (MyRobot): MyRobot object with robot devices.
 
-    @retval None
+    Returns:
+        None
     """
 
     robot.left_motor.setPosition(float("inf"))
@@ -335,14 +338,14 @@ def move_front_correct(robot: MyRobot):
 
 
 def turn(robot: MyRobot, move_direction):
-    """turn
-    @brief Drive robot motors and set encoders position
-    to turn by exactly 90 or 180 degrees.
+    """Drive robot motors and set encoders position to turn by exactly 90 or 180 degrees.
 
-    @param robot: MyRobot object with robot devices
-    @param move_direction: variable with direction where to move in global directions
+    Args:
+        robot (MyRobot): MyRobot object with robot devices.
+        move_direction: Variable with direction where to move in global directions.
 
-    @retval None
+    Returns:
+        None
     """
 
     revolutions = (pi / 2) * robot.params.axle / 2 / robot.params.wheel  # in radians
@@ -384,21 +387,19 @@ def turn(robot: MyRobot, move_direction):
 
 
 def move_back_DFS(robot: MyRobot, destination, maze_map, fork, fork_number, unused_routes, path):
-    """move_back_DFS
-    @brief Moves robot back to previous valid fork (Depth first search).
+    """Moves robot back to previous valid fork (Depth first search).
 
-    @param robot: MyRobot object with robot devices
-    @param destination: variable with robot destination cell
-    @param maze_map: dictionary with maze map graph
-    @param fork: dictionary with paths to each fork from current position
-    @param fork_number: variable with number of last used fork
-    @param unused_routes: dictionary with number of unused routes for each fork
-    @param path: list with actual path from start to current position
+    Args:
+        robot (MyRobot): MyRobot object with robot devices.
+        destination: Variable with robot destination cell.
+        maze_map (dict): Dictionary with maze map graph.
+        fork (dict): Dictionary with paths to each fork from current position.
+        fork_number: Variable with number of last used fork.
+        unused_routes (dict): Dictionary with number of unused routes for each fork.
+        path (list): List with actual path from start to current position.
 
-    @retval fork: updated fork dictionary
-    @retval fork_number: updated fork number
-    @retval unused_routes: updated unused routes dictionary
-    @retval path: updated path list
+    Returns:
+        tuple[dict, int, dict, list]: Updated fork dictionary, fork number, unused routes dictionary, path list.
     """
 
     while destination not in maze_map[robot.state.pos]:
@@ -416,12 +417,13 @@ def move_back_DFS(robot: MyRobot, destination, maze_map, fork, fork_number, unus
 
 
 def wait_move_end(robot: MyRobot):
-    """wait_move_end
-    @brief Stops main loop execution until robot ends move.
+    """Stops main loop execution until robot ends move.
 
-    @param robot: MyRobot object with robot devices
+    Args:
+        robot (MyRobot): MyRobot object with robot devices.
 
-    @retval None
+    Returns:
+        None
     """
 
     while True:

@@ -16,8 +16,7 @@ from utils.params import DrawState
 
 
 def floodfill_main(robot: MyRobot):
-    """floodfill_main
-    @brief Main program for floodfill algorithm controller.
+    """Main program for floodfill algorithm controller.
     Every cycle robot calculates shortest path to target and tries to go to it.
     When target is found it checks if it was the shortest path by comparing paths
     for 2 mazes: actually discovered and discovered but cells which weren't visited
@@ -26,9 +25,11 @@ def floodfill_main(robot: MyRobot):
     target to start cell to search some of unvisited part of maze. Process repeat's
     until shortest path is found.
 
-    @param robot: object with robot instance
+    Args:
+        robot (MyRobot): Object with robot instance.
 
-    @retval None
+    Returns:
+        None
     """
     maze_map = [0] * world.maze.size
     distance = [255] * world.maze.size
@@ -135,13 +136,14 @@ def floodfill_main(robot: MyRobot):
 
 
 def DFS_main(robot: MyRobot):
-    """DFS_main
-    @brief Main program for Depth first search algorithm controller.
+    """Main program for Depth first search algorithm controller.
     Doesn't guarantee the shortest path but usually finds path very fast (micromouse mazes).
 
-    @param robot: object with robot instance
+    Args:
+        robot (MyRobot): Object with robot instance.
 
-    @retval None
+    Returns:
+        None
     """
     maze_map = map_f.init_maze_map_graph()
 
@@ -279,16 +281,17 @@ def DFS_main(robot: MyRobot):
 
 
 def BFS_main(robot: MyRobot):
-    """BFS_main
-    @brief Main program for Breadth first search algorithm controller.
+    """Main program for Breadth first search algorithm controller.
     It was adjusted for robot movement. BFS is a horizontal searching through graph
     by going by each 'level' of nodes. To avoid unnecessary back-tracking,
     only forks are treated as 'levels',  which means that robot will go back
     only when it moves to new fork or dead-end. Because of that it doesn't guarantees shortest path.
 
-    @param robot: object with robot instance
+    Args:
+        robot (MyRobot): Object with robot instance.
 
-    @retval None
+    Returns:
+        None
     """
     maze_map = map_f.init_maze_map_graph()
 
@@ -423,13 +426,14 @@ def BFS_main(robot: MyRobot):
 
 
 def A_star_main(robot: MyRobot):
-    """A_star_main
-    @brief Main program for A* algorithm controller.
+    """Main program for A* algorithm controller.
     Guarantees shortest path, but very long search time.
 
-    @param robot: object with robot instance
+    Args:
+        robot (MyRobot): Object with robot instance.
 
-    @retval None
+    Returns:
+        None
     """
 
     maze_map = map_f.init_maze_map_graph()
@@ -557,8 +561,7 @@ def A_star_main(robot: MyRobot):
 
 
 def A_star_main_modified(robot: MyRobot):
-    """
-    @brief Main program for A* modified algorithm controller.
+    """Main program for A* modified algorithm controller.
     Modification is that robot chooses where to go in 2 ways:
     1. If current position is fork or dead-end - choose cell with lowest
     Fcost and/or Hcost (just like in normal A*).
@@ -568,9 +571,11 @@ def A_star_main_modified(robot: MyRobot):
     The only drawback is that this approach might not guarantee the shortest path,
     although in micromouse mazes it usually should find it.
 
-    @param robot: object with robot instance
+    Args:
+        robot (MyRobot): Object with robot instance.
 
-    @retval None
+    Returns:
+        None
     """
 
     maze_map = map_f.init_maze_map_graph()
@@ -710,13 +715,14 @@ def A_star_main_modified(robot: MyRobot):
 
 
 def keyboard_main(robot: MyRobot):
-    """keyboard_main
-    @brief Main program for manual/with arrows controller.
+    """Main program for manual/with arrows controller.
     Made for testing purposes to move robot with WASD.
 
-    @param robot: object with robot instance
+    Args:
+        robot (MyRobot): Object with robot instance.
 
-    @retval None
+    Returns:
+        None
     """
 
     keyboard = Keyboard()
