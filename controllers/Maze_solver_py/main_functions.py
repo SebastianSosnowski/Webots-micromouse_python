@@ -6,8 +6,6 @@ import map_functions as map_f
 import move_functions as move_f
 import algorithm_functions as algorithm_f
 
-# import draw.draw_maze as draw_maze
-
 
 from queue import Queue
 from utils.my_robot import MyRobot

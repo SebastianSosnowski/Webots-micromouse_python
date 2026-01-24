@@ -9,19 +9,16 @@ from utils.my_robot import MyRobot
 from config.enums import Direction, Move, Algorithm, MazeLayout
 from config.world import world
 
-# import var
-
-""" floodfill
-# @brief Floodfill algorithm which calculates shortest path to actual target based on actual maze map.
-#
-# @param maze_map: list with actual maze map with walls
-# @param distance: list with actual distances values/path
-#
-# @retval move_direction: variable with move direction to do
-"""
-
 
 def floodfill(maze_map, distance):
+    """floodfill
+    @brief Floodfill algorithm which calculates shortest path to actual target based on actual maze map.
+
+    @param maze_map: list with actual maze map with walls
+    @param distance: list with actual distances values/path
+
+    @retval distance: updated distance list
+    """
 
     search = True
 
@@ -65,21 +62,18 @@ def floodfill(maze_map, distance):
     return distance
 
 
-""" where_to_move
-# @brief Decide where to move by checking distance values in neighbors cells.
-# Depending on robot orientation, value in variable move_direction 
-# is changed so it match global directions. 
-#
-# @param walls: variable with walls in current robot position
-# @param robot_position: variable with actual robot position in maze
-# @param distance: list with actual distances values/path
-# @param robot_orientation: variable with actual robot orientation in global directions
-#
-# @retval move_direction: variable with move direction to do
-"""
-
-
 def where_to_move(robot: MyRobot, walls, distance):
+    """where_to_move
+    @brief Decide where to move by checking distance values in neighbors cells.
+    Depending on robot orientation, value in variable move_direction
+    is changed so it match global directions.
+
+    @param robot: MyRobot object with robot state
+    @param walls: variable with walls in current robot position
+    @param distance: list with actual distances values/path
+
+    @retval move_direction: variable with move direction to do
+    """
 
     position = robot.state.pos
     orientation = robot.state.orientation
@@ -137,19 +131,17 @@ def where_to_move(robot: MyRobot, walls, distance):
     return move_direction
 
 
-""" where_to_move_graph  WORKS only for 16x16 maze
-# @brief Substitute of where_to_move function made for graphs.
-# Decide global move direction by calculating where, in reference to actual position node,
-# is placed current destination node.
-#
-# @param robot_position: variable with actual robot position in maze
-# @param current_destination: variable with position to which robot want's to go
-#
-# @retval move_direction: variable with move direction to do
-"""
-
-
 def where_to_move_graph(robot_position, current_destination):
+    """where_to_move_graph  WORKS only for 16x16 maze
+    @brief Substitute of where_to_move function made for graphs.
+    Decide global move direction by calculating where, in reference to actual position node,
+    is placed current destination node.
+
+    @param robot_position: variable with actual robot position in maze
+    @param current_destination: variable with position to which robot want's to go
+
+    @retval move_direction: variable with move direction to do
+    """
 
     x = current_destination - robot_position
     match x:
@@ -175,7 +167,6 @@ def check_possible_routes_BFS(adjacent_cells, visited, queue, fork):
     @param visited: list with cells already added to queue
     @param queue: queue with cells which will be visited
     @param fork: bool variable which informs if current cell is a fork
-    @param target: variable with a cell which is a target
 
     @retval current_destination: variable with a cell to which move next
     @retval visited: updated list with cells already added to queue
@@ -204,22 +195,19 @@ def check_possible_routes_BFS(adjacent_cells, visited, queue, fork):
     return current_destination, visited, queue, dead_end, searching_end
 
 
-""" check_possible_routes_DFS  
-# @brief Add possible adjacent cells to stack and then decides to which cell move next.
-# Last item in stack is chosen.
-#
-# @param adjacent_cells: list with cells accessible from current robot position
-# @param visited: list with cells already added to stack
-# @param stack: stack with cells which will be visited
-# @param target: variable with a cell which is a target
-#
-# @retval current_destination: variable with a cell to which move next
-# @retval visited: updated list with cells already added to queue
-# @retval stack: updated stack with cells which will be visited
-"""
-
-
 def check_possible_routes_DFS(adjacent_cells, visited, stack):
+    """check_possible_routes_DFS
+    @brief Add possible adjacent cells to stack and then decides to which cell move next.
+    Last item in stack is chosen.
+
+    @param adjacent_cells: list with cells accessible from current robot position
+    @param visited: list with cells already added to stack
+    @param stack: stack with cells which will be visited
+
+    @retval current_destination: variable with a cell to which move next
+    @retval visited: updated list with cells already added to stack
+    @retval stack: updated stack with cells which will be visited
+    """
 
     for cell in reversed(adjacent_cells):
         if cell not in visited:
@@ -263,20 +251,18 @@ def check_possible_routes_DFS(adjacent_cells, visited, stack):
     return path
 
 
-""" A_star  
-# @brief A* algorithm function which is used to create path between 2 cells.
-# It is used to determine final path as well as paths between current position 
-# and current destination in main program.
-#
-# @param maze_map: dictionary with discovered maze map (or any graph)
-# @param start: variable with starting cell number
-# @param target: variable with targeted cell number
-#
-# @retval path: list with path from start to target
-"""
-
-
 def get_path_A_star(maze_map, start, target):
+    """A_star
+    @brief A* algorithm function which is used to create path between 2 cells.
+    It is used to determine final path as well as paths between current position
+    and current destination in main program.
+
+    @param maze_map: dictionary with discovered maze map (or any graph)
+    @param start: variable with starting cell number
+    @param target: variable with targeted cell number
+
+    @retval path: list with path from start to target
+    """
     # A* vars
     open = []  # list of unvisited nodes
     closed = []  # list of visited nodes
@@ -307,19 +293,17 @@ def get_path_A_star(maze_map, start, target):
         current_position = check_possible_routes_A_star(open, cost)
 
 
-""" check_possible_routes_A_star TODO Implement heap to make it much faster.
-# @brief Decides to which cell move next.
-# Cell with the lowest overall cost (Fcost) is chosen. If more cells have equal
-# Fcost, then cell with lowest Hcost (closer to target) is chosen.
-#
-# @param open: list with cells to visit
-# @param cost: list of costs, which contain Gcost and Hcost
-#
-# @retval current_destination: variable with a cell to which move next
-"""
-
-
 def check_possible_routes_A_star(open, cost):
+    """check_possible_routes_A_star TODO Implement heap to make it much faster.
+    @brief Decides to which cell move next.
+    Cell with the lowest overall cost (Fcost) is chosen. If more cells have equal
+    Fcost, then cell with lowest Hcost (closer to target) is chosen.
+
+    @param open: list with cells to visit
+    @param cost: list of costs, which contain Gcost and Hcost
+
+    @retval current_destination: variable with a cell to which move next
+    """
     current_destination = open[
         -1
     ]  # if there are 2 cells with same Fcost and Hcost, pick last added to open i.e. neighbor
@@ -376,21 +360,19 @@ def update_neighbors_costs(neighbors, open, closed, parent, cost, current_positi
     return open, parent, cost
 
 
-""" get_back_path_A_star  NOT USED anymore, but kept in code :).
-# @brief Creates a path from current robot position to its current destination.
-# First path from target to start is created. Then path from current position to start is created.
-# If path to current target wasn't found yet, both paths are combined to create path.
-#
-# @param maze_map: dictionary graph with current known maze configuration
-# @param robot_position: variable with current robot position in maze
-# @param target: variable with position to which robot want's to go
-# @param parent: list with parent nodes used to create path
-#
-# @retval path: list with path to target
-"""
-
-
 def get_back_path_A_star(maze_map, target, robot_position, parent):
+    """get_back_path_A_star  NOT USED anymore, but kept in code :).
+    @brief Creates a path from current robot position to its current destination.
+    First path from target to start is created. Then path from current position to start is created.
+    If path to current target wasn't found yet, both paths are combined to create path.
+
+    @param maze_map: dictionary graph with current known maze configuration
+    @param target: variable with position to which robot want's to go
+    @param robot_position: variable with current robot position in maze
+    @param parent: list with parent nodes used to create path
+
+    @retval path: list with path to target
+    """
     path_to_target = []
     path_to_current = []
     path = []
@@ -434,25 +416,23 @@ def get_back_path_A_star(maze_map, target, robot_position, parent):
     return path
 
 
-""" check_fork_DFS  
-# @brief Detect's fork, assign number to it and 
-# monitor possible unused routes from each one which is used for DFS algorithm operation.
-# Also detect's dead-ends.
-#
-# @param connections: list with cells available from current position
-# @param robot_position: variable with current robot position in maze
-# @param fork: dictionary with paths to each fork from current position
-# @param fork_number: variable with number of last used fork
-# @param fork_count: dictionary with number of unused routes for each fork
-#
-# @retval fork: updated fork dictionary
-# @retval fork_number: updated fork number
-# @retval fork_count: updated fork count
-# @retval dead_end: bool variable with info if current cell is dead-end
-"""
-
-
 def check_fork_DFS(connections, robot_position, fork, fork_number, fork_count):
+    """check_fork_DFS
+    @brief Detect's fork, assign number to it and
+    monitor possible unused routes from each one which is used for DFS algorithm operation.
+    Also detect's dead-ends.
+
+    @param connections: list with cells available from current position
+    @param robot_position: variable with current robot position in maze
+    @param fork: dictionary with paths to each fork from current position
+    @param fork_number: variable with number of last used fork
+    @param fork_count: dictionary with number of unused routes for each fork
+
+    @retval fork: updated fork dictionary
+    @retval fork_number: updated fork number
+    @retval fork_count: updated fork count
+    @retval dead_end: bool variable with info if current cell is dead-end
+    """
 
     dead_end = False
 
@@ -518,17 +498,15 @@ def get_path_BFS(graph, start, current_target):
     return path
 
 
-""" change_orientation
-# @brief Change robot orientation basing on last orientation and last turn.
-#
-# @param robot_orientation: variable with actual robot orientation in global directions
-# @param action: variable with information where robot turns
-#
-# @retval robot_orientation: variable with updated robot orientation
-"""
-
-
 def change_orientation(robot_orientation: Direction, action: Move):
+    """change_orientation
+    @brief Change robot orientation basing on last orientation and last turn.
+
+    @param robot_orientation: variable with actual robot orientation in global directions
+    @param action: variable with information where robot turns
+
+    @retval robot_orientation: variable with updated robot orientation
+    """
     orientation_value: int = robot_orientation.value
     match action:
         case Move.RIGHT:  # turn right
@@ -553,17 +531,15 @@ def change_orientation(robot_orientation: Direction, action: Move):
     return Direction(orientation_value)
 
 
-""" change_position
-# @brief Update position of the robot basing on current orientation of the robot.
-#
-# @param robot_position: variable with robot position
-# @param robot_orientation: variable with actual robot orientation in global directions
-#
-# @retval robot_position: variable with updated robot position
-"""
-
-
 def change_position(robot_position, robot_orientation):
+    """change_position
+    @brief Update position of the robot basing on current orientation of the robot.
+
+    @param robot_position: variable with robot position
+    @param robot_orientation: variable with actual robot orientation in global directions
+
+    @retval robot_position: variable with updated robot position
+    """
 
     if robot_orientation == Direction.NORTH:
         robot_position = robot_position + world.maze.columns
@@ -579,20 +555,18 @@ def change_position(robot_position, robot_orientation):
     return robot_position
 
 
-""" change_target
-# @brief Marks every visited cell, after reaching targeted cell, change cell to first unvisited cell.
-# When reaching final target, saves distance map to file.
-#
-# @param maze_map: list with actual maze map with walls
-# @param robot_position: variable with actual robot position in maze
-# @param distance: list with actual distances values/path
-# @param target: variable with field number to which robot tries to get
-#
-# @retval target: variable with updated targeted field
-"""
-
-
 def change_target(robot: MyRobot, maze_map, distance):
+    """change_target
+    @brief Marks every visited cell, after reaching targeted cell, change cell to first unvisited cell.
+    When reaching final target, saves distance map to file.
+
+    @param robot: MyRobot object with robot state
+    @param maze_map: list with actual maze map with walls
+    @param distance: list with actual distances values/path
+
+    @retval maze_map: updated maze map
+    @retval shortest_path: bool variable which informs if shortest path was found
+    """
     distance = init_distance_map(distance, robot.state.current_target)  # reset path
     distance = floodfill(maze_map, distance)  # path
 
@@ -628,16 +602,14 @@ def change_target(robot: MyRobot, maze_map, distance):
     return maze_map, shortest_path
 
 
-""" mark_center
-# @brief Adds walls to unvisited cells in center
-#
-# @param maze_map: list with actual maze map with walls
-#
-# @retval maze_map: list with updated maze map
-"""
-
-
 def mark_center(maze_map):
+    """mark_center
+    @brief Adds walls to unvisited cells in center
+
+    @param maze_map: list with actual maze map with walls
+
+    @retval maze_map: list with updated maze map
+    """
 
     center = [119, 120, 135]
 
@@ -660,18 +632,16 @@ def mark_center(maze_map):
     return maze_map
 
 
-""" mark_center_graph 
-# @brief Adds walls to unvisited cells in center.
-# Path is used to determine which cells weren't visited.
-#
-# @param maze_map: list with actual maze map with walls
-# @param path: list with path
-#
-# @retval maze_map: list with updated maze map
-"""
-
-
 def mark_center_graph(maze_map, path):
+    """mark_center_graph
+    @brief Adds walls to unvisited cells in center.
+    Path is used to determine which cells weren't visited.
+
+    @param maze_map: list with actual maze map with walls
+    @param path: list with path
+
+    @retval maze_map: list with updated maze map
+    """
 
     center = [119, 120, 135]
     rows = world.maze.rows
@@ -695,18 +665,16 @@ def mark_center_graph(maze_map, path):
     return maze_map
 
 
-""" check_distance
-# @brief Fills unvisited cells with 4 walls to verify if the shortest path was find.
-#
-# @param distance: list with actual distances values/path
-# @param maze_map: list with actual maze map with walls
-# @param target: variable with field number to which robot tries to get
-#
-# @retval shortest_path: bool variable which informs if shortest path was found
-"""
-
-
 def check_distance(distance, maze_map, target):
+    """check_distance
+    @brief Fills unvisited cells with 4 walls to verify if the shortest path was find.
+
+    @param distance: list with actual distances values/path
+    @param maze_map: list with actual maze map with walls
+    @param target: variable with field number to which robot tries to get
+
+    @retval shortest_path: bool variable which informs if shortest path was found
+    """
 
     distance_check = distance.copy()
     maze_map_check = maze_map.copy()
@@ -725,18 +693,16 @@ def check_distance(distance, maze_map, target):
     return shortest_path
 
 
-""" calc_cost  
-# @brief Calculates Manhattan's distance which is used
-# as cost in A* algorithm.
-#
-# @param start: variable with first position
-# @param target: variable with second position
-#
-# @retval distance: Manhattan's distance/cost
-"""
-
-
 def calc_cost(start, target):
+    """calc_cost
+    @brief Calculates Manhattan's distance which is used
+    as cost in A* algorithm.
+
+    @param start: variable with first position
+    @param target: variable with second position
+
+    @retval distance: Manhattan's distance/cost
+    """
 
     # index to matrix/grid
     point1 = [start % 16, start // 16]
@@ -751,48 +717,40 @@ def calc_cost(start, target):
     return distance
 
 
-""" read_file
-# @brief Read file. Pickle module used.
-#
-# @param file_name: variable with a file name
-#
-# @retval list_temp: list with a content of a file
-"""
-
-
 def read_file(file_name):
+    """read_file
+    @brief Read file. Pickle module used.
+
+    @param file_name: variable with a file name
+
+    @retval list_temp: list with a content of a file
+    """
 
     with open(file_name, "rb") as file:
         return pickle.load(file)
 
 
-""" write_file
-# @brief Write file. Pickle module used.
-#
-# @param file_name: variable with a file name
-# @param: values: any type of object with a content to write file
-#
-# @retval None
-"""
-
-
 def write_file(file_name, values):
+    """write_file
+    @brief Write file. Pickle module used.
+
+    @param file_name: variable with a file name
+    @param values: any type of object with a content to write file
+
+    @retval None
+    """
     path = Path(file_name)
     path.parent.mkdir(parents=True, exist_ok=True)
     with open(file_name, "wb") as file:
         pickle.dump(values, file)
 
 
-""" choose_file_path
-# @brief Choose appropriate directory and file name to save results
-#
-# @param None
-#
-# @retval path_file, maze_file: Appropriate files directory and names
-"""
-
-
 def choose_file_path():
+    """choose_file_path
+    @brief Choose appropriate directory and file name to save results
+
+    @retval path_file, maze_file: Appropriate files directory and names
+    """
 
     match world.sim.maze_layout:
         case MazeLayout.FORBOT:

@@ -3,17 +3,16 @@ from utils.my_robot import MyRobot
 from config.enums import Direction
 from config.world import world
 
-""" detect_walls
-# @brief Read and process sensors to detect walls
-#
-# @param robot, ps, tof: variables with robot devices
-# @param number_of_reads: variable which indicates how many times to read sensors
-#
-# @retval left_wall, front_wall, right_wall, back_wall: variables which indicate respective walls presence. 
-"""
-
 
 def detect_walls(robot: MyRobot, number_of_reads):
+    """detect_walls
+    @brief Read and process sensors to detect walls
+
+    @param robot: MyRobot object with robot devices
+    @param number_of_reads: variable which indicates how many times to read sensors
+
+    @retval left_wall, front_wall, right_wall, back_wall: variables which indicate respective walls presence.
+    """
 
     avg2_right_sensor = 0  # ps2
     avg4_back_sensor = 0  # ps4
@@ -61,22 +60,19 @@ def detect_walls(robot: MyRobot, number_of_reads):
     return left_wall, front_wall, right_wall, back_wall
 
 
-""" add_wall
-# @brief Add wall according to distance sensors.
-# Depending on robot orientation, value in variable detected_wall 
-# is changed so it match global directions. Then wall is added
-# to maze map on robot field and respective neighboring field.
-#
-# @param maze_map: list with actual maze map with walls
-# @param robot_position: actual robot position in maze
-# @param robot_orientation: actual robot orientation in global directions
-# @param detected_wall: value which indicates on which side of robot wall was detected
-#
-# @retval maze_map: list with updated maze_map.
-"""
-
-
 def add_wall(robot: MyRobot, maze_map, detected_wall):
+    """add_wall
+    @brief Add wall according to distance sensors.
+    Depending on robot orientation, value in variable detected_wall
+    is changed so it match global directions. Then wall is added
+    to maze map on robot field and respective neighboring field.
+
+    @param robot: MyRobot object with robot state
+    @param maze_map: list with actual maze map with walls
+    @param detected_wall: value which indicates on which side of robot wall was detected
+
+    @retval maze_map: list with updated maze_map.
+    """
     robot_position = robot.state.pos
     orientation = robot.state.orientation
 
@@ -135,21 +131,19 @@ def add_wall(robot: MyRobot, maze_map, detected_wall):
     return maze_map
 
 
-""" add_walls_graph_old OLD VERSION, not used anymore, but kept in code :).
-# @brief Substitute for add_wall for graphs.
-# Add connected cells according to detected walls.
-# Then remove connected cells in respective neighboring fields according to detected walls.
-#
-# @param maze_map: list with current maze map with walls
-# @param robot_position: current robot position in maze
-# @param robot_orientation: current robot orientation in global directions
-# @param detected_walls: value which indicates on which side of robot wall was detected
-#
-# @retval maze_map: updated maze map.
-"""
-
-
 def add_walls_graph_old(maze_map, robot_position, robot_orientation, detected_walls):
+    """add_walls_graph_old OLD VERSION, not used anymore, but kept in code :).
+    @brief Substitute for add_wall for graphs.
+    Add connected cells according to detected walls.
+    Then remove connected cells in respective neighboring fields according to detected walls.
+
+    @param maze_map: list with current maze map with walls
+    @param robot_position: current robot position in maze
+    @param robot_orientation: current robot orientation in global directions
+    @param detected_walls: value which indicates on which side of robot wall was detected
+
+    @retval maze_map: updated maze map.
+    """
 
     rows = world.maze.rows
 
@@ -264,20 +258,18 @@ def add_walls_graph_old(maze_map, robot_position, robot_orientation, detected_wa
     return maze_map
 
 
-""" add_walls_graph
-# @brief Substitute add_wall function for graphs.
-# Remove connected cells in robot position and respective neighboring cells according to detected walls.
-#
-# @param maze_map: dictionary with current maze map with walls
-# @param robot_position: current robot position in maze
-# @param robot_orientation: current robot orientation in global directions
-# @param detected_walls: value which indicates on which side of robot wall was detected
-#
-# @retval maze_map: updated maze map.
-"""
-
-
 def add_walls_graph(maze_map, robot_position, robot_orientation, detected_walls):
+    """add_walls_graph
+    @brief Substitute add_wall function for graphs.
+    Remove connected cells in robot position and respective neighboring cells according to detected walls.
+
+    @param maze_map: dictionary with current maze map with walls
+    @param robot_position: current robot position in maze
+    @param robot_orientation: current robot orientation in global directions
+    @param detected_walls: value which indicates on which side of robot wall was detected
+
+    @retval maze_map: updated maze map.
+    """
 
     rows = world.maze.rows
 
@@ -405,16 +397,14 @@ def add_walls_graph(maze_map, robot_position, robot_orientation, detected_walls)
     return maze_map
 
 
-""" init_maze_map
-# @brief Initialize maze map with external walls.
-#
-# @param maze_map: list which contains maze map values
-#
-# @retval maze_map: Initialized maze map list
-"""
-
-
 def init_maze_map(maze_map):
+    """init_maze_map
+    @brief Initialize maze map with external walls.
+
+    @param maze_map: list which contains maze map values
+
+    @retval maze_map: Initialized maze map list
+    """
     maze_map[0] = maze_map[0] | world.maze.visited  # mark start as visited
 
     for i in range(0, 16):
@@ -434,18 +424,14 @@ def init_maze_map(maze_map):
     return maze_map
 
 
-""" init_maze_map_graph
-# @brief Initialize maze map with external walls as graph.
-# Border cells are initialized with respective walls.
-# Inside cells are initialized without any walls i.e. 4 connections.
-#
-# @params None
-#
-# @retval maze_map: Initialized maze map dictionary
-"""
-
-
 def init_maze_map_graph():
+    """init_maze_map_graph
+    @brief Initialize maze map with external walls as graph.
+    Border cells are initialized with respective walls.
+    Inside cells are initialized without any walls i.e. 4 connections.
+
+    @retval maze_map: Initialized maze map dictionary
+    """
 
     maze_map = {}
     rows = world.maze.rows
@@ -495,35 +481,31 @@ def init_maze_map_graph():
     return maze_map
 
 
-""" init_distance_map
-# @brief Initialize distance map with max values and 0 as target.
-# Target is 0 for floodfill algorithm working properly.
-#
-# @param distance: list which contains distance values
-# @param target: value which contains targeted cell
-#
-# @retval distance: Initialized distance list
-"""
-
-
 def init_distance_map(distance, target):
+    """init_distance_map
+    @brief Initialize distance map with max values and 0 as target.
+    Target is 0 for floodfill algorithm working properly.
+
+    @param distance: list which contains distance values
+    @param target: value which contains targeted cell
+
+    @retval distance: Initialized distance list
+    """
     distance = [world.maze.size - 1] * world.maze.size
     distance[target] = 0
 
     return distance
 
 
-""" print_array
-# @brief print 256 element list as 16x16 in terminal.
-#
-# @param list: list which contains map or distance values
-# @param action: value which indicates to print map walls without visited cells
-#
-# @retval None
-"""
-
-
 def print_array(list, action):
+    """print_array
+    @brief print 256 element list as 16x16 in terminal.
+
+    @param list: list which contains map or distance values
+    @param action: value which indicates to print map walls without visited cells
+
+    @retval None
+    """
 
     print("")
     if action == 0:  # just print array
