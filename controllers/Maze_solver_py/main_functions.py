@@ -1,19 +1,17 @@
-from controller import Keyboard
 from collections import deque
+from queue import Queue
 
-# my modules
+from controller import Keyboard
+
+import algorithm_functions as algorithm_f
 import map_functions as map_f
 import move_functions as move_f
-import algorithm_functions as algorithm_f
 
-
-from queue import Queue
-from utils.my_robot import MyRobot
-from config.enums import Move, Mode, Direction
+from config.enums import Direction, Mode, Move
 from config.world import world
 from draw.maze_drawer import MazeDrawer
+from utils.my_robot import MyRobot
 
-# import var
 from utils.params import DrawState
 
 

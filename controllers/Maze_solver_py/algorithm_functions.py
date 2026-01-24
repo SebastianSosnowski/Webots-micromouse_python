@@ -1,13 +1,12 @@
 # algorithm related functions
-import pickle
 from collections import deque
 from pathlib import Path
+import pickle
 
-from map_functions import init_distance_map
-
-from utils.my_robot import MyRobot
-from config.enums import Direction, Move, Algorithm, MazeLayout
+from config.enums import Algorithm, Direction, MazeLayout, Move
 from config.world import world
+from map_functions import init_distance_map
+from utils.my_robot import MyRobot
 
 
 def floodfill(maze_map, distance):

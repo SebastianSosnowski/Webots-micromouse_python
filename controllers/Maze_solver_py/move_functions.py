@@ -2,25 +2,13 @@
 
 from math import pi
 
-from algorithm_functions import change_orientation
 import algorithm_functions as algorithm_f
+from algorithm_functions import change_orientation
 import map_functions as map_f
 
-from utils.my_robot import MyRobot
 from config.enums import Direction, Move
 from config.world import world
-
-""" move_one_position_graph
-# @brief Executes robot movement to next position. Used in graph algorithms.
-#
-# @param current_destination: variable with cell to which robot moves
-# @param robot_position: variable with current robot position
-# @param robot_orientation: variable with current robot orientation in global directions
-# @params robot, ps, tof, left_motor, right_motor, ps_left, ps_right: variables with robot devices
-#
-# @retval robot_position: variable with updated robot position
-# @retval robot_orientation: variable with updated robot orientation in global directions
-"""
+from utils.my_robot import MyRobot
 
 
 def move_one_position_graph(robot: MyRobot, current_destination):
@@ -395,15 +383,7 @@ def turn(robot: MyRobot, move_direction):
     wait_move_end(robot)
 
 
-def move_back_DFS(
-    robot: MyRobot,
-    destination,
-    maze_map,
-    fork,
-    fork_number,
-    unused_routes,
-    path,
-):
+def move_back_DFS(robot: MyRobot, destination, maze_map, fork, fork_number, unused_routes, path):
     """move_back_DFS
     @brief Moves robot back to previous valid fork (Depth first search).
 

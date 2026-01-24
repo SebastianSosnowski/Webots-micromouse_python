@@ -1,9 +1,9 @@
-import yaml
-from pathlib import Path
 from enum import EnumType
 import logging
+from pathlib import Path
+import yaml
 
-from config.enums import Mode, Algorithm, MazeLayout
+from config.enums import Algorithm, MazeLayout, Mode
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

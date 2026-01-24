@@ -2,11 +2,10 @@
 
 from pathlib import Path
 
-# my modules
-from config.loader import load_config
-from utils.my_robot import MyRobot
 from config.enums import Algorithm
+from config.loader import load_config
 from config.world import world
+from utils.my_robot import MyRobot
 
 import main_functions as main_f
 

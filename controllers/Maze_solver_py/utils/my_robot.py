@@ -1,5 +1,7 @@
-from controller import Robot, Motor, PositionSensor, DistanceSensor
 from typing import cast
+
+from controller import DistanceSensor, Motor, PositionSensor, Robot
+
 from .params import RobotParams, RobotState
 from config.world import world
 

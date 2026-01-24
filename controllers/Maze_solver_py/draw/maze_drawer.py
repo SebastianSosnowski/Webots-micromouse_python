@@ -1,8 +1,8 @@
-from turtle import setup, Turtle, tracer, update, done
 from queue import Queue
 from threading import Thread
+from turtle import done, setup, tracer, Turtle, update
 
-from config.enums import Direction, Algorithm, Mode
+from config.enums import Algorithm, Direction, Mode
 from config.world import world
 from utils.params import DrawState
 
