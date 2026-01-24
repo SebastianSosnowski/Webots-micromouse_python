@@ -4,11 +4,11 @@ from config.world import world
 from utils.my_robot import MyRobot
 
 
-def detect_walls(robot: MyRobot, number_of_reads):
+def detect_walls(robot: MyRobot, number_of_reads: int):
     """Read and process sensors to detect walls.
 
     Args:
-        robot (MyRobot): MyRobot object with robot devices.
+        robot: MyRobot object with robot devices.
         number_of_reads: Variable which indicates how many times to read sensors.
 
     Returns:
@@ -61,15 +61,15 @@ def detect_walls(robot: MyRobot, number_of_reads):
     return left_wall, front_wall, right_wall, back_wall
 
 
-def add_wall(robot: MyRobot, maze_map, detected_wall):
+def add_wall(robot: MyRobot, maze_map: list[int], detected_wall: int):
     """Add wall according to distance sensors.
     Depending on robot orientation, value in variable detected_wall
     is changed so it match global directions. Then wall is added
     to maze map on robot field and respective neighboring field.
 
     Args:
-        robot (MyRobot): MyRobot object with robot state.
-        maze_map (list): List with actual maze map with walls.
+        robot: MyRobot object with robot state.
+        maze_map: List with actual maze map with walls.
         detected_wall: Value which indicates on which side of robot wall was detected.
 
     Returns:
@@ -133,19 +133,24 @@ def add_wall(robot: MyRobot, maze_map, detected_wall):
     return maze_map
 
 
-def add_walls_graph_old(maze_map, robot_position, robot_orientation, detected_walls):
+def add_walls_graph_old(
+    maze_map: dict[int, list[int]],
+    robot_position: int,
+    robot_orientation: Direction,
+    detected_walls: dict[str, bool],
+):
     """Substitute for add_wall for graphs.
     Add connected cells according to detected walls.
     Then remove connected cells in respective neighboring fields according to detected walls.
 
     Args:
-        maze_map (list): List with current maze map with walls.
+        maze_map: Dictionary with current maze map with walls.
         robot_position: Current robot position in maze.
         robot_orientation: Current robot orientation in global directions.
-        detected_walls: Value which indicates on which side of robot wall was detected.
+        detected_walls: Dictionary which indicates on which side of robot wall was detected.
 
     Returns:
-        list: Updated maze map.
+        dict: Updated maze map.
     """
 
     rows = world.maze.rows
@@ -261,15 +266,20 @@ def add_walls_graph_old(maze_map, robot_position, robot_orientation, detected_wa
     return maze_map
 
 
-def add_walls_graph(maze_map, robot_position, robot_orientation, detected_walls):
+def add_walls_graph(
+    maze_map: dict[int, list[int]],
+    robot_position: int,
+    robot_orientation: Direction,
+    detected_walls: dict[str, bool],
+):
     """Substitute add_wall function for graphs.
     Remove connected cells in robot position and respective neighboring cells according to detected walls.
 
     Args:
-        maze_map (dict): Dictionary with current maze map with walls.
+        maze_map: Dictionary with current maze map with walls.
         robot_position: Current robot position in maze.
         robot_orientation: Current robot orientation in global directions.
-        detected_walls: Value which indicates on which side of robot wall was detected.
+        detected_walls: Dictionary which indicates on which side of robot wall was detected.
 
     Returns:
         dict: Updated maze map.
@@ -401,11 +411,11 @@ def add_walls_graph(maze_map, robot_position, robot_orientation, detected_walls)
     return maze_map
 
 
-def init_maze_map(maze_map):
+def init_maze_map(maze_map: list[int]):
     """Initialize maze map with external walls.
 
     Args:
-        maze_map (list): List which contains maze map values.
+        maze_map: List which contains maze map values.
 
     Returns:
         list: Initialized maze map list.
@@ -486,12 +496,12 @@ def init_maze_map_graph():
     return maze_map
 
 
-def init_distance_map(distance, target):
+def init_distance_map(distance: list[int], target: int):
     """Initialize distance map with max values and 0 as target.
     Target is 0 for floodfill algorithm working properly.
 
     Args:
-        distance (list): List which contains distance values.
+        distance: List which contains distance values.
         target: Value which contains targeted cell.
 
     Returns:
@@ -503,11 +513,11 @@ def init_distance_map(distance, target):
     return distance
 
 
-def print_array(list, action):
+def print_array(list: list[int], action: int):
     """Print 256 element list as 16x16 in terminal.
 
     Args:
-        list (list): List which contains map or distance values.
+        list: List which contains map or distance values.
         action: Value which indicates to print map walls without visited cells.
 
     Returns:

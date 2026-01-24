@@ -26,7 +26,7 @@ def floodfill_main(robot: MyRobot):
     until shortest path is found.
 
     Args:
-        robot (MyRobot): Object with robot instance.
+        robot: Object with robot instance.
 
     Returns:
         None
@@ -140,7 +140,7 @@ def DFS_main(robot: MyRobot):
     Doesn't guarantee the shortest path but usually finds path very fast (micromouse mazes).
 
     Args:
-        robot (MyRobot): Object with robot instance.
+        robot: Object with robot instance.
 
     Returns:
         None
@@ -288,7 +288,7 @@ def BFS_main(robot: MyRobot):
     only when it moves to new fork or dead-end. Because of that it doesn't guarantees shortest path.
 
     Args:
-        robot (MyRobot): Object with robot instance.
+        robot: Object with robot instance.
 
     Returns:
         None
@@ -430,7 +430,7 @@ def A_star_main(robot: MyRobot):
     Guarantees shortest path, but very long search time.
 
     Args:
-        robot (MyRobot): Object with robot instance.
+        robot: Object with robot instance.
 
     Returns:
         None
@@ -572,7 +572,7 @@ def A_star_main_modified(robot: MyRobot):
     although in micromouse mazes it usually should find it.
 
     Args:
-        robot (MyRobot): Object with robot instance.
+        robot: Object with robot instance.
 
     Returns:
         None
@@ -719,7 +719,7 @@ def keyboard_main(robot: MyRobot):
     Made for testing purposes to move robot with WASD.
 
     Args:
-        robot (MyRobot): Object with robot instance.
+        robot: Object with robot instance.
 
     Returns:
         None

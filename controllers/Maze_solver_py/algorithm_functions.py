@@ -9,12 +9,12 @@ from map_functions import init_distance_map
 from utils.my_robot import MyRobot
 
 
-def floodfill(maze_map, distance):
+def floodfill(maze_map: list[int], distance: list[int]):
     """Floodfill algorithm which calculates shortest path to actual target based on actual maze map.
 
     Args:
-        maze_map (list): List with actual maze map with walls.
-        distance (list): List with actual distances values/path.
+        maze_map: List with actual maze map with walls.
+        distance: List with actual distances values/path.
 
     Returns:
         list: Updated distance list.
@@ -62,16 +62,16 @@ def floodfill(maze_map, distance):
     return distance
 
 
-def where_to_move(robot: MyRobot, walls, distance):
+def where_to_move(robot: MyRobot, walls: int, distance: list[int]):
     """Decide where to move by checking distance values in neighbors cells.
 
     Depending on robot orientation, value in variable move_direction
     is changed so it match global directions.
 
     Args:
-        robot (MyRobot): MyRobot object with robot state.
+        robot: MyRobot object with robot state.
         walls: Variable with walls in current robot position.
-        distance (list): List with actual distances values/path.
+        distance: List with actual distances values/path.
 
     Returns:
         Direction: Variable with move direction to do.
@@ -133,7 +133,7 @@ def where_to_move(robot: MyRobot, walls, distance):
     return move_direction
 
 
-def where_to_move_graph(robot_position, current_destination):
+def where_to_move_graph(robot_position: int, current_destination: int):
     """Substitute of where_to_move function made for graphs. WORKS only for 16x16 maze.
 
     Decide global move direction by calculating where, in reference to actual position node,
@@ -161,17 +161,19 @@ def where_to_move_graph(robot_position, current_destination):
     return move_direction
 
 
-def check_possible_routes_BFS(adjacent_cells, visited, queue, fork):
+def check_possible_routes_BFS(
+    adjacent_cells: list[int], visited: list[int], queue: deque, fork: bool
+):
     """Add possible adjacent cells to queue and then decides to which cell move next.
 
     First item in queue is chosen when robot current position is
     a fork or dead end (breadth first search). Otherwise last item in queue is chosen.
 
     Args:
-        adjacent_cells (list): List with cells accessible from current robot position.
-        visited (list): List with cells already added to queue.
+        adjacent_cells: List with cells accessible from current robot position.
+        visited: List with cells already added to queue.
         queue: Queue with cells which will be visited.
-        fork (bool): Bool variable which informs if current cell is a fork.
+        fork: Bool variable which informs if current cell is a fork.
 
     Returns:
         tuple: (current_destination, visited, queue, dead_end, searching_end)
@@ -202,15 +204,15 @@ def check_possible_routes_BFS(adjacent_cells, visited, queue, fork):
     return current_destination, visited, queue, dead_end, searching_end
 
 
-def check_possible_routes_DFS(adjacent_cells, visited, stack):
+def check_possible_routes_DFS(adjacent_cells: list[int], visited: list[int], stack: list[int]):
     """Add possible adjacent cells to stack and then decides to which cell move next.
 
     Last item in stack is chosen.
 
     Args:
-        adjacent_cells (list): List with cells accessible from current robot position.
-        visited (list): List with cells already added to stack.
-        stack (list): Stack with cells which will be visited.
+        adjacent_cells: List with cells accessible from current robot position.
+        visited: List with cells already added to stack.
+        stack: Stack with cells which will be visited.
 
     Returns:
         tuple: (current_destination, visited, stack)
@@ -261,14 +263,14 @@ def check_possible_routes_DFS(adjacent_cells, visited, stack):
     return path
 
 
-def get_path_A_star(maze_map, start, target):
+def get_path_A_star(maze_map: dict, start: int, target: int):
     """A* algorithm function which is used to create path between 2 cells.
 
     It is used to determine final path as well as paths between current position
     and current destination in main program.
 
     Args:
-        maze_map (dict): Dictionary with discovered maze map (or any graph).
+        maze_map: Dictionary with discovered maze map (or any graph).
         start: Variable with starting cell number.
         target: Variable with targeted cell number.
 
@@ -304,16 +306,18 @@ def get_path_A_star(maze_map, start, target):
 
         current_position = check_possible_routes_A_star(open, cost)
 
+    return []
 
-def check_possible_routes_A_star(open, cost):
+
+def check_possible_routes_A_star(open: list[int], cost: dict[int, list[int]]):
     """Decides to which cell move next. TODO Implement heap to make it much faster.
 
     Cell with the lowest overall cost (Fcost) is chosen. If more cells have equal
     Fcost, then cell with lowest Hcost (closer to target) is chosen.
 
     Args:
-        open (list): List with cells to visit.
-        cost (dict): Dictionary of costs, which contain Gcost and Hcost.
+        open: List with cells to visit.
+        cost: Dictionary of costs, which contain Gcost and Hcost.
 
     Returns:
         int: Variable with a cell to which move next.
@@ -332,7 +336,14 @@ def check_possible_routes_A_star(open, cost):
     return current_destination
 
 
-def update_neighbors_costs(neighbors, open, closed, parent, cost, current_position):
+def update_neighbors_costs(
+    neighbors: list[int],
+    open: list[int],
+    closed: list[int],
+    parent: dict[int, int],
+    cost: dict[int, list[int]],
+    current_position: int,
+):
     """Used in A* algorithm. Assign and/or update costs of neighbor nodes.
 
     New cost is assigned to node when it's not in open list or new cost is lower than actual.
@@ -340,11 +351,11 @@ def update_neighbors_costs(neighbors, open, closed, parent, cost, current_positi
     If target is found, function breaks.
 
     Args:
-        neighbors (list): List with cells adjacent to current position.
-        open (list): List with cells to visit.
-        closed (list): List with cells already visited.
-        parent (dict): Dictionary with parent nodes used to create path.
-        cost (dict): Dictionary of costs, which contain Gcost and Hcost.
+        neighbors: List with cells adjacent to current position.
+        open: List with cells to visit.
+        closed: List with cells already visited.
+        parent: Dictionary with parent nodes used to create path.
+        cost: Dictionary of costs, which contain Gcost and Hcost.
         current_position: Variable with current robot position.
 
     Returns:
@@ -377,17 +388,17 @@ def update_neighbors_costs(neighbors, open, closed, parent, cost, current_positi
     return open, parent, cost
 
 
-def get_back_path_A_star(maze_map, target, robot_position, parent):
+def get_back_path_A_star(maze_map: dict, target: int, robot_position: int, parent: list[int]):
     """Creates a path from current robot position to its current destination. NOT USED anymore, but kept in code :).
 
     First path from target to start is created. Then path from current position to start is created.
     If path to current target wasn't found yet, both paths are combined to create path.
 
     Args:
-        maze_map (dict): Dictionary graph with current known maze configuration.
+        maze_map: Dictionary graph with current known maze configuration.
         target: Variable with position to which robot want's to go.
         robot_position: Variable with current robot position in maze.
-        parent (list): List with parent nodes used to create path.
+        parent: List with parent nodes used to create path.
 
     Returns:
         list: Path to target.
@@ -435,17 +446,23 @@ def get_back_path_A_star(maze_map, target, robot_position, parent):
     return path
 
 
-def check_fork_DFS(connections, robot_position, fork, fork_number, fork_count):
+def check_fork_DFS(
+    connections: list[int],
+    robot_position: int,
+    fork: dict[int, list[int]],
+    fork_number: int,
+    fork_count: dict[int, int],
+):
     """Detect's fork, assign number to it and monitor possible unused routes from each one which is used for DFS algorithm operation.
 
     Also detect's dead-ends.
 
     Args:
-        connections (list): List with cells available from current position.
+        connections: List with cells available from current position.
         robot_position: Variable with current robot position in maze.
-        fork (dict): Dictionary with paths to each fork from current position.
+        fork: Dictionary with paths to each fork from current position.
         fork_number: Variable with number of last used fork.
-        fork_count (dict): Dictionary with number of unused routes for each fork.
+        fork_count: Dictionary with number of unused routes for each fork.
 
     Returns:
         tuple: (fork, fork_number, fork_count, dead_end)
@@ -476,13 +493,13 @@ def check_fork_DFS(connections, robot_position, fork, fork_number, fork_count):
     return fork, fork_number, fork_count, dead_end
 
 
-def get_path_BFS(graph, start, current_target):
+def get_path_BFS(graph: dict[int, list[int]], start: int, current_target: int):
     """Creates a path from current robot position to its current destination.
 
     It is used when current destination is not in adjacent cell.
 
     Args:
-        graph (dict): Dictionary graph with visited cells.
+        graph: Dictionary graph with visited cells.
         start: Variable with current robot position in maze.
         current_target: Variable with position to which robot want's to go.
 
@@ -525,8 +542,8 @@ def change_orientation(robot_orientation: Direction, action: Move):
     """Change robot orientation basing on last orientation and last turn.
 
     Args:
-        robot_orientation (Direction): Variable with actual robot orientation in global directions.
-        action (Move): Variable with information where robot turns.
+        robot_orientation: Variable with actual robot orientation in global directions.
+        action: Variable with information where robot turns.
 
     Returns:
         Direction: Variable with updated robot orientation.
@@ -555,12 +572,12 @@ def change_orientation(robot_orientation: Direction, action: Move):
     return Direction(orientation_value)
 
 
-def change_position(robot_position, robot_orientation):
+def change_position(robot_position: int, robot_orientation: Direction):
     """Update position of the robot basing on current orientation of the robot.
 
     Args:
         robot_position: Variable with robot position.
-        robot_orientation (Direction): Variable with actual robot orientation in global directions.
+        robot_orientation: Variable with actual robot orientation in global directions.
 
     Returns:
         int: Variable with updated robot position.
@@ -580,15 +597,15 @@ def change_position(robot_position, robot_orientation):
     return robot_position
 
 
-def change_target(robot: MyRobot, maze_map, distance):
+def change_target(robot: MyRobot, maze_map: list[int], distance: list[int]):
     """Marks every visited cell, after reaching targeted cell, change cell to first unvisited cell.
 
     When reaching final target, saves distance map to file.
 
     Args:
-        robot (MyRobot): MyRobot object with robot state.
-        maze_map (list): List with actual maze map with walls.
-        distance (list): List with actual distances values/path.
+        robot: MyRobot object with robot state.
+        maze_map: List with actual maze map with walls.
+        distance: List with actual distances values/path.
 
     Returns:
         tuple: (maze_map, shortest_path)
@@ -630,11 +647,11 @@ def change_target(robot: MyRobot, maze_map, distance):
     return maze_map, shortest_path
 
 
-def mark_center(maze_map):
+def mark_center(maze_map: list[int]):
     """Adds walls to unvisited cells in center.
 
     Args:
-        maze_map (list): List with actual maze map with walls.
+        maze_map: List with actual maze map with walls.
 
     Returns:
         list: List with updated maze map.
@@ -661,17 +678,17 @@ def mark_center(maze_map):
     return maze_map
 
 
-def mark_center_graph(maze_map, path):
+def mark_center_graph(maze_map: dict[int, list[int]], path: list[int]):
     """Adds walls to unvisited cells in center.
 
     Path is used to determine which cells weren't visited.
 
     Args:
-        maze_map (list): List with actual maze map with walls.
-        path (list): List with path.
+        maze_map: Dictionary with actual maze map with walls.
+        path: List with path.
 
     Returns:
-        list: List with updated maze map.
+        dict: Dictionary with updated maze map.
     """
 
     center = [119, 120, 135]
@@ -696,12 +713,12 @@ def mark_center_graph(maze_map, path):
     return maze_map
 
 
-def check_distance(distance, maze_map, target):
+def check_distance(distance: list[int], maze_map: list[int], target: int):
     """Fills unvisited cells with 4 walls to verify if the shortest path was find.
 
     Args:
-        distance (list): List with actual distances values/path.
-        maze_map (list): List with actual maze map with walls.
+        distance: List with actual distances values/path.
+        maze_map: List with actual maze map with walls.
         target: Variable with field number to which robot tries to get.
 
     Returns:
@@ -725,7 +742,7 @@ def check_distance(distance, maze_map, target):
     return shortest_path
 
 
-def calc_cost(start, target):
+def calc_cost(start: int, target: int):
     """Calculates Manhattan's distance which is used as cost in A* algorithm.
 
     Args:
@@ -749,7 +766,7 @@ def calc_cost(start, target):
     return distance
 
 
-def read_file(file_name):
+def read_file(file_name: str):
     """Read file. Pickle module used.
 
     Args:
@@ -763,7 +780,7 @@ def read_file(file_name):
         return pickle.load(file)
 
 
-def write_file(file_name, values):
+def write_file(file_name: str, values):
     """Write file. Pickle module used.
 
     Args:

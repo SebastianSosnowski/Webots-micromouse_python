@@ -11,11 +11,11 @@ from config.world import world
 from utils.my_robot import MyRobot
 
 
-def move_one_position_graph(robot: MyRobot, current_destination):
+def move_one_position_graph(robot: MyRobot, current_destination: int):
     """Executes robot movement to next position. Used in graph algorithms.
 
     Args:
-        robot (MyRobot): MyRobot object with robot devices.
+        robot: MyRobot object with robot devices.
         current_destination: Variable with cell to which robot moves.
 
     Returns:
@@ -33,13 +33,13 @@ def move_one_position_graph(robot: MyRobot, current_destination):
     robot.state.pos = current_destination
 
 
-def move_one_position(robot: MyRobot, walls, distance):
+def move_one_position(robot: MyRobot, walls: int, distance: list[int]):
     """Executes robot movement to next position. Used in floodfill.
 
     Args:
-        robot (MyRobot): MyRobot object with robot devices.
+        robot: MyRobot object with robot devices.
         walls: Variable with walls in current robot position.
-        distance (list): List with actual distances values/path.
+        distance: List with actual distances values/path.
 
     Returns:
         None
@@ -57,11 +57,11 @@ def move_one_position(robot: MyRobot, walls, distance):
     robot.state.pos = algorithm_f.change_position(robot.state.pos, robot.state.orientation)
 
 
-def drive(robot: MyRobot, move_direction):
+def drive(robot: MyRobot, move_direction: Direction):
     """Drive robot motors etc. to actually move based on its orientation and move direction.
 
     Args:
-        robot (MyRobot): MyRobot object with robot devices.
+        robot: MyRobot object with robot devices.
         move_direction: Variable direction where to move in global directions.
 
     Returns:
@@ -99,11 +99,11 @@ def drive(robot: MyRobot, move_direction):
         move_1_tile(robot)
 
 
-def read_sensors(robot: MyRobot, number_of_reads):
+def read_sensors(robot: MyRobot, number_of_reads: int):
     """Read and process left and right sensors for a PID controller.
 
     Args:
-        robot (MyRobot): MyRobot object with robot devices.
+        robot: MyRobot object with robot devices.
         number_of_reads: Variable which indicates how many times to read sensors.
 
     Returns:
@@ -144,7 +144,7 @@ def PID_correction(robot: MyRobot):
     """Correct robot position according to distance sensors by changing motors speed.
 
     Args:
-        robot (MyRobot): MyRobot object with robot devices.
+        robot: MyRobot object with robot devices.
 
     Returns:
         None
@@ -237,7 +237,7 @@ def move_1_tile(robot: MyRobot):
     """Drive robot motors and set encoders position to move forward by distance of exactly one tile.
 
     Args:
-        robot (MyRobot): MyRobot object with robot devices.
+        robot: MyRobot object with robot devices.
 
     Returns:
         None
@@ -337,11 +337,11 @@ def move_front_correct(robot: MyRobot):
     robot.right_motor.setVelocity(0)
 
 
-def turn(robot: MyRobot, move_direction):
+def turn(robot: MyRobot, move_direction: Move):
     """Drive robot motors and set encoders position to turn by exactly 90 or 180 degrees.
 
     Args:
-        robot (MyRobot): MyRobot object with robot devices.
+        robot: MyRobot object with robot devices.
         move_direction: Variable with direction where to move in global directions.
 
     Returns:
@@ -386,17 +386,25 @@ def turn(robot: MyRobot, move_direction):
     wait_move_end(robot)
 
 
-def move_back_DFS(robot: MyRobot, destination, maze_map, fork, fork_number, unused_routes, path):
+def move_back_DFS(
+    robot: MyRobot,
+    destination: int,
+    maze_map: dict,
+    fork: dict,
+    fork_number: int,
+    unused_routes: dict,
+    path: list,
+):
     """Moves robot back to previous valid fork (Depth first search).
 
     Args:
-        robot (MyRobot): MyRobot object with robot devices.
+        robot: MyRobot object with robot devices.
         destination: Variable with robot destination cell.
-        maze_map (dict): Dictionary with maze map graph.
-        fork (dict): Dictionary with paths to each fork from current position.
+        maze_map: Dictionary with maze map graph.
+        fork: Dictionary with paths to each fork from current position.
         fork_number: Variable with number of last used fork.
-        unused_routes (dict): Dictionary with number of unused routes for each fork.
-        path (list): List with actual path from start to current position.
+        unused_routes: Dictionary with number of unused routes for each fork.
+        path: List with actual path from start to current position.
 
     Returns:
         tuple[dict, int, dict, list]: Updated fork dictionary, fork number, unused routes dictionary, path list.
@@ -420,7 +428,7 @@ def wait_move_end(robot: MyRobot):
     """Stops main loop execution until robot ends move.
 
     Args:
-        robot (MyRobot): MyRobot object with robot devices.
+        robot: MyRobot object with robot devices.
 
     Returns:
         None

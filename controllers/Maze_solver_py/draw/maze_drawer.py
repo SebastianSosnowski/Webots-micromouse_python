@@ -265,7 +265,7 @@ class MazeDrawer(Thread):
         self.last_x, self.last_y = next_x, next_y
 
 
-def line(start_x, start_y, end_x, end_y, t: Turtle):
+def line(start_x: float, start_y: float, end_x: float, end_y: float, t: Turtle):
     """Draw line.
 
     Args:
@@ -273,7 +273,7 @@ def line(start_x, start_y, end_x, end_y, t: Turtle):
         start_y: Variable with line beginning y coordinate.
         end_x: Variable with line ending x coordinate.
         end_y: Variable with line ending y coordinate.
-        t (Turtle): Corresponding turtle object.
+        t: Corresponding turtle object.
 
     Returns:
         None
@@ -284,14 +284,14 @@ def line(start_x, start_y, end_x, end_y, t: Turtle):
     t.goto(end_x, end_y)
 
 
-def write_distance(x, y, distance, t: Turtle):
+def write_distance(x: float, y: float, distance: int, t: Turtle):
     """Write distance value in maze cell.
 
     Args:
         x: Variable with text x coordinate.
         y: Variable with text y coordinate.
         distance: Variable with distance value to target.
-        t (Turtle): Corresponding turtle object.
+        t: Corresponding turtle object.
 
     Returns:
         None
@@ -301,15 +301,15 @@ def write_distance(x, y, distance, t: Turtle):
     t.write("%i" % distance, font=("Verdana", 13, "bold"))
 
 
-def draw_wall(maze_map, x, y, size, t: Turtle):
+def draw_wall(maze_map: int, x: float, y: float, size: float, t: Turtle):
     """Draw corresponding walls and values in each field.
 
     Args:
-        maze_map (list): List with actual maze map with walls.
+        maze_map: Value with actual maze map walls for this field.
         x: Variable with offset in x direction.
         y: Variable with offset in y direction.
         size: Value with one field size (for easier change when changing window size).
-        t (Turtle): Corresponding turtle object.
+        t: Corresponding turtle object.
 
     Returns:
         None
@@ -364,18 +364,20 @@ def draw_wall(maze_map, x, y, size, t: Turtle):
             line(x, y, x, y + size, t)
 
 
-def graph_walls_convert(maze_field, position):
+def graph_walls_convert(maze_field: list[int], position: int):
     """Convert edges in node to value which represents walls configuration.
     Made for compatibility with visualization which was made for floodfill
     which doesn't use graph for a maze map.
 
     Args:
-        maze_field (list): List with connected fields to position.
+        maze_field: List with connected fields to position.
         position: Variable with maze position.
 
     Returns:
         int: Variable with value which represents walls configuration.
     """
+    if maze_field is None:
+        maze_field = []
     cell_value = 15
 
     if not maze_field:  # not visited
@@ -397,14 +399,14 @@ def graph_walls_convert(maze_field, position):
     return cell_value
 
 
-def write_cost(x, y, cost, t: Turtle):
+def write_cost(x: float, y: float, cost: list[int], t: Turtle):
     """Write cost values in maze cell. Used in A* algorithm.
 
     Args:
         x: Variable with text x coordinate.
         y: Variable with text y coordinate.
-        cost (list): List with cell costs values.
-        t (Turtle): Corresponding turtle object.
+        cost: List with cell costs values.
+        t: Corresponding turtle object.
 
     Returns:
         None
