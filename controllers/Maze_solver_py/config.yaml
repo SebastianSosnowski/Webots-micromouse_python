@@ -6,6 +6,7 @@ simulation:
   time_step: 64
 
 robot:
+  model: epuck
   axle: 0.0568
   wheel: 0.02002
   speed: 4
