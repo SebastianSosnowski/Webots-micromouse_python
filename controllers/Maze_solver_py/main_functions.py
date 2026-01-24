@@ -18,11 +18,11 @@ from utils.params import DrawState
 def floodfill_main(robot: MyRobot):
     """Main program for floodfill algorithm controller.
     Every cycle robot calculates shortest path to target and tries to go to it.
-    When target is found it checks if it was the shortest path by comparing paths
-    for 2 mazes: actually discovered and discovered but cells which weren't visited
+    When target is found, it checks if it was the shortest path by comparing paths
+    for 2 mazes: actually discovered and discovered, but cells which weren't visited
     are assumed with 4 walls. If path from actually discovered maze has same length
-    as 2nd one - the shortest path was founded. If not robot makes second run - from
-    target to start cell to search some of unvisited part of maze. Process repeat's
+    as 2nd one - the shortest path was founded. If not, robot makes next run - from
+    target to start cell to search some of unvisited part of maze. Process is repeated
     until shortest path is found.
 
     Args:
@@ -722,7 +722,7 @@ def A_star_main_modified(robot: MyRobot):
 
 
 def keyboard_main(robot: MyRobot):
-    """Main program for manual/with arrows controller.
+    """Main program for manual controller.
     Made for testing purposes to move robot with WASD.
 
     Args:
