@@ -19,26 +19,22 @@ from draw.maze_drawer import MazeDrawer
 # import var
 from utils.params import DrawState
 
-""" floodfill_main
-# @brief Main program for floodfill algorithm controller. 
-# 2 approaches are available:
-# 1. Without searching whole maze - every cycle robot calculates shortest path to target
-# and tries to go to it. When target is found it checks if it was the shortest path
-# by comparing paths for 2 mazes: actually discovered and discovered but cells
-# which weren't visited are assumed with 4 walls. If path from actually discovered
-# maze has same length as 2nd one - the shortest path was founded. If not robot makes
-# second run - from target to start cell to search some of unvisited part of maze.
-# Process repeat's until shortest path is found.
-# 2. With searching whole maze - WORKS only for mazes, where ALL cells are accessible.
-# Unrecommended to use.
-#
-# @param robot: object with robot instance
-#
-# @retval None
-"""
-
 
 def floodfill_main(robot: MyRobot):
+    """floodfill_main
+    @brief Main program for floodfill algorithm controller.
+    Every cycle robot calculates shortest path to target and tries to go to it.
+    When target is found it checks if it was the shortest path by comparing paths
+    for 2 mazes: actually discovered and discovered but cells which weren't visited
+    are assumed with 4 walls. If path from actually discovered maze has same length
+    as 2nd one - the shortest path was founded. If not robot makes second run - from
+    target to start cell to search some of unvisited part of maze. Process repeat's
+    until shortest path is found.
+
+    @param robot: object with robot instance
+
+    @retval None
+    """
     maze_map = [0] * world.maze.size
     distance = [255] * world.maze.size
 
@@ -153,839 +149,667 @@ def floodfill_main(robot: MyRobot):
 """
 
 
-# def DFS_main(robot: MyRobot):
-
-#     # left_motor, right_motor, ps_left, ps_right, ps, tof = init_devices(robot)
-#     # target, robot_position, start, robot_orientation = init_parameters()
-
-#     maze_map = map_f.init_maze_map_graph()
-
-#     var.maze_map_global = maze_map
-
-#     path_file, maze_file = algorithm_f.choose_file_path()
-
-#     # dfs vars
-#     fork_number = -1
-#     unused_routes = {}
-#     fork = {}
-#     visited = []
-#     stack = []
-#     path = []
-#     visited.append(robot.state.pos)
-#     stack.append(robot.state.pos)
-
-#     match world.sim.mode:
-#         case Mode.SEARCH:  # search
-
-#             if robot.state.start:
-#                 # run in another thread to make it possible to look on it during robot run
-#                 Maze_thread = Thread(
-#                     target=draw_maze.draw_maze,
-#                     args=(var.maze_map_global, []),
-#                     daemon=True,
-#                 )
-#                 Maze_thread.start()
-
-#                 robot.state.start = False
-
-#             if world.sim.testing:
-#                 timer = robot.getTime()
-
-#             while stack:
-
-#                 if robot.step(world.sim.time_step) == -1:
-#                     break
-
-#                 stack.pop()
-
-#                 left_wall, front_wall, right_wall, back_wall = map_f.detect_walls(robot, 5)
-#                 walls = {
-#                     "front wall": front_wall,
-#                     "right wall": right_wall,
-#                     "back wall": back_wall,
-#                     "left wall": left_wall,
-#                 }
-
-#                 maze_map = map_f.add_walls_graph(
-#                     maze_map, robot.state.pos, robot_orientation, walls
-#                 )
-
-#                 path.append(robot.state.pos)
-
-#                 var.robot_pos = robot.state.pos
-#                 var.maze_map_global = maze_map
-
-#                 var.drawing_event.set()
-
-#                 if robot.state.pos == target:
-
-#                     print("Target reached")
-#                     print("Searching time: %.2f" % robot.getTime(), "s")
-#                     var.main_event.wait()
-#                     var.main_event.clear()
-#                     maze_map = algorithm_f.mark_center_graph(maze_map, path)
-#                     algorithm_f.write_file(path_file, path)
-#                     algorithm_f.write_file(maze_file, maze_map)
-#                     input("press any key to end")
-#                     exit(0)
-
-#                 fork, fork_number, unused_routes, dead_end = algorithm_f.check_fork_DFS(
-#                     maze_map[robot.state.pos],
-#                     robot.state.pos,
-#                     fork,
-#                     fork_number,
-#                     unused_routes,
-#                 )
-
-#                 if dead_end:
-#                     (
-#                         fork,
-#                         fork_number,
-#                         unused_routes,
-#                         path,
-#                         robot_orientation,
-#                         robot.state.pos,
-#                     ) = move_f.move_back_DFS(
-#                         stack[-1],
-#                         maze_map,
-#                         robot.state.pos,
-#                         fork,
-#                         fork_number,
-#                         unused_routes,
-#                         robot_orientation,
-#                         robot,
-#                         ps,
-#                         tof,
-#                         left_motor,
-#                         right_motor,
-#                         ps_left,
-#                         ps_right,
-#                         path,
-#                     )
-#                     fork[fork_number].append(path[-1])
-
-#                 current_destination, visited, stack = algorithm_f.check_possible_routes_DFS(
-#                     maze_map[robot.state.pos], visited, stack, target
-#                 )
-
-#                 if current_destination not in maze_map[robot.state.pos]:
-#                     fork[fork_number].pop()
-#                     (
-#                         fork,
-#                         fork_number,
-#                         unused_routes,
-#                         path,
-#                         robot_orientation,
-#                         robot.state.pos,
-#                     ) = move_f.move_back_DFS(
-#                         current_destination,
-#                         maze_map,
-#                         robot.state.pos,
-#                         fork,
-#                         fork_number,
-#                         unused_routes,
-#                         robot_orientation,
-#                         robot,
-#                         ps,
-#                         tof,
-#                         left_motor,
-#                         right_motor,
-#                         ps_left,
-#                         ps_right,
-#                         path,
-#                     )
-#                     fork[fork_number].append(robot.state.pos)
-
-#                 robot.state.pos, robot_orientation = move_f.move_one_position_graph(
-#                     current_destination,
-#                     robot.state.pos,
-#                     robot_orientation,
-#                     robot,
-#                     ps,
-#                     tof,
-#                     left_motor,
-#                     right_motor,
-#                     ps_left,
-#                     ps_right,
-#                 )
-
-#                 if world.sim.testing:
-#                     timer = robot.getTime() - timer
-#                     print("Move time: %.2f" % timer, "s")
-
-#                 var.main_event.wait()
-#                 var.main_event.clear()
-
-#         case Mode.SPEEDRUN:
-
-#             if robot.state.start:
-#                 path = algorithm_f.read_file(path_file)
-#                 path.reverse()
-#                 print(len(path))
-#                 path.pop()  # remove start cell
-
-#                 maze_map = algorithm_f.read_file(maze_file)
-#                 var.maze_map_global = maze_map
-
-#                 # run in another thread to make it possible to look on it during robot run
-#                 Maze_thread = Thread(target=draw_maze.draw_maze, args=(maze_map, []), daemon=True)
-#                 Maze_thread.start()
-
-#                 robot.state.start = 0
-
-#             while path:
-
-#                 if robot.step(world.sim.time_step) == -1:
-#                     break
-
-#                 current_destination = path.pop()
-
-#                 robot.state.pos, robot_orientation = move_f.move_one_position_graph(
-#                     current_destination,
-#                     robot.state.pos,
-#                     robot_orientation,
-#                     robot,
-#                     ps,
-#                     tof,
-#                     left_motor,
-#                     right_motor,
-#                     ps_left,
-#                     ps_right,
-#                 )
-
-#                 var.robot_pos = robot.state.pos
-
-#                 var.drawing_event.set()
-
-#                 var.main_event.wait()
-#                 var.main_event.clear()
-
-#                 if robot.state.pos == target:
-#                     print("Target reached")
-#                     print("Speedrun time: %.2f" % robot.getTime(), "s")
-#                     input("press any key to end")
-#                     exit(0)
-
-
-# """ BFS_main
-# # @brief Main program for Breadth first search algorithm controller.
-# # It was adjusted for robot movement. BFS is a horizontal searching through graph
-# # by going by each 'level' of nodes. To avoid unnecessary back-tracking,
-# # only forks are treated as 'levels',  which means that robot will go back
-# # only when it moves to new fork or dead-end. Because of that it doesn't guarantees shortest path.
-# #
-# # @param robot: object with robot instance
-# #
-# # @retval None
-# """
-
-
-# def BFS_main(robot: MyRobot):
-
-#     # left_motor, right_motor, ps_left, ps_right, ps, tof = init_devices(robot)
-#     # target, robot_position, start, robot_orientation = init_parameters()
-
-#     maze_map = map_f.init_maze_map_graph()
-
-#     var.maze_map_global = maze_map
-
-#     maze_map_searched = {}
-#     for i in range(256):
-#         maze_map_searched[i] = []
-
-#     path_file, maze_file = algorithm_f.choose_file_path()
-
-#     # bfs vars
-#     visited = []
-#     path = []
-#     searching_end = False
-#     move_back = False
-#     fork = False
-#     queue = deque()
-
-#     visited.append(robot.state.pos)
-#     queue.append(robot.state.pos)
-
-#     match world.sim.mode:
-#         case Mode.SEARCH:  # search
-
-#             if robot.state.start:
-#                 # run in another thread to make it possible to look on it during robot run
-#                 Maze_thread = Thread(
-#                     target=draw_maze.draw_maze,
-#                     args=(var.maze_map_global, []),
-#                     daemon=True,
-#                 )
-#                 Maze_thread.start()
-
-#                 robot.state.start = False
-#             if world.sim.testing:
-#                 timer = robot.getTime()
-
-#             while queue:
-
-#                 if robot.step(world.sim.time_step) == -1:
-#                     break
-
-#                 if searching_end:
-#                     robot.state.pos = queue.pop()
-#                 elif move_back or fork:
-#                     robot.state.pos = queue.popleft()
-#                     move_back = False
-#                 else:
-#                     robot.state.pos = queue.pop()
-
-#                 left_wall, front_wall, right_wall, back_wall = map_f.detect_walls(robot, 5)
-#                 walls = {
-#                     "front wall": front_wall,
-#                     "right wall": right_wall,
-#                     "back wall": back_wall,
-#                     "left wall": left_wall,
-#                 }
-
-#                 maze_map = map_f.add_walls_graph(
-#                     maze_map, robot.state.pos, robot_orientation, walls
-#                 )
-#                 maze_map_searched = map_f.add_walls_graph(
-#                     maze_map_searched, robot.state.pos, robot_orientation, walls
-#                 )
-
-#                 var.robot_pos = robot.state.pos
-
-#                 var.maze_map_global = maze_map
-#                 var.drawing_event.set()
-
-#                 if robot.state.pos == target:
-#                     print("Target reached")
-#                     print("Searching time: %.2f" % robot.getTime(), "s")
-#                     path = algorithm_f.get_path_BFS(
-#                         maze_map_searched, maze_parameters.START_CELL, target
-#                     )
-#                     var.main_event.wait()
-#                     var.main_event.clear()
-#                     maze_map = algorithm_f.mark_center_graph(maze_map, path)
-#                     algorithm_f.write_file(path_file, path)
-#                     algorithm_f.write_file(maze_file, maze_map)
-#                     input("press any key to end")
-#                     exit(0)
-
-#                 routes = len(maze_map[robot.state.pos])
-#                 fork = routes >= 3
-
-#                 current_destination, visited, queue, move_back, searching_end = (
-#                     algorithm_f.check_possible_routes_BFS(
-#                         maze_map[robot.state.pos], visited, queue, fork, target
-#                     )
-#                 )
-
-#                 if (
-#                     current_destination not in maze_map[robot.state.pos]
-#                 ):  # not adjacent cell e.g. we move back farther than 1 cell
-#                     # temp_graph = {}
-#                     # for cell in visited: # create sub-graph only from visited cells
-#                     #     temp_graph[cell] = maze_map[cell]
-
-#                     back_path = algorithm_f.get_path_BFS(
-#                         maze_map_searched, robot.state.pos, current_destination
-#                     )
-
-#                     while back_path:
-#                         Move_to = back_path.pop()
-#                         robot.state.pos, robot_orientation = move_f.move_one_position_graph(
-#                             Move_to,
-#                             robot.state.pos,
-#                             robot_orientation,
-#                             robot,
-#                             ps,
-#                             tof,
-#                             left_motor,
-#                             right_motor,
-#                             ps_left,
-#                             ps_right,
-#                         )
-#                 else:
-#                     robot.state.pos, robot_orientation = move_f.move_one_position_graph(
-#                         current_destination,
-#                         robot.state.pos,
-#                         robot_orientation,
-#                         robot,
-#                         ps,
-#                         tof,
-#                         left_motor,
-#                         right_motor,
-#                         ps_left,
-#                         ps_right,
-#                     )
-
-#                 if world.sim.testing:
-#                     timer = robot.getTime() - timer
-#                     print("Move time: %.2f" % timer, "s")
-
-#                 var.main_event.wait()
-#                 var.main_event.clear()
-
-#         case Mode.SPEEDRUN:
-
-#             if robot.state.start:
-#                 path = algorithm_f.read_file(path_file)
-#                 print(len(path))
-#                 maze_map = algorithm_f.read_file(maze_file)
-#                 var.maze_map_global = maze_map
-
-#                 # run in another thread to make it possible to look on it during robot run
-#                 Maze_thread = Thread(target=draw_maze.draw_maze, args=(maze_map, []), daemon=True)
-#                 Maze_thread.start()
-
-#                 robot.state.start = False
-
-#             while path:
-
-#                 if robot.step(world.sim.time_step) == -1:
-#                     break
-
-#                 current_destination = path.pop()
-
-#                 robot.state.pos, robot_orientation = move_f.move_one_position_graph(
-#                     current_destination,
-#                     robot.state.pos,
-#                     robot_orientation,
-#                     robot,
-#                     ps,
-#                     tof,
-#                     left_motor,
-#                     right_motor,
-#                     ps_left,
-#                     ps_right,
-#                 )
-
-#                 var.robot_pos = robot.state.pos
-
-#                 var.drawing_event.set()
-
-#                 var.main_event.wait()
-#                 var.main_event.clear()
-
-#                 if robot.state.pos == target:
-#                     print("Target reached")
-#                     print("Speedrun time: %.2f" % robot.getTime(), "s")
-#                     input("press any key to end")
-#                     exit(0)
-
-
-# """ A_star_main
-# # @brief Main program for A* algorithm controller.
-# # Guarantees shortest path, but very long search time.
-# #
-# # @param robot: object with robot instance
-# #
-# # @retval None
-# """
-
-
-# def A_star_main(robot: MyRobot):
-
-#     # left_motor, right_motor, ps_left, ps_right, ps, tof = init_devices(robot)
-#     # target, robot_position, start, robot_orientation = init_parameters()
-
-#     maze_map = map_f.init_maze_map_graph()
-
-#     var.maze_map_global = maze_map
-
-#     maze_map_searched = {}
-#     for i in range(256):
-#         maze_map_searched[i] = []
-
-#     path_file, maze_file = algorithm_f.choose_file_path()
-
-#     # A* vars
-#     open = []  # list of unvisited nodes
-#     closed = []  # list of visited nodes
-#     cost = {}
-#     parent = {}  # probably not needed anymore
-#     path = []
-#     time_sum = 0.0
-#     current_destination = robot.state.pos
-#     cost[robot.state.pos] = [0, algorithm_f.calc_cost(robot.state.pos, target)]
-#     parent[robot.state.pos] = robot.state.pos
-#     open.append(robot.state.pos)
-
-#     match world.sim.mode:
-#         case Mode.SEARCH:  # search
-
-#             if robot.state.start:
-#                 # run in another thread to make it possible to look on it during robot run
-#                 Maze_thread = Thread(
-#                     target=draw_maze.draw_maze,
-#                     args=(var.maze_map_global, []),
-#                     daemon=True,
-#                 )
-#                 Maze_thread.start()
-
-#                 robot.state.start = False
-#             if world.sim.testing:
-#                 timer = robot.getTime()
-
-#             while open:
-
-#                 if robot.step(world.sim.time_step) == -1:
-#                     break
-
-#                 left_wall, front_wall, right_wall, back_wall = map_f.detect_walls(robot, 5)
-#                 walls = {
-#                     "front wall": front_wall,
-#                     "right wall": right_wall,
-#                     "back wall": back_wall,
-#                     "left wall": left_wall,
-#                 }
-
-#                 maze_map = map_f.add_walls_graph(
-#                     maze_map, robot.state.pos, robot_orientation, walls
-#                 )
-#                 maze_map_searched = map_f.add_walls_graph(
-#                     maze_map_searched, robot.state.pos, robot_orientation, walls
-#                 )
-
-#                 open.remove(robot.state.pos)
-#                 closed.append(robot.state.pos)
-
-#                 open, parent, cost = algorithm_f.update_neighbors_costs(
-#                     maze_map[robot.state.pos], open, closed, parent, cost, robot.state.pos
-#                 )
-
-#                 var.robot_pos = robot.state.pos
-#                 var.maze_map_global = maze_map
-#                 var.cost_global = cost
-
-#                 var.drawing_event.set()
-
-#                 if robot.state.pos == target:
-#                     print("Target reached")
-#                     print("Searching time: %.2f" % robot.getTime(), "s")
-#                     path = algorithm_f.get_path_A_star(
-#                         maze_map_searched, maze_parameters.START_CELL, target
-#                     )
-#                     var.main_event.wait()
-#                     var.main_event.clear()
-#                     maze_map = algorithm_f.mark_center_graph(maze_map, path)
-#                     algorithm_f.write_file(path_file, path)
-#                     algorithm_f.write_file(maze_file, maze_map)
-#                     input("press any key to end")
-#                     exit(0)
-
-#                 current_destination = algorithm_f.check_possible_routes_A_star(open, cost)
-
-#                 if (
-#                     current_destination not in maze_map[robot.state.pos]
-#                 ):  # not neighbor cell e.g. we move back farther than 1 cell
-
-#                     path = algorithm_f.get_path_A_star(
-#                         maze_map_searched, robot.state.pos, current_destination
-#                     )
-#                     while path:
-#                         Move_to = path.pop(0)
-#                         robot.state.pos, robot_orientation = move_f.move_one_position_graph(
-#                             Move_to,
-#                             robot.state.pos,
-#                             robot_orientation,
-#                             robot,
-#                             ps,
-#                             tof,
-#                             left_motor,
-#                             right_motor,
-#                             ps_left,
-#                             ps_right,
-#                         )
-
-#                 else:
-#                     robot.state.pos, robot_orientation = move_f.move_one_position_graph(
-#                         current_destination,
-#                         robot.state.pos,
-#                         robot_orientation,
-#                         robot,
-#                         ps,
-#                         tof,
-#                         left_motor,
-#                         right_motor,
-#                         ps_left,
-#                         ps_right,
-#                     )
-
-#                 if world.sim.testing:
-#                     timer = robot.getTime() - timer
-#                     print("Move time: %.2f" % timer, "s")
-
-#                 var.main_event.wait()
-#                 var.main_event.clear()
-
-#         case Mode.SPEEDRUN:  # speedrun
-
-#             if robot.state.start:
-#                 path = algorithm_f.read_file(path_file)
-#                 print(len(path))
-#                 maze_map = algorithm_f.read_file(maze_file)
-#                 var.maze_map_global = maze_map
-
-#                 # run in another thread to make it possible to look on it during robot run
-#                 Maze_thread = Thread(target=draw_maze.draw_maze, args=(maze_map, []), daemon=True)
-#                 Maze_thread.start()
-
-#                 robot.state.start = False
-
-#             while path:
-
-#                 if robot.step(world.sim.time_step) == -1:
-#                     break
-
-#                 current_destination = path.pop(0)
-
-#                 robot.state.pos, robot_orientation = move_f.move_one_position_graph(
-#                     current_destination,
-#                     robot.state.pos,
-#                     robot_orientation,
-#                     robot,
-#                     ps,
-#                     tof,
-#                     left_motor,
-#                     right_motor,
-#                     ps_left,
-#                     ps_right,
-#                 )
-
-#                 var.robot_pos = robot.state.pos
-
-#                 var.drawing_event.set()
-
-#                 var.main_event.wait()
-#                 var.main_event.clear()
-
-#                 if robot.state.pos == target:
-#                     print("Target reached")
-#                     print("Speedrun time: %.2f" % robot.getTime(), "s")
-#                     input("press any key to end")
-#                     exit(0)
-
-
-# """ A_star_main_modified
-# # @brief Main program for A* modified algorithm controller.
-# # Modification is that robot chooses where to go in 2 ways:
-# # 1. If current position is fork or dead-end - choose cell with lowest
-# # Fcost and/or Hcost (just like in normal A*).
-# # 2. If current cell is corridor - keep going until it's fork or dead-end.
-# # This approach makes searching much faster than normal A*, because robot
-# # doesn't need to keep moving across whole maze to just check one cell.
-# # The only drawback is that this approach might not guarantee the shortest path,
-# # although in micromouse mazes it usually should find it.
-# #
-# # @param robot: object with robot instance
-# #
-# # @retval None
-# """
-
-
-# def A_star_main_modified(robot: MyRobot):
-
-#     # left_motor, right_motor, ps_left, ps_right, ps, tof = init_devices(robot)
-#     # target, robot_position, start, robot_orientation = init_parameters()
-
-#     maze_map = map_f.init_maze_map_graph()
-#     var.maze_map_global = maze_map
-
-#     maze_map_searched = {}
-#     for i in range(256):
-#         maze_map_searched[i] = []
-
-#     path_file, maze_file = algorithm_f.choose_file_path()
-
-#     # A* vars
-#     open = []  # list of unvisited nodes
-#     closed = []  # list of visited nodes
-#     cost = {}
-#     parent = {}  # probably not needed anymore
-#     path = []
-
-#     time_sum = 0.0
-
-#     current_destination = robot.state.pos
-#     cost[robot.state.pos] = [0, algorithm_f.calc_cost(robot.state.pos, target)]
-#     parent[robot.state.pos] = robot.state.pos
-#     open.append(robot.state.pos)
-
-#     match world.sim.mode:
-#         case Mode.SEARCH:  # search
-
-#             if robot.state.start:
-#                 # run maze drawing in another thread to make it possible to look on it during robot run
-#                 Maze_thread = Thread(
-#                     target=draw_maze.draw_maze,
-#                     args=(var.maze_map_global, []),
-#                     daemon=True,
-#                 )
-#                 Maze_thread.start()
-
-#                 robot.state.start = False
-#             if world.sim.testing:
-#                 timer = robot.getTime()
-
-#             while open:
-
-#                 if robot.step(world.sim.time_step) == -1:
-#                     break
-
-#                 left_wall, front_wall, right_wall, back_wall = map_f.detect_walls(robot, 5)
-#                 walls = {
-#                     "front wall": front_wall,
-#                     "right wall": right_wall,
-#                     "back wall": back_wall,
-#                     "left wall": left_wall,
-#                 }
-
-#                 maze_map = map_f.add_walls_graph(
-#                     maze_map, robot.state.pos, robot_orientation, walls
-#                 )
-#                 maze_map_searched = map_f.add_walls_graph(
-#                     maze_map_searched, robot.state.pos, robot_orientation, walls
-#                 )
-
-#                 open.remove(robot.state.pos)
-#                 closed.append(robot.state.pos)
-
-#                 open, parent, cost = algorithm_f.update_neighbors_costs(
-#                     maze_map[robot.state.pos], open, closed, parent, cost, robot.state.pos
-#                 )
-
-#                 var.robot_pos = robot.state.pos
-#                 var.maze_map_global = maze_map
-#                 var.cost_global = cost
-
-#                 var.drawing_event.set()
-
-#                 if robot.state.pos == target:
-#                     print("Target reached")
-#                     print("Searching time: %.2f" % robot.getTime(), "s")
-#                     path = algorithm_f.get_path_A_star(
-#                         maze_map_searched, maze_parameters.START_CELL, target
-#                     )
-#                     var.main_event.wait()
-#                     var.main_event.clear()
-#                     maze_map = algorithm_f.mark_center_graph(maze_map, path)
-#                     algorithm_f.write_file(path_file, path)
-#                     algorithm_f.write_file(maze_file, maze_map)
-#                     input("press any key to end")
-#                     exit(0)
-
-#                 routes = len(maze_map[robot.state.pos])
-#                 corridor = routes == 2
-
-#                 if corridor:
-#                     current_destination = open[-1]
-#                 else:
-#                     current_destination = algorithm_f.check_possible_routes_A_star(open, cost)
-
-#                 if (
-#                     current_destination not in maze_map[robot.state.pos]
-#                 ):  # not adjacent cell e.g. we move back farther than 1 cell
-
-#                     path = algorithm_f.get_path_A_star(
-#                         maze_map_searched, robot.state.pos, current_destination
-#                     )
-
-#                     while path:
-#                         Move_to = path.pop(0)
-#                         robot.state.pos, robot_orientation = move_f.move_one_position_graph(
-#                             Move_to,
-#                             robot.state.pos,
-#                             robot_orientation,
-#                             robot,
-#                             ps,
-#                             tof,
-#                             left_motor,
-#                             right_motor,
-#                             ps_left,
-#                             ps_right,
-#                         )
-
-#                 else:
-#                     robot.state.pos, robot_orientation = move_f.move_one_position_graph(
-#                         current_destination,
-#                         robot.state.pos,
-#                         robot_orientation,
-#                         robot,
-#                         ps,
-#                         tof,
-#                         left_motor,
-#                         right_motor,
-#                         ps_left,
-#                         ps_right,
-#                     )
-
-#                 if world.sim.testing:
-#                     timer = robot.getTime() - timer
-#                     print("Move time: %.2f" % timer, "s")
-
-#                 var.main_event.wait()
-#                 var.main_event.clear()
-
-#         case Mode.SPEEDRUN:  # speedrun
-
-#             if robot.state.start:
-#                 path = algorithm_f.read_file(path_file)
-#                 print(len(path))
-#                 maze_map = algorithm_f.read_file(maze_file)
-#                 var.maze_map_global = maze_map
-
-#                 # run in another thread to make it possible to look on it during robot run
-#                 Maze_thread = Thread(target=draw_maze.draw_maze, args=(maze_map, []), daemon=True)
-#                 Maze_thread.start()
-
-#                 robot.state.start = False
-
-#             while path:
-
-#                 if robot.step(world.sim.time_step) == -1:
-#                     break
-
-#                 current_destination = path.pop(0)
-
-#                 robot.state.pos, robot_orientation = move_f.move_one_position_graph(
-#                     current_destination,
-#                     robot.state.pos,
-#                     robot_orientation,
-#                     robot,
-#                     ps,
-#                     tof,
-#                     left_motor,
-#                     right_motor,
-#                     ps_left,
-#                     ps_right,
-#                 )
-
-#                 var.robot_pos = robot.state.pos
-
-#                 var.drawing_event.set()
-
-#                 var.main_event.wait()
-#                 var.main_event.clear()
-
-#                 if robot.state.pos == target:
-#                     print("Target reached")
-#                     print("Speedrun time: %.2f" % robot.getTime(), "s")
-#                     input("press any key to end")
-#                     exit(0)
-
-
-""" keyboard_main
-# @brief Main program for manual/with arrows controller.
-# Made for testing purposes to move robot with WASD.
-#
-# @param robot: object with robot instance
-#
-# @retval None
-"""
+def DFS_main(robot: MyRobot):
+    """DFS_main
+    @brief Main program for Depth first search algorithm controller.
+    Doesn't guarantee the shortest path but usually finds path very fast (micromouse mazes).
+
+    @param robot: object with robot instance
+
+    @retval None
+    """
+    # left_motor, right_motor, ps_left, ps_right, ps, tof = init_devices(robot)
+    # target, robot_position, start, robot_orientation = init_parameters()
+
+    maze_map = map_f.init_maze_map_graph()
+
+    path_file, maze_file = algorithm_f.choose_file_path()
+
+    # dfs vars
+    fork_number = -1
+    unused_routes = {}
+    fork = {}
+    visited = []
+    stack = []
+    path = []
+    visited.append(robot.state.pos)
+    stack.append(robot.state.pos)
+
+    draw_queue = Queue(maxsize=1)
+
+    match world.sim.mode:
+        case Mode.SEARCH:  # search
+
+            if robot.state.start:
+                # run in another thread to make it possible to look on it during robot run
+                drawer = MazeDrawer(maze_map, [], draw_queue)
+                drawer.start_drawing()
+                robot.state.start = False
+            if world.sim.testing:
+                timer = robot.getTime()
+
+            while stack:
+
+                if robot.step(world.sim.time_step) == -1:
+                    break
+
+                stack.pop()
+
+                left_wall, front_wall, right_wall, back_wall = map_f.detect_walls(robot, 5)
+                walls = {
+                    "front wall": front_wall,
+                    "right wall": right_wall,
+                    "back wall": back_wall,
+                    "left wall": left_wall,
+                }
+
+                maze_map = map_f.add_walls_graph(
+                    maze_map, robot.state.pos, robot.state.orientation, walls
+                )
+
+                path.append(robot.state.pos)
+
+                # var.robot_pos = robot.state.pos
+                # var.maze_map_global = maze_map
+
+                # var.drawing_event.set()
+                draw_queue.put(DrawState(robot.state.pos, maze_map, [], {}))
+                if robot.state.pos == world.maze.target_cell:
+
+                    print("Target reached")
+                    print("Searching time: %.2f" % robot.getTime(), "s")
+                    # var.main_event.wait()
+                    # var.main_event.clear()
+                    maze_map = algorithm_f.mark_center_graph(maze_map, path)
+                    algorithm_f.write_file(path_file, path)
+                    algorithm_f.write_file(maze_file, maze_map)
+                    input("press any key to end")
+                    exit(0)
+
+                fork, fork_number, unused_routes, dead_end = algorithm_f.check_fork_DFS(
+                    maze_map[robot.state.pos],
+                    robot.state.pos,
+                    fork,
+                    fork_number,
+                    unused_routes,
+                )
+
+                if dead_end:
+                    (fork, fork_number, unused_routes, path) = move_f.move_back_DFS(
+                        robot, stack[-1], maze_map, fork, fork_number, unused_routes, path
+                    )
+                    fork[fork_number].append(path[-1])
+
+                current_destination, visited, stack = algorithm_f.check_possible_routes_DFS(
+                    maze_map[robot.state.pos], visited, stack
+                )
+
+                if current_destination not in maze_map[robot.state.pos]:
+                    fork[fork_number].pop()
+                    (fork, fork_number, unused_routes, path) = move_f.move_back_DFS(
+                        robot, current_destination, maze_map, fork, fork_number, unused_routes, path
+                    )
+                    fork[fork_number].append(robot.state.pos)
+
+                move_f.move_one_position_graph(robot, current_destination)
+
+                if world.sim.testing:
+                    timer = robot.getTime() - timer
+                    print("Move time: %.2f" % timer, "s")
+
+                # var.main_event.wait()
+                # var.main_event.clear()
+
+        case Mode.SPEEDRUN:
+
+            if robot.state.start:
+                path = algorithm_f.read_file(path_file)
+                path.reverse()
+                print(len(path))
+                path.pop()  # remove start cell
+
+                maze_map = algorithm_f.read_file(maze_file)
+                # var.maze_map_global = maze_map
+
+                # run in another thread to make it possible to look on it during robot run
+                drawer = MazeDrawer(maze_map, [], draw_queue)
+                drawer.start_drawing()
+                robot.state.start = False
+
+            while path:
+
+                if robot.step(world.sim.time_step) == -1:
+                    break
+
+                current_destination = path.pop()
+
+                move_f.move_one_position_graph(robot, current_destination)
+
+                # var.robot_pos = robot.state.pos
+
+                # var.drawing_event.set()
+
+                # var.main_event.wait()
+                # var.main_event.clear()
+                draw_queue.put(DrawState(robot.state.pos, maze_map, [], {}))
+
+                if robot.state.pos == world.maze.target_cell:
+                    print("Target reached")
+                    print("Speedrun time: %.2f" % robot.getTime(), "s")
+                    input("press any key to end")
+                    exit(0)
+
+
+def BFS_main(robot: MyRobot):
+    """BFS_main
+    @brief Main program for Breadth first search algorithm controller.
+    It was adjusted for robot movement. BFS is a horizontal searching through graph
+    by going by each 'level' of nodes. To avoid unnecessary back-tracking,
+    only forks are treated as 'levels',  which means that robot will go back
+    only when it moves to new fork or dead-end. Because of that it doesn't guarantees shortest path.
+
+    @param robot: object with robot instance
+
+    @retval None
+    """
+    # left_motor, right_motor, ps_left, ps_right, ps, tof = init_devices(robot)
+    # target, robot_position, start, robot_orientation = init_parameters()
+
+    maze_map = map_f.init_maze_map_graph()
+
+    # var.maze_map_global = maze_map
+
+    maze_map_searched = {}
+    for i in range(256):
+        maze_map_searched[i] = []
+
+    path_file, maze_file = algorithm_f.choose_file_path()
+
+    # bfs vars
+    visited = []
+    path = []
+    searching_end = False
+    move_back = False
+    fork = False
+    queue = deque()
+
+    visited.append(robot.state.pos)
+    queue.append(robot.state.pos)
+
+    draw_queue = Queue(maxsize=1)
+
+    match world.sim.mode:
+        case Mode.SEARCH:  # search
+
+            if robot.state.start:
+                # run in another thread to make it possible to look on it during robot run
+                drawer = MazeDrawer(maze_map, [], draw_queue)
+                drawer.start_drawing()
+                robot.state.start = False
+            if world.sim.testing:
+                timer = robot.getTime()
+
+            while queue:
+
+                if robot.step(world.sim.time_step) == -1:
+                    break
+
+                if searching_end:
+                    robot.state.pos = queue.pop()
+                elif move_back or fork:
+                    robot.state.pos = queue.popleft()
+                    move_back = False
+                else:
+                    robot.state.pos = queue.pop()
+
+                left_wall, front_wall, right_wall, back_wall = map_f.detect_walls(robot, 5)
+                walls = {
+                    "front wall": front_wall,
+                    "right wall": right_wall,
+                    "back wall": back_wall,
+                    "left wall": left_wall,
+                }
+
+                maze_map = map_f.add_walls_graph(
+                    maze_map, robot.state.pos, robot.state.orientation, walls
+                )
+                maze_map_searched = map_f.add_walls_graph(
+                    maze_map_searched, robot.state.pos, robot.state.orientation, walls
+                )
+
+                # var.robot_pos = robot.state.pos
+
+                # var.maze_map_global = maze_map
+                # var.drawing_event.set()
+                draw_queue.put(DrawState(robot.state.pos, maze_map, [], {}))
+
+                if robot.state.pos == world.maze.target_cell:
+                    draw_queue.put(None)
+                    print("Target reached")
+                    print("Searching time: %.2f" % robot.getTime(), "s")
+                    path = algorithm_f.get_path_BFS(
+                        maze_map_searched, world.maze.start_cell, world.maze.target_cell
+                    )
+                    # var.main_event.wait()
+                    # var.main_event.clear()
+                    maze_map = algorithm_f.mark_center_graph(maze_map, path)
+                    algorithm_f.write_file(path_file, path)
+                    algorithm_f.write_file(maze_file, maze_map)
+                    input("press any key to end")
+                    exit(0)
+
+                routes = len(maze_map[robot.state.pos])
+                fork = routes >= 3
+
+                robot.state.current_target, visited, queue, move_back, searching_end = (
+                    algorithm_f.check_possible_routes_BFS(
+                        maze_map[robot.state.pos], visited, queue, fork
+                    )
+                )
+
+                if (
+                    robot.state.current_target not in maze_map[robot.state.pos]
+                ):  # not adjacent cell e.g. we move back farther than 1 cell
+                    # temp_graph = {}
+                    # for cell in visited: # create sub-graph only from visited cells
+                    #     temp_graph[cell] = maze_map[cell]
+
+                    back_path = algorithm_f.get_path_BFS(
+                        maze_map_searched, robot.state.pos, robot.state.current_target
+                    )
+
+                    while back_path:
+                        Move_to = back_path.pop()
+                        move_f.move_one_position_graph(robot, Move_to)
+                else:
+                    move_f.move_one_position_graph(robot, robot.state.current_target)
+
+                if world.sim.testing:
+                    timer = robot.getTime() - timer
+                    print("Move time: %.2f" % timer, "s")
+
+                # var.main_event.wait()
+                # var.main_event.clear()
+
+        case Mode.SPEEDRUN:
+
+            if robot.state.start:
+                path = algorithm_f.read_file(path_file)
+                print(len(path))
+                maze_map = algorithm_f.read_file(maze_file)
+                # var.maze_map_global = maze_map
+
+                # run in another thread to make it possible to look on it during robot run
+                drawer = MazeDrawer(maze_map, [], draw_queue)
+                drawer.start_drawing()
+                robot.state.start = False
+
+            while path:
+
+                if robot.step(world.sim.time_step) == -1:
+                    break
+
+                robot.state.current_target = path.pop()
+
+                move_f.move_one_position_graph(robot, robot.state.current_target)
+
+                # var.robot_pos = robot.state.pos
+
+                # var.drawing_event.set()
+
+                # var.main_event.wait()
+                # var.main_event.clear()
+                draw_queue.put(DrawState(robot.state.pos, maze_map, [], {}))
+
+                if robot.state.pos == world.maze.target_cell:
+                    draw_queue.put(None)
+                    print("Target reached")
+                    print("Speedrun time: %.2f" % robot.getTime(), "s")
+                    input("press any key to end")
+                    exit(0)
+
+
+def A_star_main(robot: MyRobot):
+    """A_star_main
+    @brief Main program for A* algorithm controller.
+    Guarantees shortest path, but very long search time.
+
+    @param robot: object with robot instance
+
+    @retval None
+    """
+
+    # left_motor, right_motor, ps_left, ps_right, ps, tof = init_devices(robot)
+    # target, robot_position, start, robot_orientation = init_parameters()
+
+    maze_map = map_f.init_maze_map_graph()
+
+    # var.maze_map_global = maze_map
+
+    maze_map_searched = {}
+    for i in range(256):
+        maze_map_searched[i] = []
+
+    path_file, maze_file = algorithm_f.choose_file_path()
+
+    # A* vars
+    open = []  # list of unvisited nodes
+    closed = []  # list of visited nodes
+    cost = {}
+    parent = {}  # probably not needed anymore
+    path = []
+    time_sum = 0.0
+    robot.state.current_target = robot.state.pos
+    cost[robot.state.pos] = [0, algorithm_f.calc_cost(robot.state.pos, robot.state.current_target)]
+    parent[robot.state.pos] = robot.state.pos
+    open.append(robot.state.pos)
+    draw_queue = Queue(maxsize=1)
+
+    match world.sim.mode:
+        case Mode.SEARCH:  # search
+
+            if robot.state.start:
+                # run in another thread to make it possible to look on it during robot run
+                drawer = MazeDrawer(maze_map, [], draw_queue)
+                drawer.start_drawing()
+                robot.state.start = False
+            if world.sim.testing:
+                timer = robot.getTime()
+
+            while open:
+
+                if robot.step(world.sim.time_step) == -1:
+                    break
+
+                left_wall, front_wall, right_wall, back_wall = map_f.detect_walls(robot, 5)
+                walls = {
+                    "front wall": front_wall,
+                    "right wall": right_wall,
+                    "back wall": back_wall,
+                    "left wall": left_wall,
+                }
+
+                maze_map = map_f.add_walls_graph(
+                    maze_map, robot.state.pos, robot.state.orientation, walls
+                )
+                maze_map_searched = map_f.add_walls_graph(
+                    maze_map_searched, robot.state.pos, robot.state.orientation, walls
+                )
+
+                open.remove(robot.state.pos)
+                closed.append(robot.state.pos)
+
+                open, parent, cost = algorithm_f.update_neighbors_costs(
+                    maze_map[robot.state.pos], open, closed, parent, cost, robot.state.pos
+                )
+
+                # var.robot_pos = robot.state.pos
+                # var.maze_map_global = maze_map
+                # var.cost_global = cost
+
+                # var.drawing_event.set()
+                draw_queue.put(DrawState(robot.state.pos, maze_map, [], cost))
+
+                if robot.state.pos == world.maze.target_cell:
+                    draw_queue.put(None)
+                    print("Target reached")
+                    print("Searching time: %.2f" % robot.getTime(), "s")
+                    path = algorithm_f.get_path_A_star(
+                        maze_map_searched, world.maze.start_cell, world.maze.target_cell
+                    )
+                    # var.main_event.wait()
+                    # var.main_event.clear()
+                    maze_map = algorithm_f.mark_center_graph(maze_map, path)
+                    algorithm_f.write_file(path_file, path)
+                    algorithm_f.write_file(maze_file, maze_map)
+                    input("press any key to end")
+                    exit(0)
+
+                robot.state.current_target = algorithm_f.check_possible_routes_A_star(open, cost)
+
+                if (
+                    robot.state.current_target not in maze_map[robot.state.pos]
+                ):  # not neighbor cell e.g. we move back farther than 1 cell
+
+                    path = algorithm_f.get_path_A_star(
+                        maze_map_searched, robot.state.pos, robot.state.current_target
+                    )
+                    while path:
+                        Move_to = path.pop(0)
+                        move_f.move_one_position_graph(robot, Move_to)
+
+                else:
+                    move_f.move_one_position_graph(robot, robot.state.current_target)
+
+                if world.sim.testing:
+                    timer = robot.getTime() - timer
+                    print("Move time: %.2f" % timer, "s")
+
+                # var.main_event.wait()
+                # var.main_event.clear()
+
+        case Mode.SPEEDRUN:  # speedrun
+
+            if robot.state.start:
+                path = algorithm_f.read_file(path_file)
+                print(len(path))
+                maze_map = algorithm_f.read_file(maze_file)
+                # var.maze_map_global = maze_map
+
+                # run in another thread to make it possible to look on it during robot run
+                drawer = MazeDrawer(maze_map, [], draw_queue)
+                drawer.start_drawing()
+                robot.state.start = False
+
+            while path:
+
+                if robot.step(world.sim.time_step) == -1:
+                    break
+
+                robot.state.current_target = path.pop(0)
+
+                move_f.move_one_position_graph(robot, robot.state.current_target)
+
+                # var.robot_pos = robot.state.pos
+
+                # var.drawing_event.set()
+
+                # var.main_event.wait()
+                # var.main_event.clear()
+                draw_queue.put(DrawState(robot.state.pos, maze_map, [], {}))
+
+                if robot.state.pos == world.maze.target_cell:
+                    draw_queue.put(None)
+                    print("Target reached")
+                    print("Speedrun time: %.2f" % robot.getTime(), "s")
+                    input("press any key to end")
+                    exit(0)
+
+
+def A_star_main_modified(robot: MyRobot):
+    """
+    @brief Main program for A* modified algorithm controller.
+    Modification is that robot chooses where to go in 2 ways:
+    1. If current position is fork or dead-end - choose cell with lowest
+    Fcost and/or Hcost (just like in normal A*).
+    2. If current cell is corridor - keep going until it's fork or dead-end.
+    This approach makes searching much faster than normal A*, because robot
+    doesn't need to keep moving across whole maze to just check one cell.
+    The only drawback is that this approach might not guarantee the shortest path,
+    although in micromouse mazes it usually should find it.
+
+    @param robot: object with robot instance
+
+    @retval None
+    """
+    # left_motor, right_motor, ps_left, ps_right, ps, tof = init_devices(robot)
+    # target, robot_position, start, robot_orientation = init_parameters()
+
+    maze_map = map_f.init_maze_map_graph()
+    # var.maze_map_global = maze_map
+
+    maze_map_searched = {}
+    for i in range(256):
+        maze_map_searched[i] = []
+
+    path_file, maze_file = algorithm_f.choose_file_path()
+
+    # A* vars
+    open = []  # list of unvisited nodes
+    closed = []  # list of visited nodes
+    cost = {}
+    parent = {}  # probably not needed anymore
+    path = []
+
+    time_sum = 0.0
+
+    robot.state.current_target = robot.state.pos
+    cost[robot.state.pos] = [0, algorithm_f.calc_cost(robot.state.pos, robot.state.current_target)]
+    parent[robot.state.pos] = robot.state.pos
+    open.append(robot.state.pos)
+
+    draw_queue = Queue(maxsize=1)
+
+    match world.sim.mode:
+        case Mode.SEARCH:  # search
+
+            if robot.state.start:
+                # run maze drawing in another thread to make it possible to look on it during robot run
+                drawer = MazeDrawer(maze_map, [], draw_queue)
+                drawer.start_drawing()
+                robot.state.start = False
+
+            if world.sim.testing:
+                timer = robot.getTime()
+
+            while open:
+
+                if robot.step(world.sim.time_step) == -1:
+                    break
+
+                left_wall, front_wall, right_wall, back_wall = map_f.detect_walls(robot, 5)
+                walls = {
+                    "front wall": front_wall,
+                    "right wall": right_wall,
+                    "back wall": back_wall,
+                    "left wall": left_wall,
+                }
+
+                maze_map = map_f.add_walls_graph(
+                    maze_map, robot.state.pos, robot.state.orientation, walls
+                )
+                maze_map_searched = map_f.add_walls_graph(
+                    maze_map_searched, robot.state.pos, robot.state.orientation, walls
+                )
+
+                open.remove(robot.state.pos)
+                closed.append(robot.state.pos)
+
+                open, parent, cost = algorithm_f.update_neighbors_costs(
+                    maze_map[robot.state.pos], open, closed, parent, cost, robot.state.pos
+                )
+
+                # var.robot_pos = robot.state.pos
+                # var.maze_map_global = maze_map
+                # var.cost_global = cost
+
+                # var.drawing_event.set()
+                draw_queue.put(DrawState(robot.state.pos, maze_map, [], cost))
+
+                if robot.state.pos == world.maze.target_cell:
+                    draw_queue.put(None)
+                    print("Target reached")
+                    print("Searching time: %.2f" % robot.getTime(), "s")
+                    path = algorithm_f.get_path_A_star(
+                        maze_map_searched, world.maze.start_cell, world.maze.target_cell
+                    )
+                    # var.main_event.wait()
+                    # var.main_event.clear()
+                    maze_map = algorithm_f.mark_center_graph(maze_map, path)
+                    algorithm_f.write_file(path_file, path)
+                    algorithm_f.write_file(maze_file, maze_map)
+                    input("press any key to end")
+                    exit(0)
+
+                routes = len(maze_map[robot.state.pos])
+                corridor = routes == 2
+
+                if corridor:
+                    robot.state.current_target = open[-1]
+                else:
+                    robot.state.current_target = algorithm_f.check_possible_routes_A_star(
+                        open, cost
+                    )
+
+                if (
+                    robot.state.current_target not in maze_map[robot.state.pos]
+                ):  # not adjacent cell e.g. we move back farther than 1 cell
+
+                    path = algorithm_f.get_path_A_star(
+                        maze_map_searched, robot.state.pos, robot.state.current_target
+                    )
+
+                    while path:
+                        Move_to = path.pop(0)
+                        move_f.move_one_position_graph(robot, Move_to)
+
+                else:
+                    move_f.move_one_position_graph(robot, robot.state.current_target)
+
+                if world.sim.testing:
+                    timer = robot.getTime() - timer
+                    print("Move time: %.2f" % timer, "s")
+
+                # var.main_event.wait()
+                # var.main_event.clear()
+
+        case Mode.SPEEDRUN:  # speedrun
+
+            if robot.state.start:
+                path = algorithm_f.read_file(path_file)
+                print(len(path))
+                maze_map = algorithm_f.read_file(maze_file)
+                # var.maze_map_global = maze_map
+
+                # run in another thread to make it possible to look on it during robot run
+                drawer = MazeDrawer(maze_map, [], draw_queue)
+                drawer.start_drawing()
+                robot.state.start = False
+
+            while path:
+
+                if robot.step(world.sim.time_step) == -1:
+                    break
+
+                robot.state.current_target = path.pop(0)
+
+                move_f.move_one_position_graph(robot, robot.state.current_target)
+
+                # var.robot_pos = robot.state.pos
+
+                # var.drawing_event.set()
+
+                # var.main_event.wait()
+                # var.main_event.clear()
+                draw_queue.put(DrawState(robot.state.pos, maze_map, [], {}))
+
+                if robot.state.pos == world.maze.target_cell:
+                    draw_queue.put(None)
+                    print("Target reached")
+                    print("Speedrun time: %.2f" % robot.getTime(), "s")
+                    input("press any key to end")
+                    exit(0)
 
 
 def keyboard_main(robot: MyRobot):
+    """keyboard_main
+    @brief Main program for manual/with arrows controller.
+    Made for testing purposes to move robot with WASD.
 
-    # left_motor, right_motor, ps_left, ps_right, ps, tof = init_devices(robot)
+    @param robot: object with robot instance
+
+    @retval None
+    """
 
     keyboard = Keyboard()
     keyboard.enable(world.sim.time_step)

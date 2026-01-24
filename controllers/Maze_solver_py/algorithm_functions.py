@@ -165,26 +165,24 @@ def where_to_move_graph(robot_position, current_destination):
     return move_direction
 
 
-""" check_possible_routes_BFS  
-# @brief Add possible adjacent cells to queue and then decides to which cell move next.
-# First item in queue is chosen when robot current position is
-# a fork or dead end (breadth first search). Otherwise last item in queue is chosen.
-#
-# @param adjacent_cells: list with cells accessible from current robot position
-# @param visited: list with cells already added to queue
-# @param queue: queue with cells which will be visited
-# @param fork: bool variable which informs if current cell is a fork
-# @param target: variable with a cell which is a target
-#
-# @retval current_destination: variable with a cell to which move next
-# @retval visited: updated list with cells already added to queue
-# @retval queue: updated queue with cells which will be visited
-# @retval dead_end: bool variable which informs if current cell is a dead end and robot need's to move back
-# @retval searching_end: bool variable which informs if target was found i.e. run is ended
-"""
+def check_possible_routes_BFS(adjacent_cells, visited, queue, fork):
+    """
+    @brief Add possible adjacent cells to queue and then decides to which cell move next.
+    First item in queue is chosen when robot current position is
+    a fork or dead end (breadth first search). Otherwise last item in queue is chosen.
 
+    @param adjacent_cells: list with cells accessible from current robot position
+    @param visited: list with cells already added to queue
+    @param queue: queue with cells which will be visited
+    @param fork: bool variable which informs if current cell is a fork
+    @param target: variable with a cell which is a target
 
-def check_possible_routes_BFS(adjacent_cells, visited, queue, fork, target):
+    @retval current_destination: variable with a cell to which move next
+    @retval visited: updated list with cells already added to queue
+    @retval queue: updated queue with cells which will be visited
+    @retval dead_end: bool variable which informs if current cell is a dead end and robot need's to move back
+    @retval searching_end: bool variable which informs if target was found i.e. run is ended
+    """
     dead_end = True
     searching_end = False
     for cell in adjacent_cells:
@@ -192,7 +190,7 @@ def check_possible_routes_BFS(adjacent_cells, visited, queue, fork, target):
             visited.append(cell)
             queue.append(cell)
             dead_end = False
-            if cell == target:
+            if cell == world.maze.target_cell:
                 searching_end = True
                 break
 
@@ -221,13 +219,13 @@ def check_possible_routes_BFS(adjacent_cells, visited, queue, fork, target):
 """
 
 
-def check_possible_routes_DFS(adjacent_cells, visited, stack, target):
+def check_possible_routes_DFS(adjacent_cells, visited, stack):
 
     for cell in reversed(adjacent_cells):
         if cell not in visited:
             visited.append(cell)
             stack.append(cell)
-            if cell == target:
+            if cell == world.maze.target_cell:
                 break
 
     current_destination = stack[-1]
@@ -336,26 +334,24 @@ def check_possible_routes_A_star(open, cost):
     return current_destination
 
 
-""" update_neighbors_costs  
-# @brief Used in A* algorithm. Assign and/or update costs of neighbor nodes.
-# New cost is assigned to node when it's not in open list or new cost is lower than actual.
-# In addition parent of the node is assigned, which allows to create path later.
-# If target is found, function breaks.
-#
-# @param neighbors: list with cells adjacent to current position
-# @param open: list with cells to visit
-# @param closed: list with cells already visited
-# @param parent: dictionary with parent nodes used to create path
-# @param cost: dictionary of costs, which contain Gcost and Hcost
-# @param current_position: variable with current robot position
-#
-# @retval open: updated list with cells to visit
-# @retval parent: updated dictionary with parent nodes used to create path
-# @retval cost: updated dictionary of costs, which contain Gcost and Hcost
-"""
-
-
 def update_neighbors_costs(neighbors, open, closed, parent, cost, current_position):
+    """
+    @brief Used in A* algorithm. Assign and/or update costs of neighbor nodes.
+    New cost is assigned to node when it's not in open list or new cost is lower than actual.
+    In addition parent of the node is assigned, which allows to create path later.
+    If target is found, function breaks.
+
+    @param neighbors: list with cells adjacent to current position
+    @param open: list with cells to visit
+    @param closed: list with cells already visited
+    @param parent: dictionary with parent nodes used to create path
+    @param cost: dictionary of costs, which contain Gcost and Hcost
+    @param current_position: variable with current robot position
+
+    @retval open: updated list with cells to visit
+    @retval parent: updated dictionary with parent nodes used to create path
+    @retval cost: updated dictionary of costs, which contain Gcost and Hcost
+    """
     for neighbor in neighbors:
         if neighbor in closed:
             continue
@@ -479,19 +475,17 @@ def check_fork_DFS(connections, robot_position, fork, fork_number, fork_count):
     return fork, fork_number, fork_count, dead_end
 
 
-""" get_back_path_BFS  
-# @brief Creates a path from current robot position to its current destination.
-# It is used when current destination is not in adjacent cell.
-#
-# @param graph: dictionary graph with visited cells
-# @param start: variable with current robot position in maze
-# @param target: variable with position to which robot want's to go
-#
-# @retval path: list with path to target
-"""
+def get_path_BFS(graph, start, current_target):
+    """
+    @brief Creates a path from current robot position to its current destination.
+    It is used when current destination is not in adjacent cell.
 
+    @param graph: dictionary graph with visited cells
+    @param start: variable with current robot position in maze
+    @param target: variable with position to which robot want's to go
 
-def get_path_BFS(graph, start, target):
+    @retval path: list with path to target
+    """
 
     visited = []
     queue = deque()
@@ -515,7 +509,7 @@ def get_path_BFS(graph, start, target):
                     visited.append(n)
                     queue.append(n)
                     parent[n] = s
-                    if n == target:
+                    if n == current_target:
                         while n != start:  # or parent[n] != n
                             path.append(n)
                             n = parent[n]

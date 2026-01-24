@@ -23,39 +23,28 @@ from config.world import world
 """
 
 
-def move_one_position_graph(
-    current_destination,
-    robot_position,
-    robot_orientation,
-    robot,
-    ps,
-    tof,
-    left_motor,
-    right_motor,
-    ps_left,
-    ps_right,
-):
+def move_one_position_graph(robot: MyRobot, current_destination):
+    """move_one_position_graph
+    @brief Executes robot movement to next position. Used in graph algorithms.
 
-    move_direction = algorithm_f.where_to_move_graph(robot_position, current_destination)
+    @param current_destination: variable with cell to which robot moves
+    @param robot_position: variable with current robot position
+    @param robot_orientation: variable with current robot orientation in global directions
+    @params robot, ps, tof, left_motor, right_motor, ps_left, ps_right: variables with robot devices
 
-    _, front_wall, _, _ = map_f.detect_walls(robot, ps, tof, 5)
+    @retval robot_position: variable with updated robot position
+    @retval robot_orientation: variable with updated robot orientation in global directions
+    """
+
+    move_direction = algorithm_f.where_to_move_graph(robot.state.pos, current_destination)
+
+    _, front_wall, _, _ = map_f.detect_walls(robot, 5)
     if front_wall:
-        move_front_correct(tof, left_motor, right_motor, robot, ps)
+        move_front_correct(robot)
 
-    robot_orientation = drive(
-        robot_orientation,
-        move_direction,
-        robot,
-        left_motor,
-        right_motor,
-        ps_left,
-        ps_right,
-        ps,
-    )
+    drive(robot, move_direction)
 
-    robot_position = current_destination
-
-    return robot_position, robot_orientation
+    robot.state.pos = current_destination
 
 
 """ move_one_position
@@ -174,17 +163,14 @@ def read_sensors(robot: MyRobot, number_of_reads):
     return avg1_right_angle_sensor, avg6_left_angle_sensor, left_wall, right_wall
 
 
-""" PID_correction
-# @brief Correct robot position according to distance sensors by changing motors speed.
-#
-# @params left_motor, right_motor, robot, ps, ps_left, ps_right: variables with robot devices
-#
-# @retval None
-"""
-
-
 def PID_correction(robot: MyRobot):
+    """PID_correction
+    @brief Correct robot position according to distance sensors by changing motors speed.
 
+    @params left_motor, right_motor, robot, ps, ps_left, ps_right: variables with robot devices
+
+    @retval None
+    """
     while True:
         distance_left_now = robot.ps_left.getValue()
         distance_right_now = robot.ps_right.getValue()
@@ -194,8 +180,8 @@ def PID_correction(robot: MyRobot):
         previous_error = 0.00
         error_integral = 0.00
         P = 0.005  # 0.005
-        I = 0.0008  # 0.0005  0.0001
-        D = 0.0005  # 0.0002
+        I = 0.002  # 0.0005  0.0001
+        D = 0.0008  # 0.0002
         Middle = 75
 
         if left_wall and right_wall:
@@ -445,39 +431,18 @@ def turn(robot: MyRobot, move_direction):
 
 
 def move_back_DFS(
+    robot: MyRobot,
     destination,
     maze_map,
-    robot_position,
     fork,
     fork_number,
     unused_routes,
-    robot_orientation,
-    robot,
-    ps,
-    tof,
-    left_motor,
-    right_motor,
-    ps_left,
-    ps_right,
     path,
 ):
 
-    while destination not in maze_map[robot_position]:
+    while destination not in maze_map[robot.state.pos]:
         for cell in reversed(fork[fork_number]):
-
-            robot_position, robot_orientation = move_one_position_graph(
-                cell,
-                robot_position,
-                robot_orientation,
-                robot,
-                ps,
-                tof,
-                left_motor,
-                right_motor,
-                ps_left,
-                ps_right,
-            )
-
+            move_one_position_graph(robot, cell)
             fork[fork_number].pop()
             path.pop()
 
@@ -486,7 +451,7 @@ def move_back_DFS(
             if fork_number != 0:
                 fork_number -= 1
 
-    return fork, fork_number, unused_routes, path, robot_orientation, robot_position
+    return fork, fork_number, unused_routes, path
 
 
 """ wait_move_end
