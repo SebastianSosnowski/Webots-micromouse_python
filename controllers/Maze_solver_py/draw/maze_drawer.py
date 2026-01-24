@@ -1,12 +1,10 @@
 from turtle import setup, Turtle, tracer, update, done
-# import var
+from queue import Queue
+from threading import Thread
 
 from config.enums import Direction, Algorithm, Mode
 from config.world import world
-
 from utils.params import DrawState
-from queue import Queue
-from threading import Thread
 
 
 class MazeDrawer(Thread):

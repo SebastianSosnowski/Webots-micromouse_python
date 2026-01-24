@@ -1,7 +1,6 @@
 """flood_fill_py controller."""
 
 from pathlib import Path
-from controller import Robot
 
 # my modules
 from config.loader import load_config

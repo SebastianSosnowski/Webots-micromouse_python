@@ -1,6 +1,6 @@
 # Map updating functions
 from utils.my_robot import MyRobot
-from config.enums import Direction, MazeLayout
+from config.enums import Direction
 from config.world import world
 
 """ detect_walls

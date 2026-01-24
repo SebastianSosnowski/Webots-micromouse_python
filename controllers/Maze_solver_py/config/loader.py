@@ -1,8 +1,9 @@
 import yaml
 from pathlib import Path
 from enum import EnumType
-from config.enums import Mode, Algorithm, MazeLayout
 import logging
+
+from config.enums import Mode, Algorithm, MazeLayout
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -13,9 +14,7 @@ def load_config(path: Path) -> dict:
         config: dict = yaml.safe_load(file)
     sim_cfg: dict = config.get("simulation", {})
     sim_cfg["mode"] = validate_simulation_parameter(sim_cfg.get("mode", ""), Mode)
-    sim_cfg["algorithm"] = validate_simulation_parameter(
-        sim_cfg.get("algorithm", ""), Algorithm
-    )
+    sim_cfg["algorithm"] = validate_simulation_parameter(sim_cfg.get("algorithm", ""), Algorithm)
     sim_cfg["maze_layout"] = validate_simulation_parameter(
         sim_cfg.get("maze_layout", ""), MazeLayout
     )

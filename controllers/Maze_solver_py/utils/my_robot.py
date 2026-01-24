@@ -1,7 +1,6 @@
 from controller import Robot, Motor, PositionSensor, DistanceSensor
 from typing import cast
-from config.enums import Direction, Mode
-from .params import RobotParams, SimulationParams, MazeParams, RobotState
+from .params import RobotParams, RobotState
 from config.world import world
 
 
