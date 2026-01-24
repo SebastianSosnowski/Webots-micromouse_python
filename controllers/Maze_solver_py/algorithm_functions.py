@@ -766,213 +766,48 @@ def calc_cost(start: int, target: int):
     return distance
 
 
-def read_file(file_name: str):
-    """Read file. Pickle module used.
+def read_file(path: Path):
+    """Read a pickle file.
 
     Args:
-        file_name: Variable with a file name.
+        path: Path to the file.
 
     Returns:
-        list: List with a content of a file.
+        Content of a file.
     """
-
-    with open(file_name, "rb") as file:
+    with path.open("rb") as file:
         return pickle.load(file)
 
 
-def write_file(file_name: str, values):
-    """Write file. Pickle module used.
+def write_file(path: Path, values):
+    """Write data to a pickle file.
 
     Args:
-        file_name: Variable with a file name.
+        path: Path to the file.
         values: Any type of object with a content to write file.
 
     Returns:
         None
     """
-    path = Path(file_name)
     path.parent.mkdir(parents=True, exist_ok=True)
-    with open(file_name, "wb") as file:
+    with path.open("wb") as file:
         pickle.dump(values, file)
 
 
-def choose_file_path():
-    """Choose appropriate directory and file name to save results.
+def create_files_directories(layout: MazeLayout, algorithm: Algorithm) -> tuple[Path, Path]:
+    """Create appropriate directory and file name to save results.
+
+    Args:
+        layout: Maze layout enumeration used in simulation.
+        algorithm: Algorithm enumeration used in simulation.
 
     Returns:
-        tuple[str, str]: Appropriate files directory and names (path_file, maze_file).
+        tuple[Path, Path]: Appropriate files directory and names (path_file, maze_file).
     """
+    base_dir = Path("Results")
+    maze_dir = layout.name.capitalize()
+    algo_name = algorithm.name.lower()
+    path_dir = base_dir / maze_dir / f"{algo_name}_path.pkl"
+    maze_dir = base_dir / maze_dir / f"{algo_name}_maze.pkl"
 
-    match world.sim.maze_layout:
-        case MazeLayout.FORBOT:
-            match world.sim.algorithm:
-                case Algorithm.FLOODFILL:
-                    path_file = "Results/Forbot/floodfill_path.pkl"
-                    maze_file = "Results/Forbot/floodfill_maze.pkl"
-                case Algorithm.DFS:
-                    path_file = "Results/Forbot/DFS_path.pkl"
-                    maze_file = "Results/Forbot/DFS_maze.pkl"
-                case Algorithm.BFS:
-                    path_file = "Results/Forbot/BFS_path.pkl"
-                    maze_file = "Results/Forbot/BFS_maze.pkl"
-                case Algorithm.A_STAR:
-                    path_file = "Results/Forbot/A_star_path.pkl"
-                    maze_file = "Results/Forbot/A_star_maze.pkl"
-                case Algorithm.A_STAR_MOD:
-                    path_file = "Results/Forbot/A_star_mod_path.pkl"
-                    maze_file = "Results/Forbot/A_star_mod_maze.pkl"
-        case MazeLayout.TAIWAN_2015:
-            match world.sim.algorithm:
-                case Algorithm.FLOODFILL:
-                    path_file = "Results/Taiwan2015/floodfill_path.pkl"
-                    maze_file = "Results/Taiwan2015/floodfill_maze.pkl"
-                case Algorithm.DFS:
-                    path_file = "Results/Taiwan2015/DFS_path.pkl"
-                    maze_file = "Results/Taiwan2015/DFS_maze.pkl"
-                case Algorithm.BFS:
-                    path_file = "Results/Taiwan2015/BFS_path.pkl"
-                    maze_file = "Results/Taiwan2015/BFS_maze.pkl"
-                case Algorithm.A_STAR:
-                    path_file = "Results/Taiwan2015/A_star_path.pkl"
-                    maze_file = "Results/Taiwan2015/A_star_maze.pkl"
-                case Algorithm.A_STAR_MOD:
-                    path_file = "Results/Taiwan2015/A_star_mod_path.pkl"
-                    maze_file = "Results/Taiwan2015/A_star_mod_maze.pkl"
-        case MazeLayout.APEC_2010:
-            match world.sim.algorithm:
-                case Algorithm.FLOODFILL:
-                    path_file = "Results/Apec2010/floodfill_path.pkl"
-                    maze_file = "Results/Apec2010/floodfill_maze.pkl"
-                case Algorithm.DFS:
-                    path_file = "Results/Apec2010/DFS_path.pkl"
-                    maze_file = "Results/Apec2010/DFS_maze.pkl"
-                case Algorithm.BFS:
-                    path_file = "Results/Apec2010/BFS_path.pkl"
-                    maze_file = "Results/Apec2010/BFS_maze.pkl"
-                case Algorithm.A_STAR:
-                    path_file = "Results/Apec2010/A_star_path.pkl"
-                    maze_file = "Results/Apec2010/A_star_maze.pkl"
-                case Algorithm.A_STAR_MOD:
-                    path_file = "Results/Apec2010/A_star_mod_path.pkl"
-                    maze_file = "Results/Apec2010/A_star_mod_maze.pkl"
-        case MazeLayout.UK_2016:
-            match world.sim.algorithm:
-                case Algorithm.FLOODFILL:
-                    path_file = "Results/UK2016/floodfill_path.pkl"
-                    maze_file = "Results/UK2016/floodfill_maze.pkl"
-                case Algorithm.DFS:
-                    path_file = "Results/UK2016/DFS_path.pkl"
-                    maze_file = "Results/UK2016/DFS_maze.pkl"
-                case Algorithm.BFS:
-                    path_file = "Results/UK2016/BFS_path.pkl"
-                    maze_file = "Results/UK2016/BFS_maze.pkl"
-                case Algorithm.A_STAR:
-                    path_file = "Results/UK2016/A_star_path.pkl"
-                    maze_file = "Results/UK2016/A_star_maze.pkl"
-                case Algorithm.A_STAR_MOD:
-                    path_file = "Results/UK2016/A_star_mod_path.pkl"
-                    maze_file = "Results/UK2016/A_star_mod_maze.pkl"
-        case MazeLayout.HIGASHI_2017:
-            match world.sim.algorithm:
-                case Algorithm.FLOODFILL:
-                    path_file = "Results/Higashi2017_mod/floodfill_path.pkl"
-                    maze_file = "Results/Higashi2017_mod/floodfill_maze.pkl"
-                case Algorithm.DFS:
-                    path_file = "Results/Higashi2017_mod/DFS_path.pkl"
-                    maze_file = "Results/Higashi2017_mod/DFS_maze.pkl"
-                case Algorithm.BFS:
-                    path_file = "Results/Higashi2017_mod/BFS_path.pkl"
-                    maze_file = "Results/Higashi2017_mod/BFS_maze.pkl"
-                case Algorithm.A_STAR:
-                    path_file = "Results/Higashi2017_mod/A_star_path.pkl"
-                    maze_file = "Results/Higashi2017_mod/A_star_maze.pkl"
-                case Algorithm.A_STAR_MOD:
-                    path_file = "Results/Higashi2017_mod/A_star_mod_path.pkl"
-                    maze_file = "Results/Higashi2017_mod/A_star_mod_maze.pkl"
-        case MazeLayout.JAPAN_2013EQ:
-            match world.sim.algorithm:
-                case Algorithm.FLOODFILL:
-                    path_file = "Results/Japan2013eq/floodfill_path.pkl"
-                    maze_file = "Results/Japan2013eq/floodfill_maze.pkl"
-                case Algorithm.DFS:
-                    path_file = "Results/Japan2013eq/DFS_path.pkl"
-                    maze_file = "Results/Japan2013eq/DFS_maze.pkl"
-                case Algorithm.BFS:
-                    path_file = "Results/Japan2013eq/BFS_path.pkl"
-                    maze_file = "Results/Japan2013eq/BFS_maze.pkl"
-                case Algorithm.A_STAR:
-                    path_file = "Results/Japan2013eq/A_star_path.pkl"
-                    maze_file = "Results/Japan2013eq/A_star_maze.pkl"
-                case Algorithm.A_STAR_MOD:
-                    path_file = "Results/Japan2013eq/A_star_mod_path.pkl"
-                    maze_file = "Results/Japan2013eq/A_star_mod_maze.pkl"
-        case MazeLayout.KANKOU_2003:
-            match world.sim.algorithm:
-                case Algorithm.FLOODFILL:
-                    path_file = "Results/Kankou2003/floodfill_path.pkl"
-                    maze_file = "Results/Kankou2003/floodfill_maze.pkl"
-                case Algorithm.DFS:
-                    path_file = "Results/Kankou2003/DFS_path.pkl"
-                    maze_file = "Results/Kankou2003/DFS_maze.pkl"
-                case Algorithm.BFS:
-                    path_file = "Results/Kankou2003/BFS_path.pkl"
-                    maze_file = "Results/Kankou2003/BFS_maze.pkl"
-                case Algorithm.A_STAR:
-                    path_file = "Results/Kankou2003/A_star_path.pkl"
-                    maze_file = "Results/Kankou2003/A_star_maze.pkl"
-                case Algorithm.A_STAR_MOD:
-                    path_file = "Results/Kankou2003/A_star_mod_path.pkl"
-                    maze_file = "Results/Kankou2003/A_star_mod_maze.pkl"
-        case MazeLayout.JAPAN_2011:
-            match world.sim.algorithm:
-                case Algorithm.FLOODFILL:
-                    path_file = "Results/Japan2011/floodfill_path.pkl"
-                    maze_file = "Results/Japan2011/floodfill_maze.pkl"
-                case Algorithm.DFS:
-                    path_file = "Results/Japan2011/DFS_path.pkl"
-                    maze_file = "Results/Japan2011/DFS_maze.pkl"
-                case Algorithm.BFS:
-                    path_file = "Results/Japan2011/BFS_path.pkl"
-                    maze_file = "Results/Japan2011/BFS_maze.pkl"
-                case Algorithm.A_STAR:
-                    path_file = "Results/Japan2011/A_star_path.pkl"
-                    maze_file = "Results/Japan2011/A_star_maze.pkl"
-                case Algorithm.A_STAR_MOD:
-                    path_file = "Results/Japan2011/A_star_mod_path.pkl"
-                    maze_file = "Results/Japan2011/A_star_mod_maze.pkl"
-        case MazeLayout.JAPAN_1987:
-            match world.sim.algorithm:
-                case Algorithm.FLOODFILL:
-                    path_file = "Results/Japan1987/floodfill_path.pkl"
-                    maze_file = "Results/Japan1987/floodfill_maze.pkl"
-                case Algorithm.DFS:
-                    path_file = "Results/Japan1987/DFS_path.pkl"
-                    maze_file = "Results/Japan1987/DFS_maze.pkl"
-                case Algorithm.BFS:
-                    path_file = "Results/Japan1987/BFS_path.pkl"
-                    maze_file = "Results/Japan1987/BFS_maze.pkl"
-                case Algorithm.A_STAR:
-                    path_file = "Results/Japan1987/A_star_path.pkl"
-                    maze_file = "Results/Japan1987/A_star_maze.pkl"
-                case Algorithm.A_STAR_MOD:
-                    path_file = "Results/Japan1987/A_star_mod_path.pkl"
-                    maze_file = "Results/Japan1987/A_star_mod_maze.pkl"
-        case MazeLayout.KOR_88:
-            match world.sim.algorithm:
-                case Algorithm.FLOODFILL:
-                    path_file = "Results/Kor88/floodfill_path.pkl"
-                    maze_file = "Results/Kor88/floodfill_maze.pkl"
-                case Algorithm.DFS:
-                    path_file = "Results/Kor88/DFS_path.pkl"
-                    maze_file = "Results/Kor88/DFS_maze.pkl"
-                case Algorithm.BFS:
-                    path_file = "Results/Kor88/BFS_path.pkl"
-                    maze_file = "Results/Kor88/BFS_maze.pkl"
-                case Algorithm.A_STAR:
-                    path_file = "Results/Kor88/A_star_path.pkl"
-                    maze_file = "Results/Kor88/A_star_maze.pkl"
-                case Algorithm.A_STAR_MOD:
-                    path_file = "Results/Kor88/A_star_mod_path.pkl"
-                    maze_file = "Results/Kor88/A_star_mod_maze.pkl"
-
-    return path_file, maze_file
+    return path_dir, maze_dir

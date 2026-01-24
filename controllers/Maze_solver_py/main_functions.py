@@ -38,7 +38,9 @@ def floodfill_main(robot: MyRobot):
 
     shortest_path = False
 
-    path_file, maze_file = algorithm_f.choose_file_path()
+    path_dir, maze_dir = algorithm_f.create_files_directories(
+        world.sim.maze_layout, world.sim.algorithm
+    )
     draw_queue = Queue(maxsize=1)
 
     while robot.step(world.sim.time_step) != -1:
@@ -89,7 +91,7 @@ def floodfill_main(robot: MyRobot):
                     draw_queue.put(None)
                     print("Target reached")
                     print("Searching time: %.2f" % robot.getTime(), "s")
-                    algorithm_f.write_file(maze_file, maze_map)
+                    algorithm_f.write_file(maze_dir, maze_map)
 
                     # to make sure path will use only visited cells
                     for i in range(0, world.maze.size):
@@ -100,7 +102,7 @@ def floodfill_main(robot: MyRobot):
                         distance, robot.state.current_target
                     )  # reset path
                     distance = algorithm_f.floodfill(maze_map, distance)  # path
-                    algorithm_f.write_file(path_file, distance)
+                    algorithm_f.write_file(path_dir, distance)
                     input("press any key to end")
                     exit(0)
 
@@ -118,8 +120,8 @@ def floodfill_main(robot: MyRobot):
             case Mode.SPEEDRUN:
 
                 if robot.state.start:
-                    distance = algorithm_f.read_file(path_file)
-                    maze_map = algorithm_f.read_file(maze_file)
+                    distance = algorithm_f.read_file(path_dir)
+                    maze_map = algorithm_f.read_file(maze_dir)
                     drawer = MazeDrawer(maze_map, distance, draw_queue)
                     drawer.start_drawing()
 
@@ -147,7 +149,9 @@ def DFS_main(robot: MyRobot):
     """
     maze_map = map_f.init_maze_map_graph()
 
-    path_file, maze_file = algorithm_f.choose_file_path()
+    path_dir, maze_dir = algorithm_f.create_files_directories(
+        world.sim.maze_layout, world.sim.algorithm
+    )
 
     # dfs vars
     fork_number = -1
@@ -200,8 +204,8 @@ def DFS_main(robot: MyRobot):
                     print("Target reached")
                     print("Searching time: %.2f" % robot.getTime(), "s")
                     maze_map = algorithm_f.mark_center_graph(maze_map, path)
-                    algorithm_f.write_file(path_file, path)
-                    algorithm_f.write_file(maze_file, maze_map)
+                    algorithm_f.write_file(path_dir, path)
+                    algorithm_f.write_file(maze_dir, maze_map)
                     input("press any key to end")
                     exit(0)
 
@@ -248,12 +252,12 @@ def DFS_main(robot: MyRobot):
         case Mode.SPEEDRUN:
 
             if robot.state.start:
-                path = algorithm_f.read_file(path_file)
+                path = algorithm_f.read_file(path_dir)
                 path.reverse()
                 print(len(path))
                 path.pop()  # remove start cell
 
-                maze_map = algorithm_f.read_file(maze_file)
+                maze_map = algorithm_f.read_file(maze_dir)
                 # var.maze_map_global = maze_map
 
                 # run in another thread to make it possible to look on it during robot run
@@ -299,8 +303,9 @@ def BFS_main(robot: MyRobot):
     for i in range(256):
         maze_map_searched[i] = []
 
-    path_file, maze_file = algorithm_f.choose_file_path()
-
+    path_dir, maze_dir = algorithm_f.create_files_directories(
+        world.sim.maze_layout, world.sim.algorithm
+    )
     # bfs vars
     visited = []
     path = []
@@ -363,8 +368,8 @@ def BFS_main(robot: MyRobot):
                         maze_map_searched, world.maze.start_cell, world.maze.target_cell
                     )
                     maze_map = algorithm_f.mark_center_graph(maze_map, path)
-                    algorithm_f.write_file(path_file, path)
-                    algorithm_f.write_file(maze_file, maze_map)
+                    algorithm_f.write_file(path_dir, path)
+                    algorithm_f.write_file(maze_dir, maze_map)
                     input("press any key to end")
                     exit(0)
 
@@ -397,9 +402,9 @@ def BFS_main(robot: MyRobot):
         case Mode.SPEEDRUN:
 
             if robot.state.start:
-                path = algorithm_f.read_file(path_file)
+                path = algorithm_f.read_file(path_dir)
                 print(len(path))
-                maze_map = algorithm_f.read_file(maze_file)
+                maze_map = algorithm_f.read_file(maze_dir)
 
                 # run in another thread to make it possible to look on it during robot run
                 drawer = MazeDrawer(maze_map, [], draw_queue)
@@ -442,8 +447,9 @@ def A_star_main(robot: MyRobot):
     for i in range(256):
         maze_map_searched[i] = []
 
-    path_file, maze_file = algorithm_f.choose_file_path()
-
+    path_dir, maze_dir = algorithm_f.create_files_directories(
+        world.sim.maze_layout, world.sim.algorithm
+    )
     # A* vars
     open = []  # list of unvisited nodes
     closed = []  # list of visited nodes
@@ -505,8 +511,8 @@ def A_star_main(robot: MyRobot):
                         maze_map_searched, world.maze.start_cell, world.maze.target_cell
                     )
                     maze_map = algorithm_f.mark_center_graph(maze_map, path)
-                    algorithm_f.write_file(path_file, path)
-                    algorithm_f.write_file(maze_file, maze_map)
+                    algorithm_f.write_file(path_dir, path)
+                    algorithm_f.write_file(maze_dir, maze_map)
                     input("press any key to end")
                     exit(0)
 
@@ -532,9 +538,9 @@ def A_star_main(robot: MyRobot):
         case Mode.SPEEDRUN:
 
             if robot.state.start:
-                path = algorithm_f.read_file(path_file)
+                path = algorithm_f.read_file(path_dir)
                 print(len(path))
-                maze_map = algorithm_f.read_file(maze_file)
+                maze_map = algorithm_f.read_file(maze_dir)
 
                 # run in another thread to make it possible to look on it during robot run
                 drawer = MazeDrawer(maze_map, [], draw_queue)
@@ -584,8 +590,9 @@ def A_star_main_modified(robot: MyRobot):
     for i in range(256):
         maze_map_searched[i] = []
 
-    path_file, maze_file = algorithm_f.choose_file_path()
-
+    path_dir, maze_dir = algorithm_f.create_files_directories(
+        world.sim.maze_layout, world.sim.algorithm
+    )
     # A* vars
     open = []  # list of unvisited nodes
     closed = []  # list of visited nodes
@@ -651,8 +658,8 @@ def A_star_main_modified(robot: MyRobot):
                         maze_map_searched, world.maze.start_cell, world.maze.target_cell
                     )
                     maze_map = algorithm_f.mark_center_graph(maze_map, path)
-                    algorithm_f.write_file(path_file, path)
-                    algorithm_f.write_file(maze_file, maze_map)
+                    algorithm_f.write_file(path_dir, path)
+                    algorithm_f.write_file(maze_dir, maze_map)
                     input("press any key to end")
                     exit(0)
 
@@ -686,9 +693,9 @@ def A_star_main_modified(robot: MyRobot):
         case Mode.SPEEDRUN:
 
             if robot.state.start:
-                path = algorithm_f.read_file(path_file)
+                path = algorithm_f.read_file(path_dir)
                 print(len(path))
-                maze_map = algorithm_f.read_file(maze_file)
+                maze_map = algorithm_f.read_file(maze_dir)
 
                 # run in another thread to make it possible to look on it during robot run
                 drawer = MazeDrawer(maze_map, [], draw_queue)
