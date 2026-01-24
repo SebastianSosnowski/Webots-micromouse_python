@@ -9,6 +9,13 @@ from utils.params import DrawState
 
 class MazeDrawer(Thread):
     def __init__(self, maze_map, distance, draw_queue: Queue) -> None:
+        """Initialize the MazeDrawer thread.
+
+        Args:
+            maze_map: Initial maze map.
+            distance: Initial distance map.
+            draw_queue (Queue): Queue for drawing updates.
+        """
         super().__init__(daemon=True)
         self.draw_queue = draw_queue
         self.maze_map = maze_map
@@ -21,9 +28,11 @@ class MazeDrawer(Thread):
         self.cost = {}
 
     def start_drawing(self):
+        """Start the drawing thread."""
         self.start()
 
     def run(self):
+        """Run the drawing loop, processing updates from the queue."""
         self.text_canvas, self.maze_canvas = self._init_maze(self.maze_map, self.distance)
         self.robot_pos_canvas, self.path_canvas = self._init_canvas()
 
@@ -41,6 +50,7 @@ class MazeDrawer(Thread):
         done()
 
     def _init_canvas(self):
+        """Initialize the drawing canvases for circles and lines."""
         circles = Turtle()
         circles.pencolor("red")
         circles.hideturtle()
@@ -111,6 +121,11 @@ class MazeDrawer(Thread):
         return text, maze
 
     def _update_state(self, msg: DrawState):
+        """Update the internal state based on the draw message.
+
+        Args:
+            msg (DrawState): The draw state message.
+        """
         if msg.distance != self.distance:
             self.distance_update = True
             self.distance = msg.distance

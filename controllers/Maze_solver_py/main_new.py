@@ -11,6 +11,11 @@ import main_functions as main_f
 
 
 def run_robot(robot: MyRobot):
+    """Run the robot based on the configured algorithm.
+
+    Args:
+        robot (MyRobot): The robot instance to control.
+    """
 
     match world.sim.algorithm:
         case Algorithm.KEYBOARD:

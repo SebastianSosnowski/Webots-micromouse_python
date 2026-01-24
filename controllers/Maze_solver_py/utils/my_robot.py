@@ -8,12 +8,18 @@ from config.world import world
 
 class MyRobot(Robot):
     def __init__(self, robot_cfg: dict):
+        """Initialize the MyRobot instance.
+
+        Args:
+            robot_cfg (dict): Configuration dictionary for robot parameters.
+        """
         super().__init__()
         self.params = RobotParams(robot_cfg["axle"], robot_cfg["wheel"], robot_cfg["speed"])
         self.state = RobotState(world.maze.start_cell, world.maze.target_cell)
         self._init_devices()
 
     def _init_devices(self):
+        """Initialize robot devices such as motors and sensors."""
         self.left_motor = cast(Motor, self.getDevice("left wheel motor"))
         self.right_motor = cast(Motor, self.getDevice("right wheel motor"))
         self.left_motor.setVelocity(self.params.speed)

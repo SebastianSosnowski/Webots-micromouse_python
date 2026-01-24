@@ -3,6 +3,12 @@ from utils.params import SimulationParams, MazeParams
 
 class World:
     def init(self, sim_cfg, maze_cfg):
+        """Initialize the world with simulation and maze parameters.
+
+        Args:
+            sim_cfg (dict): Simulation configuration dictionary.
+            maze_cfg (dict): Maze configuration dictionary.
+        """
         self.sim = SimulationParams(
             sim_cfg["mode"],
             sim_cfg["algorithm"],

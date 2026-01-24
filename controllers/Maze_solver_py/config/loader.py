@@ -10,6 +10,14 @@ logger.setLevel(logging.DEBUG)
 
 
 def load_config(path: Path) -> dict:
+    """Load configuration from a YAML file and validate simulation parameters.
+
+    Args:
+        path (Path): Path to the configuration file.
+
+    Returns:
+        dict: Loaded and validated configuration dictionary.
+    """
     with open(path) as file:
         config: dict = yaml.safe_load(file)
     sim_cfg: dict = config.get("simulation", {})
@@ -23,6 +31,15 @@ def load_config(path: Path) -> dict:
 
 
 def validate_simulation_parameter(value: str, enum_cls: EnumType) -> EnumType:
+    """Validate and convert a string value to an enum member.
+
+    Args:
+        value (str): String value to validate.
+        enum_cls (EnumType): Enum class to validate against.
+
+    Returns:
+        EnumType: Validated enum member.
+    """
     assert (
         value in enum_cls.__members__
     ), f"Setting '{value}' is not a valid member of {enum_cls.__name__}: {enum_cls._member_names_}"
