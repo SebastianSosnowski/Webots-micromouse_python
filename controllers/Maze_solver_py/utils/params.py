@@ -43,3 +43,9 @@ class DrawState:
     maze_map: list | dict
     distance: list[int]
     cost: dict
+
+
+@dataclass
+class SensorSnapshot:
+    ps: list[float]  # 8 IR
+    tof: float  # TOF

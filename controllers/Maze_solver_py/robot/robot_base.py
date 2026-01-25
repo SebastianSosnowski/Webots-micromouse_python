@@ -17,7 +17,7 @@ class MyRobot(RobotInterface):
         """
         return self.impl.read_sensors()
 
-    def move_to_position(self, target: list[int]):
+    def move(self, target: int):
         """
         Move robot to target position.
         Args:
@@ -26,4 +26,4 @@ class MyRobot(RobotInterface):
         Returns:
             None
         """
-        self.impl.move_to_position(target)
+        self.impl.move(target)

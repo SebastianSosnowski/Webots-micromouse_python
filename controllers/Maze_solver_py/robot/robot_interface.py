@@ -13,7 +13,7 @@ class RobotInterface(ABC):
         pass
 
     @abstractmethod
-    def move_to_position(self, target: list[int]):
+    def move(self, target: int):
         """
         Move robot to target position.
         Args:
