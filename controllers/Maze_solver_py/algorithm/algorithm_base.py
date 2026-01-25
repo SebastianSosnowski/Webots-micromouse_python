@@ -1,29 +1,41 @@
 from algorithm import AlgorithmInterface, Floodfill, Keyboard, DFS, BFS, AStar, AStarMod
-from utils.params import RobotState
+from utils.params import RobotState, DetectedWalls
+from config.enums import Algorithm
 
 
 class AlgorithmV2(AlgorithmInterface):
     def __init__(self, sim_cfg: dict):
-        if sim_cfg["algorithm"] == "FLOODFILL":
+        if sim_cfg["algorithm"] == Algorithm.FLOODFILL:
             self.impl = Floodfill(sim_cfg)
-        elif sim_cfg["algorithm"] == "KEYBOARD":
+        elif sim_cfg["algorithm"] == Algorithm.KEYBOARD:
             self.impl = Keyboard(sim_cfg)
-        elif sim_cfg["algorithm"] == "DFS":
+        elif sim_cfg["algorithm"] == Algorithm.DFS:
             self.impl = DFS(sim_cfg)
-        elif sim_cfg["algorithm"] == "BFS":
+        elif sim_cfg["algorithm"] == Algorithm.BFS:
             self.impl = BFS(sim_cfg)
-        elif sim_cfg["algorithm"] == "A_STAR":
+        elif sim_cfg["algorithm"] == Algorithm.A_STAR:
             self.impl = AStar(sim_cfg)
-        elif sim_cfg["algorithm"] == "A_STAR_MOD":
+        elif sim_cfg["algorithm"] == Algorithm.A_STAR_MOD:
             self.impl = AStarMod(sim_cfg)
         else:
             raise ValueError(f"Unknown algorithm: {sim_cfg['algorithm']}")
 
-    def init(self) -> tuple[list | dict, list[int]]:
+    def init(self):
         return self.impl.init()
 
-    def update(self, maze_map, state: RobotState) -> list[int]:
-        return self.impl.update(maze_map, state)
+    def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
+        return self.impl.update(detected, state)
 
     def finish(self):
         self.impl.finish()
+
+    def prepare_results(self) -> tuple[list | dict, list[int]]:
+        return self.impl.prepare_results()
+
+    @property
+    def maze_map(self) -> list | dict:
+        return self.impl.maze_map
+
+    @property
+    def distance(self) -> list:
+        return self.impl.distance

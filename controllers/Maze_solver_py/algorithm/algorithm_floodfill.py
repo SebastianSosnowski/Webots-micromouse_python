@@ -1,7 +1,7 @@
 from algorithm import AlgorithmInterface
 from config.world import world
 from config.enums import Direction
-from utils.params import RobotState
+from utils.params import RobotState, DetectedWalls
 
 
 class Floodfill(AlgorithmInterface):
@@ -12,19 +12,32 @@ class Floodfill(AlgorithmInterface):
         self._pos = world.maze.start_cell
         self._current_target = world.maze.target_cell
 
-    def init(self) -> tuple[list | dict, list[int]]:
+    def init(self):
         self._init_maze_map()
-        return self._maze_map, self._distance
+        # return self._maze_map, self._distance
 
-    def update(self, maze_map: list[int], state: RobotState):
-        self._maze_map = maze_map
-        self._init_distance_map(self._current_target)
-        self._floodfill()
-        target = self._where_to_move(state, self._maze_map[state.pos])
-        return [target]
+    def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
+        self._update_map(detected, state)
+        self._distance = self._init_distance_map(self._distance, self._current_target)
+        self._floodfill(self._maze_map, self._distance)
+        self._pos = self._where_to_move(state, self._maze_map[state.pos])
+        return [self._pos]
 
     def finish(self):
-        pass
+        if self._pos == self._current_target:
+            return self._change_target()
+        return False
+
+    def prepare_results(self) -> tuple[list | dict, list[int]]:
+        maze_map = self._maze_map.copy()
+        # to make sure path will use only visited cells
+        for i in range(0, world.maze.size):
+            if (maze_map[i] & world.maze.visited) != world.maze.visited:
+                maze_map[i] |= 15
+        self._current_target = world.maze.target_cell
+        self._distance = self._init_distance_map(self._distance, self._current_target)  # reset path
+        self._floodfill(maze_map, self._distance)  # path
+        return self._maze_map, self._distance
 
     @property
     def maze_map(self):
@@ -59,7 +72,7 @@ class Floodfill(AlgorithmInterface):
 
         # print_array(self.maze_map, 0)
 
-    def _init_distance_map(self, target: int):
+    def _init_distance_map(self, distance: list[int], target: int):
         """Initialize distance map with max values and 0 as target.
         Target is 0 for floodfill algorithm working properly.
 
@@ -70,10 +83,11 @@ class Floodfill(AlgorithmInterface):
         Returns:
             list: Initialized distance list.
         """
-        _distance = [world.maze.size - 1] * world.maze.size
-        _distance[target] = 0
+        distance = [world.maze.size - 1] * world.maze.size
+        distance[target] = 0
+        return distance
 
-    def _floodfill(self):
+    def _floodfill(self, maze_map: list[int], distance: list[int]):
         """Floodfill algorithm which calculates shortest path to actual target based on actual maze map.
 
         Args:
@@ -90,48 +104,36 @@ class Floodfill(AlgorithmInterface):
             search = False
 
             for i in range(0, world.maze.size):
-                if self._distance[i] < 255:
+                if distance[i] >= 255:
+                    continue
+                if (maze_map[i] & Direction.NORTH) != Direction.NORTH:
+                    if distance[i + world.maze.columns] == 255 or (
+                        (distance[i] + 1) < distance[i + world.maze.columns]
+                    ):
+                        # update distance value on north tile
+                        distance[i + world.maze.columns] = distance[i] + 1
+                        search = True
 
-                    if (self._maze_map[i] & Direction.NORTH) != Direction.NORTH:
-                        if self._distance[i + world.maze.columns] == 255 or (
-                            (self._distance[i] + 1) < self._distance[i + world.maze.columns]
-                        ):
-                            # update distance value on north tile
-                            self._distance[i + world.maze.columns] = self._distance[i] + 1
-                            search = True
+                if (maze_map[i] & Direction.EAST) != Direction.EAST:
+                    if distance[i + 1] == 255 or ((distance[i] + 1) < distance[i + 1]):
+                        distance[i + 1] = distance[i] + 1  # update distance value on EAST tile
+                        search = True
 
-                    if (self._maze_map[i] & Direction.EAST) != Direction.EAST:
-                        if self._distance[i + 1] == 255 or (
-                            (self._distance[i] + 1) < self._distance[i + 1]
-                        ):
-                            self._distance[i + 1] = (
-                                self._distance[i] + 1
-                            )  # update distance value on EAST tile
-                            search = True
-
-                    if (self._maze_map[i] & Direction.WEST) != Direction.WEST:
-                        if self._distance[i - 1] == 255 or (
-                            (self._distance[i] + 1) < self._distance[i - 1]
-                        ):
-                            self._distance[i - 1] = (
-                                self._distance[i] + 1
-                            )  # update distance value on WEST tile
-                            search = True
-                    # prop unnecessary cuz robot doesn't move backward
-                    if (self._maze_map[i] & Direction.SOUTH) != Direction.SOUTH:
-                        if self._distance[i - world.maze.columns] == 255 or (
-                            (self._distance[i] + 1) < self._distance[i - world.maze.columns]
-                        ):
-                            self._distance[i - world.maze.columns] = (
-                                self._distance[i] + 1
-                            )  # update distance value on SOUTH tile
-                            search = True
-
+                if (maze_map[i] & Direction.WEST) != Direction.WEST:
+                    if distance[i - 1] == 255 or ((distance[i] + 1) < distance[i - 1]):
+                        distance[i - 1] = distance[i] + 1  # update distance value on WEST tile
+                        search = True
+                # prop unnecessary cuz robot doesn't move backward
+                if (maze_map[i] & Direction.SOUTH) != Direction.SOUTH:
+                    if distance[i - world.maze.columns] == 255 or (
+                        (distance[i] + 1) < distance[i - world.maze.columns]
+                    ):
+                        # update distance value on SOUTH tile
+                        distance[i - world.maze.columns] = distance[i] + 1
+                        search = True
         # print('\n Path ')
         # print_array(distance, 0)
         # print(' Path ')
-
-        # return self._distance
 
     def _where_to_move(self, state: RobotState, walls: int):
         """
@@ -174,3 +176,184 @@ class Floodfill(AlgorithmInterface):
             chosen_dir = best_cells[0]
 
         return neighbors[chosen_dir]
+
+    def _change_target(self):
+        """Marks every visited cell, after reaching targeted cell, change cell to first unvisited cell.
+
+        When reaching final target, saves distance map to file.
+
+        Args:
+            robot: MyRobot object with robot state.
+            maze_map: List with actual maze map with walls.
+            distance: List with actual distances values/path.
+
+        Returns:
+            tuple: (maze_map, shortest_path)
+                - maze_map: Updated maze map.
+                - shortest_path (bool): Bool variable which informs if shortest path was found.
+        """
+        self._distance = self._init_distance_map(self._distance, self._current_target)  # reset path
+        self._floodfill(self._maze_map, self._distance)  # path
+
+        # fill unvisited cells with 4 walls to verify if the shortest path was find
+        shortest_path = self._check_distance()
+
+        if self._pos == world.maze.target_cell:
+
+            self._mark_center(self._maze_map)
+
+            if shortest_path:
+                print("This is the shortest/ one of the shortest paths")
+            else:
+                print("There might be a shorter path, keep going")
+                self._current_target = world.maze.start_cell
+
+        elif self._pos == world.maze.start_cell:
+            # shortest_path = check_distance(distance, maze_map, target)
+
+            if shortest_path:
+                print("This is the shortest/ one of the shortest paths")
+            else:
+                print("There might be a shorter path, keep going")
+
+            self._current_target = world.maze.target_cell
+
+        return shortest_path
+
+    def _check_distance(self):
+        """Fills unvisited cells with 4 walls to verify if the shortest path was find.
+
+        Args:
+            distance: List with actual distances values/path.
+            maze_map: List with actual maze map with walls.
+            target: Variable with field number to which robot tries to get.
+
+        Returns:
+            bool: Bool variable which informs if shortest path was found.
+        """
+
+        distance_check = self._distance.copy()
+        maze_map_check = self._maze_map.copy()
+
+        for i in range(0, world.maze.size):
+            if (maze_map_check[i] & world.maze.visited) != world.maze.visited:
+                maze_map_check[i] |= 15 | world.maze.visited
+
+        distance_check = self._init_distance_map(distance_check, self._current_target)  # reset path
+        self._floodfill(maze_map_check, distance_check)  # path
+        if self._current_target == world.maze.target_cell:
+            shortest_path = self._distance[0] >= distance_check[0]  # could be just equal'
+        elif self._current_target == world.maze.start_cell:
+            shortest_path = self._distance[136] >= distance_check[136]  # could be just equal'
+
+        return shortest_path
+
+    def _mark_center(self, maze_map: list[int]):
+        """Adds walls to unvisited cells in center.
+
+        Args:
+            maze_map: List with actual maze map with walls.
+
+        Returns:
+            list: List with updated maze map.
+        """
+
+        center = [119, 120, 135]
+
+        for center_cell in center:
+            if (maze_map[center_cell] & world.maze.visited) != world.maze.visited:
+                match center_cell:
+                    case 119:
+                        maze_map[center_cell] = 3
+                        maze_map[center_cell - 1] |= Direction.EAST
+                        maze_map[center_cell - 16] |= Direction.NORTH
+                    case 120:
+                        maze_map[center_cell] = 6
+                        maze_map[center_cell + 1] |= Direction.WEST
+                        maze_map[center_cell - 16] |= Direction.NORTH
+                    case 135:
+                        maze_map[center_cell] = 9
+                        maze_map[center_cell - 1] |= Direction.EAST
+                        maze_map[center_cell + 16] |= Direction.SOUTH
+
+    def _update_map(self, detected: DetectedWalls, state: RobotState):
+        if detected.left_wall:
+            self._add_wall(state, self._maze_map, Direction.WEST)
+
+        if detected.front_wall:
+            self._add_wall(state, self._maze_map, Direction.NORTH)
+
+        if detected.right_wall:
+            self._add_wall(state, self._maze_map, Direction.EAST)
+
+        if detected.back_wall:
+            self._add_wall(state, self._maze_map, Direction.SOUTH)
+
+    def _add_wall(self, state: RobotState, maze_map: list[int], detected_wall: int):
+        """Add wall according to distance sensors.
+        Depending on robot orientation, value in variable detected_wall
+        is changed so it match global directions. Then wall is added
+        to maze map on robot field and respective neighboring field.
+
+        Args:
+            robot: MyRobot object with robot state.
+            maze_map: List with actual maze map with walls.
+            detected_wall: Value which indicates on which side of robot wall was detected.
+
+        Returns:
+            list: List with updated maze_map.
+        """
+        robot_position = state.pos
+        orientation = state.orientation
+
+        # shift wall value
+        if orientation == Direction.EAST:
+            if detected_wall != Direction.WEST:
+                detected_wall //= 2
+            else:
+                detected_wall = Direction.NORTH
+        elif orientation == Direction.SOUTH:
+            if detected_wall == Direction.WEST or detected_wall == Direction.SOUTH:
+                detected_wall *= 4
+            else:
+                detected_wall //= 4
+        elif orientation == Direction.WEST:
+            if detected_wall != Direction.NORTH:
+                detected_wall *= 2
+            else:
+                detected_wall = Direction.WEST
+
+        maze_map[robot_position] |= detected_wall  # add sensed wall
+
+        # add wall in neighbor field
+        if detected_wall == Direction.NORTH:
+
+            robot_position = robot_position + world.maze.columns  # upper field
+            check = robot_position in range(0, world.maze.size)
+
+            if check:
+                maze_map[robot_position] = maze_map[robot_position] | Direction.SOUTH
+
+        if detected_wall == Direction.EAST:
+
+            robot_position = robot_position + 1  # left field
+            check = robot_position in range(0, world.maze.size)
+
+            if check:
+                maze_map[robot_position] = maze_map[robot_position] | Direction.WEST
+
+        if detected_wall == Direction.SOUTH:
+
+            robot_position = robot_position - world.maze.columns  # lower field
+            check = robot_position in range(0, world.maze.size)
+
+            if check:
+                maze_map[robot_position] = maze_map[robot_position] | Direction.NORTH
+
+        if detected_wall == Direction.WEST:
+
+            robot_position = robot_position - 1  # right field
+            check = robot_position in range(0, world.maze.size)
+
+            if check:
+                maze_map[robot_position] = maze_map[robot_position] | Direction.EAST

@@ -1,5 +1,5 @@
 from algorithm import AlgorithmInterface
-from utils.params import RobotState
+from utils.params import RobotState, DetectedWalls
 
 
 class BFS(AlgorithmInterface):
@@ -9,8 +9,11 @@ class BFS(AlgorithmInterface):
     def init(self):
         return ([], [])
 
-    def update(self, maze_map, state: RobotState) -> list[int]:
+    def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
         pass
 
     def finish(self):
+        pass
+
+    def prepare_results(self) -> tuple[list | dict, list[int]]:
         pass
