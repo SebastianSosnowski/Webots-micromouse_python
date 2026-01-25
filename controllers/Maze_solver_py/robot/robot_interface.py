@@ -1,9 +1,13 @@
 from abc import ABC, abstractmethod
 
+from controller import Robot
+
+from utils.params import DetectedWalls, RobotState
+
 
 class RobotInterface(ABC):
     @abstractmethod
-    def read_sensors(self) -> tuple[bool, bool, bool, bool]:
+    def read_sensors(self) -> DetectedWalls:
         """
         Read and process sensors to detect walls.
 
@@ -22,4 +26,16 @@ class RobotInterface(ABC):
         Returns:
             None
         """
+        pass
+
+    @property
+    @abstractmethod
+    def robot(self) -> Robot:
+        """return Robot() instance"""
+        pass
+
+    @property
+    @abstractmethod
+    def state(self) -> RobotState:
+        """return Robot() instance"""
         pass

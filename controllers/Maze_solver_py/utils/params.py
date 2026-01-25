@@ -49,3 +49,11 @@ class DrawState:
 class SensorSnapshot:
     ps: list[float]  # 8 IR
     tof: float  # TOF
+
+
+@dataclass
+class DetectedWalls:
+    left_wall: bool
+    front_wall: bool
+    right_wall: bool
+    back_wall: bool

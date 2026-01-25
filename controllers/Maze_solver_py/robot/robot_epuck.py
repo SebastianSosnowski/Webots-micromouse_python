@@ -4,7 +4,7 @@ from math import pi
 from controller import DistanceSensor, Motor, PositionSensor, Robot
 
 from robot import RobotInterface
-from utils.params import RobotParams, RobotState, Direction, SensorSnapshot
+from utils.params import RobotParams, RobotState, Direction, SensorSnapshot, DetectedWalls
 from config.enums import Move
 from config.world import world
 
@@ -13,19 +13,20 @@ class Epuck(RobotInterface):
     def __init__(self, robot_cfg: dict):
         self._robot = Robot()
         self.params = RobotParams(robot_cfg["axle"], robot_cfg["wheel"], robot_cfg["speed"])
-        self.state = RobotState(world.maze.start_cell, world.maze.target_cell)
+        self._state = RobotState(world.maze.start_cell, world.maze.target_cell)
         self._number_of_reads = 5
         self._front_obstacle = False
         self._init_devices()
 
-    def read_sensors(self) -> tuple[bool, bool, bool, bool]:
+    def read_sensors(self) -> DetectedWalls:
         """
         Read and process sensors to detect walls.
 
         Returns:
             tuple[bool, bool, bool, bool]: Variables which indicate respective walls presence (left_wall, front_wall, right_wall, back_wall).
         """
-        return self._detect_walls()
+        sensors = self._read_sensors_avg(self._number_of_reads)
+        return self._detect_walls(sensors)
 
     def move(self, target: int):
         """
@@ -42,8 +43,18 @@ class Epuck(RobotInterface):
             self._move_front_correct()
 
         action = self._drive(move_direction)
-        self.state.orientation = self.change_orientation(self.state.orientation, action)
-        self.state.pos = self.change_position(self.state.pos, self.state.orientation)
+        self._state.orientation = self.change_orientation(self._state.orientation, action)
+        self._state.pos = self.change_position(self._state.pos, self._state.orientation)
+
+    @property
+    def robot(self) -> Robot:
+        """return Robot() instance"""
+        return self._robot
+
+    @property
+    def state(self) -> RobotState:
+        """return Robot() instance"""
+        return self._state
 
     def _init_devices(self):
         """Initialize robot devices such as motors and sensors."""
@@ -65,7 +76,7 @@ class Epuck(RobotInterface):
         self.tof = cast(DistanceSensor, self._robot.getDevice("tof"))
         self.tof.enable(world.sim.time_step)
 
-    def _detect_walls(self):
+    def _detect_walls(self, sensors: SensorSnapshot):
         """Read and process sensors to detect walls.
 
         Args:
@@ -75,8 +86,6 @@ class Epuck(RobotInterface):
         Returns:
             tuple[bool, bool, bool, bool]: Variables which indicate respective walls presence (left_wall, front_wall, right_wall, back_wall).
         """
-        sensors = self._read_sensors_avg(self._number_of_reads)
-
         left_wall = sensors.ps[5] > 80.0
         # front_wall = avg7_front_sensor > 80.0
         right_wall = sensors.ps[2] > 80.0
@@ -85,7 +94,7 @@ class Epuck(RobotInterface):
 
         self._front_obstacle = front_wall
 
-        return (left_wall, front_wall, right_wall, back_wall)
+        return DetectedWalls(left_wall, front_wall, right_wall, back_wall)
 
     def _read_sensors_avg(self, reads: int) -> SensorSnapshot:
         ps_values = [0.0] * 8
@@ -184,7 +193,7 @@ class Epuck(RobotInterface):
         Returns:
             Direction: Global direction of movement.
         """
-        pos = self.state.pos
+        pos = self._state.pos
         cols = world.maze.columns
 
         diff = target_cell - pos
@@ -211,13 +220,15 @@ class Epuck(RobotInterface):
             None
         """
         action = Move.FORWARD
-        if self.state.orientation == move_direction:  # move forward
+        if self._state.orientation == move_direction:  # move forward
             self._move_1_tile()
 
         elif (
-            not ((self.state.orientation == Direction.WEST) and (move_direction == Direction.NORTH))
+            not (
+                (self._state.orientation == Direction.WEST) and (move_direction == Direction.NORTH)
+            )
         ) != (
-            not ((self.state.orientation // 2) == move_direction)
+            not ((self._state.orientation // 2) == move_direction)
         ):  # right, XOR, 'not' to avoid nonzero values
 
             action = Move.RIGHT
@@ -225,16 +236,18 @@ class Epuck(RobotInterface):
             self._move_1_tile()
 
         elif (
-            not ((self.state.orientation == Direction.NORTH) and (move_direction == Direction.WEST))
+            not (
+                (self._state.orientation == Direction.NORTH) and (move_direction == Direction.WEST)
+            )
         ) != (
-            not ((self.state.orientation * 2) == move_direction)
+            not ((self._state.orientation * 2) == move_direction)
         ):  # left, XOR
             action = Move.LEFT
             self._turn(action)
             self._move_1_tile()
 
-        elif (not ((self.state.orientation * 4) == move_direction)) != (
-            not ((self.state.orientation // 4) == move_direction)
+        elif (not ((self._state.orientation * 4) == move_direction)) != (
+            not ((self._state.orientation // 4) == move_direction)
         ):  # back, XOR
             action = Move.BACK
             self._turn(action)

@@ -1,5 +1,9 @@
 from robot import RobotInterface, Epuck
 
+from controller import Robot
+
+from utils.params import DetectedWalls, RobotState
+
 
 class MyRobot(RobotInterface):
     def __init__(self, robot_cfg: dict):
@@ -8,7 +12,7 @@ class MyRobot(RobotInterface):
         else:
             raise ValueError(f"Unknown robot: {robot_cfg['model']}")
 
-    def read_sensors(self) -> tuple[bool, bool, bool, bool]:
+    def read_sensors(self) -> DetectedWalls:
         """
         Read and process sensors to detect walls.
 
@@ -27,3 +31,13 @@ class MyRobot(RobotInterface):
             None
         """
         self.impl.move(target)
+
+    @property
+    def robot(self) -> Robot:
+        """return Robot() instance"""
+        return self.impl.robot
+
+    @property
+    def state(self) -> RobotState:
+        """return Robot() instance"""
+        return self.impl._state
