@@ -18,11 +18,11 @@ class AlgorithmV2(AlgorithmInterface):
         else:
             raise ValueError(f"Unknown algorithm: {sim_cfg['algorithm']}")
 
-    def init(self):
-        self.impl.init()
+    def init(self) -> tuple[list | dict, list[int]]:
+        return self.impl.init()
 
-    def update(self):
-        self.impl.update()
+    def update(self, maze_map, distance):
+        self.impl.update(maze_map, distance)
 
     def finish(self):
         self.impl.finish()

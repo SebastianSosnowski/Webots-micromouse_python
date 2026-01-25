@@ -3,11 +3,11 @@ from abc import ABC, abstractmethod
 
 class AlgorithmInterface(ABC):
     @abstractmethod
-    def init(self):
+    def init(self) -> tuple[list | dict, list[int]]:
         pass
 
     @abstractmethod
-    def update(self):
+    def update(self, maze_map, distance):
         pass
 
     @abstractmethod

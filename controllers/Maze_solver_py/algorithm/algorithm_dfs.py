@@ -6,9 +6,9 @@ class DFS(AlgorithmInterface):
         pass
 
     def init(self):
-        pass
+        return ([], [])
 
-    def update(self):
+    def update(self, maze_map, distance):
         pass
 
     def finish(self):

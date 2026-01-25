@@ -13,8 +13,15 @@ from draw.maze_drawer import MazeDrawer
 
 # from utils.my_robot import MyRobot
 from robot.robot_base import MyRobot
+from maze_solver import MazeSolver
 
 from utils.params import DrawState
+
+
+def interface_main(mz :MazeSolver):
+    mz.algorithm.init()
+    
+
 
 
 def floodfill_main(robot: MyRobot):
