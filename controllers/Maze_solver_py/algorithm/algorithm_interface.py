@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from utils.params import RobotState
 
 
 class AlgorithmInterface(ABC):
@@ -7,7 +8,7 @@ class AlgorithmInterface(ABC):
         pass
 
     @abstractmethod
-    def update(self, maze_map, distance):
+    def update(self, maze_map, state: RobotState) -> list[int]:
         pass
 
     @abstractmethod

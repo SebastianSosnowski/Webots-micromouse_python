@@ -1,4 +1,5 @@
 from algorithm import AlgorithmInterface, Floodfill, Keyboard, DFS, BFS, AStar, AStarMod
+from utils.params import RobotState
 
 
 class AlgorithmV2(AlgorithmInterface):
@@ -21,8 +22,8 @@ class AlgorithmV2(AlgorithmInterface):
     def init(self) -> tuple[list | dict, list[int]]:
         return self.impl.init()
 
-    def update(self, maze_map, distance):
-        self.impl.update(maze_map, distance)
+    def update(self, maze_map, state: RobotState) -> list[int]:
+        return self.impl.update(maze_map, state)
 
     def finish(self):
         self.impl.finish()
