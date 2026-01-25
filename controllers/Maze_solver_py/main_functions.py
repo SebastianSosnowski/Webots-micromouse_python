@@ -10,7 +10,9 @@ import move_functions as move_f
 from config.enums import Direction, Mode, Move
 from config.world import world
 from draw.maze_drawer import MazeDrawer
-from utils.my_robot import MyRobot
+
+# from utils.my_robot import MyRobot
+from robot.robot_base import MyRobot
 
 from utils.params import DrawState
 

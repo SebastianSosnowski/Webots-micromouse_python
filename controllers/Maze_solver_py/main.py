@@ -6,6 +6,7 @@ from config.enums import Algorithm
 from config.loader import load_config
 from config.world import world
 from utils.my_robot import MyRobot
+from robot.robot_base import MyRobot
 
 import main_functions as main_f
 
@@ -37,6 +38,6 @@ if __name__ == "__main__":
     config = load_config(config_path)
     world.init(config["simulation"], config["maze"])
 
+    # robot = MyRobot(config["robot"])
     robot = MyRobot(config["robot"])
-
     run_robot(robot)

@@ -6,7 +6,9 @@ import pickle
 from config.enums import Algorithm, Direction, MazeLayout, Move
 from config.world import world
 from map_functions import init_distance_map
-from utils.my_robot import MyRobot
+
+# from utils.my_robot import MyRobot
+from robot.robot_base import MyRobot
 
 
 def floodfill(maze_map: list[int], distance: list[int]):

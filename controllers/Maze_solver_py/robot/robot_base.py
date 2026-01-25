@@ -1,9 +1,12 @@
 from robot import RobotInterface, Epuck
 
-class MyRobotV2(RobotInterface):
+
+class MyRobot(RobotInterface):
     def __init__(self, robot_cfg: dict):
         if robot_cfg["model"] == "epuck":
-            self.impl = Epuck()
+            self.impl = Epuck(robot_cfg)
+        else:
+            raise ValueError(f"Unknown robot: {robot_cfg['model']}")
 
     def read_sensors(self, number_of_reads: int):
         """
