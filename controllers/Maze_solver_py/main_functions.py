@@ -29,10 +29,10 @@ def interface_main(mz: MazeSolver):
         detected = mz.robot.read_sensors()
         targets = mz.algorithm.update(detected, mz.robot.state)
         while targets:
-            mz.robot.move(targets.pop(0))
             draw_queue.put(
                 DrawState(mz.robot.state.pos, mz.algorithm.maze_map, mz.algorithm.distance, {})
             )
+            mz.robot.move(targets.pop(0))
         if mz.algorithm.finish():
             draw_queue.put(None)
             print("Target reached")

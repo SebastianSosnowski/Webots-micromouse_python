@@ -27,7 +27,7 @@ class AlgorithmV2(AlgorithmInterface):
         return self.impl.update(detected, state)
 
     def finish(self):
-        self.impl.finish()
+        return self.impl.finish()
 
     def prepare_results(self) -> tuple[list | dict, list[int]]:
         return self.impl.prepare_results()
@@ -39,3 +39,7 @@ class AlgorithmV2(AlgorithmInterface):
     @property
     def distance(self) -> list:
         return self.impl.distance
+
+    @property
+    def pos(self) -> int:
+        return self.impl.pos

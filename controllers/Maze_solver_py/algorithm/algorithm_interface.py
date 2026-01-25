@@ -28,3 +28,8 @@ class AlgorithmInterface(ABC):
     @abstractmethod
     def distance(self) -> list:
         pass
+
+    @property
+    @abstractmethod
+    def pos(self) -> int:
+        pass

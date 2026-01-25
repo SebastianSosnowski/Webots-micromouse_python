@@ -47,6 +47,10 @@ class Floodfill(AlgorithmInterface):
     def distance(self):
         return self._distance
 
+    @property
+    def pos(self) -> int:
+        return self._pos
+
     def _init_maze_map(self):
         """Initialize maze map with external walls.
 
@@ -277,6 +281,7 @@ class Floodfill(AlgorithmInterface):
                         maze_map[center_cell + 16] |= Direction.SOUTH
 
     def _update_map(self, detected: DetectedWalls, state: RobotState):
+        self._maze_map[state.pos] |= world.maze.visited
         if detected.left_wall:
             self._add_wall(state, self._maze_map, Direction.WEST)
 
