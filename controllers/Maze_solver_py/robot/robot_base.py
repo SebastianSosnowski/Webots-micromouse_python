@@ -8,14 +8,14 @@ class MyRobot(RobotInterface):
         else:
             raise ValueError(f"Unknown robot: {robot_cfg['model']}")
 
-    def read_sensors(self, number_of_reads: int):
+    def read_sensors(self) -> tuple[bool, bool, bool, bool]:
         """
         Read and process sensors to detect walls.
 
         Returns:
             tuple[bool, bool, bool, bool]: Variables which indicate respective walls presence (left_wall, front_wall, right_wall, back_wall).
         """
-        self.impl.read_sensors(number_of_reads)
+        return self.impl.read_sensors()
 
     def move_to_position(self, target: list[int]):
         """

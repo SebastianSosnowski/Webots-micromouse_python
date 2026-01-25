@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 
 class RobotInterface(ABC):
     @abstractmethod
-    def read_sensors(self, number_of_reads: int):
+    def read_sensors(self) -> tuple[bool, bool, bool, bool]:
         """
         Read and process sensors to detect walls.
 
