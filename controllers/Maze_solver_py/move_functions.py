@@ -9,8 +9,9 @@ import map_functions as map_f
 from config.enums import Direction, Move
 from config.world import world
 
-# from utils.my_robot import MyRobot
-from robot.robot_base import MyRobot
+from utils.my_robot import MyRobot
+
+# from robot.robot_base import MyRobot
 
 
 def move_one_position_graph(robot: MyRobot, current_destination: int):

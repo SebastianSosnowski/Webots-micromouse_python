@@ -28,7 +28,7 @@ class Floodfill(AlgorithmInterface):
             return self._change_target()
         return False
 
-    def prepare_results(self) -> tuple[list | dict, list[int]]:
+    def prepare_results(self) -> tuple[list[int], list | dict, list | dict]:
         maze_map = self._maze_map.copy()
         # to make sure path will use only visited cells
         for i in range(0, world.maze.size):
@@ -37,7 +37,10 @@ class Floodfill(AlgorithmInterface):
         self._current_target = world.maze.target_cell
         self._distance = self._init_distance_map(self._distance, self._current_target)  # reset path
         self._floodfill(maze_map, self._distance)  # path
-        return self._maze_map, self._distance
+        path = Floodfill.extract_path(
+            self._maze_map, self._distance, world.maze.start_cell, world.maze.target_cell
+        )
+        return path, self._maze_map, self._distance
 
     @property
     def maze_map(self):
@@ -362,3 +365,39 @@ class Floodfill(AlgorithmInterface):
 
             if check:
                 maze_map[robot_position] = maze_map[robot_position] | Direction.EAST
+
+    @staticmethod
+    def extract_path(
+        maze_map: list[int], distance: list[int], start: int, target: int
+    ) -> list[int]:
+        """Extract shortest path from distance map."""
+
+        path = []
+        current = start
+
+        while current != target:
+            d = distance[current]
+
+            for next_cell in Floodfill._neighbors(current, maze_map):
+                if distance[next_cell] == d - 1:
+                    path.append(next_cell)
+                    current = next_cell
+                    break
+            else:
+                raise RuntimeError("Path reconstruction failed")
+
+        return path
+
+    @staticmethod
+    def _neighbors(i: int, maze_map: list[int]) -> list[int]:
+        n = []
+
+        if (maze_map[i] & Direction.NORTH) != Direction.NORTH:
+            n.append(i + world.maze.columns)
+        if (maze_map[i] & Direction.EAST) != Direction.EAST:
+            n.append(i + 1)
+        if (maze_map[i] & Direction.WEST) != Direction.WEST:
+            n.append(i - 1)
+        if (maze_map[i] & Direction.SOUTH) != Direction.SOUTH:
+            n.append(i - world.maze.columns)
+        return n

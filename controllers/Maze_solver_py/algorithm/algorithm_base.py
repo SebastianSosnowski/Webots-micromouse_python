@@ -29,7 +29,7 @@ class AlgorithmV2(AlgorithmInterface):
     def finish(self):
         return self.impl.finish()
 
-    def prepare_results(self) -> tuple[list | dict, list[int]]:
+    def prepare_results(self) -> tuple[list[int], list | dict, list | dict]:
         return self.impl.prepare_results()
 
     @property

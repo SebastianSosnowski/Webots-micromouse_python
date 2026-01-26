@@ -16,7 +16,17 @@ class AlgorithmInterface(ABC):
         pass
 
     @abstractmethod
-    def prepare_results(self) -> tuple[list | dict, list[int]]:
+    def prepare_results(self) -> tuple[list[int], list | dict, list | dict]:
+        """Prepare algorithm output for robot and visualization to use.
+
+        Args:
+            None
+
+        Returns:
+            path: Positions list from start to target. Exclude robot start position.
+            map: A structure with scanned map during maze exploration to draw on maze.
+            values: A values of algorithm to draw on maze cells. Return empty list if none.
+        """
         pass
 
     @property
