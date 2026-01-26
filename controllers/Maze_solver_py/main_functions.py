@@ -23,11 +23,12 @@ def interface_main(mz: MazeSolver):
     mz.algorithm.init()
 
     draw_queue = Queue(maxsize=1)
-    drawer = MazeDrawer(mz.algorithm.maze_map, mz.algorithm.distance, draw_queue)
-    drawer.start_drawing()
+    # drawer = MazeDrawer(mz.algorithm.maze_map, mz.algorithm.distance, draw_queue)
 
     match world.sim.mode:
         case Mode.SEARCH:
+            drawer = MazeDrawer(mz.algorithm.maze_map, mz.algorithm.distance, draw_queue)
+            drawer.start_drawing()
             while mz.robot.robot.step(world.sim.time_step) != -1:
                 detected = mz.robot.read_sensors()
                 targets = mz.algorithm.update(detected, mz.robot.state)
@@ -42,27 +43,28 @@ def interface_main(mz: MazeSolver):
                     draw_queue.put(None)
                     print("Target reached")
                     print("Searching time: %.2f" % mz.robot.robot.getTime(), "s")
-                    maze_map, path = mz.algorithm.prepare_results()
-                    path_dir, maze_dir = algorithm_f.create_files_directories(
-                        world.sim.maze_layout, world.sim.algorithm
-                    )
-                    algorithm_f.write_file(maze_dir, maze_map)
-                    algorithm_f.write_file(path_dir, path)
+                    path, maze_map, values = mz.algorithm.prepare_results()
+                    algorithm_f.save_results(path, maze_map, values)
+                    # path_dir, map_dir, values_dir = algorithm_f.create_files_directories(
+                    #     world.sim.maze_layout, world.sim.algorithm
+                    # )
+                    # algorithm_f.write_file(map_dir, maze_map)
+                    # algorithm_f.write_file(path_dir, path)
                     break
         case Mode.SPEEDRUN:
-            path_dir, maze_dir = algorithm_f.create_files_directories(
+            path_dir, map_dir, values_dir = algorithm_f.create_files_directories(
                 world.sim.maze_layout, world.sim.algorithm
             )
-            path: list = algorithm_f.read_file(path_dir)
-            maze_map = algorithm_f.read_file(maze_dir)
+            path, maze_map, values = algorithm_f.read_results()
+            drawer = MazeDrawer(maze_map, values, draw_queue)
+            drawer.start_drawing()
+            # path: list = algorithm_f.read_file(path_dir)
+            # maze_map = algorithm_f.read_file(map_dir)
             while mz.robot.robot.step(world.sim.time_step) != -1:
                 while path:
-                    draw_queue.put(
-                        DrawState(
-                            mz.robot.state.pos, mz.algorithm.maze_map, mz.algorithm.distance, {}
-                        )
-                    )
+                    draw_queue.put(DrawState(mz.robot.state.pos, mz.algorithm.maze_map, values, {}))
                     mz.robot.move(path.pop(0))
+                draw_queue.put(DrawState(mz.robot.state.pos, mz.algorithm.maze_map, values, {}))
                 draw_queue.put(None)
                 print("Target reached")
                 print("Speedrun time: %.2f" % mz.robot.robot.getTime(), "s")

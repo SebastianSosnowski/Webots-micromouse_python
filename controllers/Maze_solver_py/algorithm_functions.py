@@ -797,7 +797,7 @@ def write_file(path: Path, values):
         pickle.dump(values, file)
 
 
-def create_files_directories(layout: MazeLayout, algorithm: Algorithm) -> tuple[Path, Path]:
+def create_files_directories(layout: MazeLayout, algorithm: Algorithm) -> tuple[Path, Path, Path]:
     """Create appropriate directory and file name to save results.
 
     Args:
@@ -805,12 +805,33 @@ def create_files_directories(layout: MazeLayout, algorithm: Algorithm) -> tuple[
         algorithm: Algorithm enumeration used in simulation.
 
     Returns:
-        tuple[Path, Path]: Appropriate files directory and names (path_file, maze_file).
+        tuple[Path, Path]: Appropriate files directory and names (path_file, map_file, values_file).
     """
     base_dir = Path("Results")
     maze_dir = layout.name.capitalize()
     algo_name = algorithm.name.lower()
     path_dir = base_dir / maze_dir / f"{algo_name}_path.pkl"
-    maze_dir = base_dir / maze_dir / f"{algo_name}_maze.pkl"
+    map_dir = base_dir / maze_dir / f"{algo_name}_maze.pkl"
+    values_dir = base_dir / maze_dir / f"{algo_name}_algorithm_values.pkl"
 
-    return path_dir, maze_dir
+    return path_dir, map_dir, values_dir
+
+
+def save_results(path: list[int], maze_map: list | dict, values: list | dict):
+    path_dir, map_dir, values_dir = create_files_directories(
+        world.sim.maze_layout, world.sim.algorithm
+    )
+    write_file(map_dir, maze_map)
+    write_file(path_dir, path)
+    write_file(values_dir, values)
+
+
+def read_results() -> tuple[list[int], list | dict, list | dict]:
+    path_dir, map_dir, values_dir = create_files_directories(
+        world.sim.maze_layout, world.sim.algorithm
+    )
+    path = read_file(path_dir)
+    maze_map = read_file(map_dir)
+    values = read_file(values_dir)
+
+    return path, maze_map, values

@@ -41,7 +41,7 @@ class RobotState:
 class DrawState:
     robot_pos: int
     maze_map: list | dict
-    distance: list[int]
+    distance: list | dict
     cost: dict
 
 
