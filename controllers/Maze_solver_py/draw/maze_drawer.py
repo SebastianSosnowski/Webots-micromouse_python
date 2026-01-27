@@ -23,7 +23,7 @@ class MazeDrawer(Thread):
         self.size = 60
         self.last_x = 0
         self.last_y = 0
-        self.robot_pos = 0
+        self.robot_pos = world.maze.start_cell
         self.distance_update = False
         self.cost = {}
 
@@ -33,8 +33,8 @@ class MazeDrawer(Thread):
 
     def run(self):
         """Run the drawing loop, processing updates from the queue."""
-        self.text_canvas, self.maze_canvas = self._init_maze(self.maze_map, self.distance)
         self.robot_pos_canvas, self.path_canvas = self._init_canvas()
+        self.text_canvas, self.maze_canvas = self._init_maze(self.maze_map, self.distance)
 
         while True:
             msg: DrawState = self.draw_queue.get()
@@ -117,7 +117,8 @@ class MazeDrawer(Thread):
                     cell = graph_walls_convert(maze_map[i], i)
                     draw_wall(cell, x, y, self.size, maze)
                     i += 1
-
+        if world.sim.mode == Mode.SEARCH:
+            self._draw_position(self.robot_pos_canvas)
         return text, maze
 
     def _update_state(self, msg: DrawState):
@@ -185,11 +186,8 @@ class MazeDrawer(Thread):
         Returns:
             None
         """
-        self._draw_path(self.path_canvas)
-        self._draw_position(self.robot_pos_canvas)
-
-        self._draw_path(self.path_canvas)
         self.robot_pos_canvas.clear()
+        self._draw_path(self.path_canvas)
         self._draw_position(self.robot_pos_canvas)
 
         update()
