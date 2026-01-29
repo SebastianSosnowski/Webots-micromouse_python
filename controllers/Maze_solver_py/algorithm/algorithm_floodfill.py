@@ -54,14 +54,7 @@ class Floodfill(AlgorithmInterface):
         return self._pos
 
     def _init_maze_map(self):
-        """Initialize maze map with external walls.
-
-        Args:
-            maze_map: List which contains maze map values.
-
-        Returns:
-            list: Initialized maze map list.
-        """
+        """Initialize maze map with external walls."""
         self._maze_map[0] = self._maze_map[0] | world.maze.visited  # mark start as visited
 
         for i in range(0, 16):
@@ -76,15 +69,13 @@ class Floodfill(AlgorithmInterface):
         for i in range(15, 256, 16):
             self._maze_map[i] = self._maze_map[i] | Direction.EAST
 
-        # print_array(self.maze_map, 0)
-
     def _init_distance_map(self, distance: list[int], target: int):
         """Initialize distance map with max values and 0 as target.
         Target is 0 for floodfill algorithm working properly.
 
         Args:
             distance: List which contains distance values.
-            target: Value which contains targeted cell.
+            target: Value which contains target position to find.
 
         Returns:
             list: Initialized distance list.
@@ -94,14 +85,13 @@ class Floodfill(AlgorithmInterface):
         return distance
 
     def _floodfill(self, maze_map: list[int], distance: list[int]):
-        """Floodfill algorithm which calculates shortest path to actual target based on actual maze map.
+        """Floodfill algorithm, which calculates shortest path to
+        actual target based on actual maze map.
+        The result is updated distance.
 
         Args:
             maze_map: List with actual maze map with walls.
             distance: List with actual distances values/path.
-
-        Returns:
-            list: Updated distance list.
         """
 
         search = True
@@ -137,17 +127,33 @@ class Floodfill(AlgorithmInterface):
                         # update distance value on SOUTH tile
                         distance[i - world.maze.columns] = distance[i] + 1
                         search = True
-        # print('\n Path ')
-        # print_array(distance, 0)
-        # print(' Path ')
 
     def _where_to_move(self, state: RobotState, walls: int):
         """
-        Decide which neighboring cell to move to based on floodfill distance.
-        Preference is given to the cell in front of the robot if distances are equal.
+        Decide which neighboring position to move to based on floodfill distance values.
+        Preference is given to the position in front of the robot if distances are equal.
+
+        Args:
+            state: Dataclass representing the current robot state (position and orientation).
+            walls: Bitmask representing walls present at the robot's current position.
+                Each bit corresponds to a wall in a global direction:
+
+                - NORTH = 1  (0b0001)
+                - EAST  = 2  (0b0010)
+                - SOUTH = 4  (0b0100)
+                - WEST  = 8  (0b1000)
+
+                Multiple walls are represented by setting multiple bits.
+                For example:
+                    - walls = 3  (0b0011) → wall to the NORTH and EAST
+                    - walls = 12 (0b1100) → wall to the SOUTH and WEST
+                    - walls = 15 (0b1111) → walls in all directions
+
+                Wall presence can be checked using bitwise AND, e.g.:
+                    (walls & Direction.NORTH) == Direction.NORTH
 
         Returns:
-            int: Index of the target cell.
+            int: Index of the target neighboring position to move to.
         """
         pos = state.pos
         orientation = state.orientation
@@ -183,29 +189,22 @@ class Floodfill(AlgorithmInterface):
 
         return neighbors[chosen_dir]
 
-    def _change_target(self):
-        """Marks every visited cell, after reaching targeted cell, change cell to first unvisited cell.
+    def _change_target(self) -> bool:
+        """
+        Determine whether shortest path was found after reaching current target position.
 
-        When reaching final target, saves distance map to file.
-
-        Args:
-            robot: MyRobot object with robot state.
-            maze_map: List with actual maze map with walls.
-            distance: List with actual distances values/path.
+        Uses currently discovered part of maze.
+        Also marks center walls if reached global target position.
 
         Returns:
-            tuple: (maze_map, shortest_path)
-                - maze_map: Updated maze map.
-                - shortest_path (bool): Bool variable which informs if shortest path was found.
+            bool: True if found the shortest/ one of the shortest paths. Otherwise False.
         """
         self._distance = self._init_distance_map(self._distance, self._current_target)  # reset path
         self._floodfill(self._maze_map, self._distance)  # path
 
-        # fill unvisited cells with 4 walls to verify if the shortest path was find
-        shortest_path = self._check_distance()
+        shortest_path = self._is_shortest()
 
         if self._pos == world.maze.target_cell:
-
             self._mark_center(self._maze_map)
 
             if shortest_path:
@@ -215,8 +214,6 @@ class Floodfill(AlgorithmInterface):
                 self._current_target = world.maze.start_cell
 
         elif self._pos == world.maze.start_cell:
-            # shortest_path = check_distance(distance, maze_map, target)
-
             if shortest_path:
                 print("This is the shortest/ one of the shortest paths")
             else:
@@ -226,16 +223,15 @@ class Floodfill(AlgorithmInterface):
 
         return shortest_path
 
-    def _check_distance(self):
-        """Fills unvisited cells with 4 walls to verify if the shortest path was find.
+    def _is_shortest(self) -> bool:
+        """Determine whether shortest path was found. on currently discovered maze map.
 
-        Args:
-            distance: List with actual distances values/path.
-            maze_map: List with actual maze map with walls.
-            target: Variable with field number to which robot tries to get.
+        Use currently discovered part of maze and
+        fill all unvisited positions with 4 walls to make them unreachable.
+        Then calculate distance and compare it with actual value.
 
         Returns:
-            bool: Bool variable which informs if shortest path was found.
+            bool: True if found the shortest/ one of the shortest paths. Otherwise False.
         """
 
         distance_check = self._distance.copy()
@@ -255,15 +251,7 @@ class Floodfill(AlgorithmInterface):
         return shortest_path
 
     def _mark_center(self, maze_map: list[int]):
-        """Adds walls to unvisited cells in center.
-
-        Args:
-            maze_map: List with actual maze map with walls.
-
-        Returns:
-            list: List with updated maze map.
-        """
-
+        """Adds walls to unvisited positions in center in maze map."""
         center = [119, 120, 135]
 
         for center_cell in center:
@@ -283,6 +271,13 @@ class Floodfill(AlgorithmInterface):
                         maze_map[center_cell + 16] |= Direction.SOUTH
 
     def _update_map(self, detected: DetectedWalls, state: RobotState):
+        """
+        Update maze map with discovered walls by robot.
+
+        Args:
+            detected: A dataclass with information about which walls were detected by robot in current position.
+            state: A dataclass with information about current robot state.
+        """
         self._maze_map[state.pos] |= world.maze.visited
         if detected.left_wall:
             self._add_wall(state, self._maze_map, Direction.WEST)
@@ -297,18 +292,16 @@ class Floodfill(AlgorithmInterface):
             self._add_wall(state, self._maze_map, Direction.SOUTH)
 
     def _add_wall(self, state: RobotState, maze_map: list[int], detected_wall: int):
-        """Add wall according to distance sensors.
+        """
+        Add wall to maze map on correct positions.
         Depending on robot orientation, value in variable detected_wall
-        is changed so it match global directions. Then wall is added
-        to maze map on robot field and respective neighboring field.
+        is shifted so it matches global directions. Then wall is added
+        to maze map on robot position and respective neighboring position.
 
         Args:
-            robot: MyRobot object with robot state.
-            maze_map: List with actual maze map with walls.
+            state: A dataclass with information about current robot state.
+            maze_map: Actual maze map with walls.
             detected_wall: Value which indicates on which side of robot wall was detected.
-
-        Returns:
-            list: List with updated maze_map.
         """
         robot_position = state.pos
         orientation = state.orientation
@@ -369,8 +362,18 @@ class Floodfill(AlgorithmInterface):
     def extract_path(
         maze_map: list[int], distance: list[int], start: int, target: int
     ) -> list[int]:
-        """Extract shortest path from distance map."""
+        """
+        Extract shortest path from distance map.
 
+        Args:
+            maze_map: maze map with walls.
+            distance: Distance values calculated by algorithm.
+            start: Path start position.
+            target: Path target position.
+
+        Returns:
+            List of positions creating a path from start to target.
+        """
         path = []
         current = start
 
@@ -389,6 +392,16 @@ class Floodfill(AlgorithmInterface):
 
     @staticmethod
     def _neighbors(i: int, maze_map: list[int]) -> list[int]:
+        """
+        Return neighboring positions, which are not blocked by wall.
+
+        Args:
+            i: Maze position
+            maze_map: Maze map with walls.
+
+        Returns:
+            List of reachable positions.
+        """
         n = []
 
         if (maze_map[i] & Direction.NORTH) != Direction.NORTH:
