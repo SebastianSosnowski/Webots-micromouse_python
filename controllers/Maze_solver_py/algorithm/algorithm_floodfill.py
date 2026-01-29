@@ -12,7 +12,7 @@ class Floodfill(AlgorithmInterface):
         self._pos = world.maze.start_cell
         self._current_target = world.maze.target_cell
 
-    def init(self):
+    def init(self) -> None:
         self._init_maze_map()
 
     def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:

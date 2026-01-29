@@ -20,7 +20,7 @@ class AlgorithmV2(AlgorithmInterface):
         else:
             raise ValueError(f"Unknown algorithm: {sim_cfg['algorithm']}")
 
-    def init(self):
+    def init(self) -> None:
         return self.impl.init()
 
     def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:

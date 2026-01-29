@@ -4,7 +4,7 @@ from utils.params import RobotState, DetectedWalls
 
 class AlgorithmInterface(ABC):
     @abstractmethod
-    def init(self):
+    def init(self) -> None:
         """Initialize all algorithm-related and simulation parameters."""
         pass
 
