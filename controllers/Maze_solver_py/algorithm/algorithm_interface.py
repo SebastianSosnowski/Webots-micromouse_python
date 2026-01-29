@@ -5,22 +5,36 @@ from utils.params import RobotState, DetectedWalls
 class AlgorithmInterface(ABC):
     @abstractmethod
     def init(self):
+        """Initialize all algorithm-related and simulation parameters."""
         pass
 
     @abstractmethod
     def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
+        """
+        Execute a step of algorithm based on robot sensors reading and its state.
+
+        Args:
+            detected: A dataclass with information about which walls were detected by robot in current position.
+            state: A dataclass with information about current robot state.
+
+        Returns:
+            A list of positions to which robot should move next.
+        """
         pass
 
     @abstractmethod
-    def finish(self):
+    def finish(self) -> bool:
+        """
+        Verify if algorithm finished operation.
+
+        Returns:
+            True if end, otherwise False.
+        """
         pass
 
     @abstractmethod
     def prepare_results(self) -> tuple[list[int], list | dict, list | dict]:
         """Prepare algorithm output for robot and visualization to use.
-
-        Args:
-            None
 
         Returns:
             path: Positions list from start to target. Exclude robot start position.
@@ -31,15 +45,29 @@ class AlgorithmInterface(ABC):
 
     @property
     @abstractmethod
-    def maze_map(self) -> list | dict:
+    def maze_map(self) -> list[int] | dict[int, list[int]]:
+        """Return maze map, which represents currently discovered part of maze."""
         pass
 
     @property
     @abstractmethod
     def distance(self) -> list:
+        """
+        Return algorithm values, which some algorithms assign to each position.
+
+        An example is distance map for floodfill algorithm, where each position has value,
+        which represents distance from the target.
+        If algorithm doesn't use such values (e.g. DFS), return empty list.
+        """
         pass
 
     @property
     @abstractmethod
     def pos(self) -> int:
+        """
+        Return current position in which algorithm is.
+
+        It's either a current robot position or
+        position, to which currently robot moves to after update().
+        """
         pass

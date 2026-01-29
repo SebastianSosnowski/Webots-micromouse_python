@@ -14,7 +14,6 @@ class Floodfill(AlgorithmInterface):
 
     def init(self):
         self._init_maze_map()
-        # return self._maze_map, self._distance
 
     def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
         self._update_map(detected, state)
@@ -43,11 +42,11 @@ class Floodfill(AlgorithmInterface):
         return path, self._maze_map, self._distance
 
     @property
-    def maze_map(self):
+    def maze_map(self) -> list[int] | dict[int, list[int]]:
         return self._maze_map
 
     @property
-    def distance(self):
+    def distance(self) -> list:
         return self._distance
 
     @property

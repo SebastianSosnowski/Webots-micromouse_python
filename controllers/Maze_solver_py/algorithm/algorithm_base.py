@@ -33,7 +33,7 @@ class AlgorithmV2(AlgorithmInterface):
         return self.impl.prepare_results()
 
     @property
-    def maze_map(self) -> list | dict:
+    def maze_map(self) -> list[int] | dict[int, list[int]]:
         return self.impl.maze_map
 
     @property
