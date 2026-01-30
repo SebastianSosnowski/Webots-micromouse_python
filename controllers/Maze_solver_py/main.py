@@ -6,10 +6,9 @@ from config.enums import Algorithm
 from config.loader import load_config
 from config.world import world
 
-# from utils.my_robot import MyRobot
+from utils.my_robot import MyRobot
 
-from robot.robot_base import MyRobot
-
+# from robot.robot_base import MyRobot
 from maze_solver import MazeSolver
 
 import main_functions as main_f
@@ -42,9 +41,8 @@ if __name__ == "__main__":
     config = load_config(config_path)
     world.init(config["simulation"], config["maze"])
 
-    # robot = MyRobot(config["robot"])
-    # robot = MyRobot(config["robot"])
-    # run_robot(robot)
-    maze_solver = MazeSolver(config["robot"], config["simulation"])
+    robot = MyRobot(config["robot"])
+    run_robot(robot)
+    # maze_solver = MazeSolver(config["robot"], config["simulation"])
 
-    main_f.interface_main(maze_solver)
+    # main_f.interface_main(maze_solver)

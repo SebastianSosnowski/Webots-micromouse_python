@@ -11,9 +11,9 @@ from config.enums import Direction, Mode, Move
 from config.world import world
 from draw.maze_drawer import MazeDrawer
 
-# from utils.my_robot import MyRobot
+from utils.my_robot import MyRobot
 
-from robot.robot_base import MyRobot
+# from robot.robot_base import MyRobot
 from maze_solver import MazeSolver
 
 from utils.params import DrawState
@@ -196,9 +196,9 @@ def DFS_main(robot: MyRobot):
     """
     maze_map = map_f.init_maze_map_graph()
 
-    path_dir, maze_dir = algorithm_f.create_files_directories(
-        world.sim.maze_layout, world.sim.algorithm
-    )
+    # path_dir, maze_dir = algorithm_f.create_files_directories(
+    #     world.sim.maze_layout, world.sim.algorithm
+    # )
 
     # dfs vars
     fork_number = -1
