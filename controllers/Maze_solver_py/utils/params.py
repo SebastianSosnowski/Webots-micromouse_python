@@ -95,3 +95,9 @@ class DetectedWalls:
             RelativeDir.RIGHT: self.right_wall,
             RelativeDir.BACK: self.back_wall,
         }.items()
+
+
+@dataclass
+class Fork:
+    path: list[int]  # Path to the fork between until next fork
+    unused_routes: int
