@@ -1,7 +1,7 @@
 from algorithm import AlgorithmInterface
 from utils.params import RobotState, DetectedWalls
 from config.world import world
-from algorithm.common import init_maze_map_graph
+from algorithm.common import init_maze_map_graph, add_walls_graph
 
 
 class DFS(AlgorithmInterface):
@@ -22,6 +22,7 @@ class DFS(AlgorithmInterface):
         self._stack = self._pos
 
     def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
+        add_walls_graph(self._maze_map, detected, state)
         return []
 
     def finish(self):

@@ -1,4 +1,4 @@
-from enum import IntEnum, StrEnum
+from enum import Enum, IntEnum, StrEnum, auto
 
 
 class Mode(IntEnum):
@@ -45,6 +45,13 @@ class Direction(IntEnum):
     # EAST = 2  #  00000010
     # SOUTH = 4  #  00000100
     # WEST = 8  #  00001000
+
+
+class RelativeDir(Enum):
+    FRONT = auto()
+    LEFT = auto()
+    RIGHT = auto()
+    BACK = auto()
 
 
 class Move(StrEnum):

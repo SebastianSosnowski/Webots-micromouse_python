@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from config.enums import Algorithm, MazeLayout, Mode, Direction
+from config.enums import Algorithm, MazeLayout, Mode, Direction, RelativeDir
 
 
 @dataclass
@@ -36,6 +36,36 @@ class RobotState:
     start: bool = True
     orientation: Direction = Direction.NORTH
 
+    _REL_TO_GLOBAL = {
+        Direction.NORTH: {
+            RelativeDir.FRONT: Direction.NORTH,
+            RelativeDir.RIGHT: Direction.EAST,
+            RelativeDir.BACK: Direction.SOUTH,
+            RelativeDir.LEFT: Direction.WEST,
+        },
+        Direction.EAST: {
+            RelativeDir.FRONT: Direction.EAST,
+            RelativeDir.RIGHT: Direction.SOUTH,
+            RelativeDir.BACK: Direction.WEST,
+            RelativeDir.LEFT: Direction.NORTH,
+        },
+        Direction.SOUTH: {
+            RelativeDir.FRONT: Direction.SOUTH,
+            RelativeDir.RIGHT: Direction.WEST,
+            RelativeDir.BACK: Direction.NORTH,
+            RelativeDir.LEFT: Direction.EAST,
+        },
+        Direction.WEST: {
+            RelativeDir.FRONT: Direction.WEST,
+            RelativeDir.RIGHT: Direction.NORTH,
+            RelativeDir.BACK: Direction.EAST,
+            RelativeDir.LEFT: Direction.SOUTH,
+        },
+    }
+
+    def relative_to_global(self, rel_dir: RelativeDir) -> Direction:
+        return self._REL_TO_GLOBAL[self.orientation][rel_dir]
+
 
 @dataclass(frozen=True)
 class DrawState:
@@ -57,3 +87,11 @@ class DetectedWalls:
     front_wall: bool
     right_wall: bool
     back_wall: bool
+
+    def items(self):
+        return {
+            RelativeDir.FRONT: self.front_wall,
+            RelativeDir.LEFT: self.left_wall,
+            RelativeDir.RIGHT: self.right_wall,
+            RelativeDir.BACK: self.back_wall,
+        }.items()

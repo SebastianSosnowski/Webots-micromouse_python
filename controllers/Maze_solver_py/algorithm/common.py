@@ -1,4 +1,6 @@
 from config.world import world
+from utils.params import RobotState, DetectedWalls, Direction
+
 
 def init_maze_map_graph():
     """Initialize maze map with external walls as graph.
@@ -57,146 +59,41 @@ def init_maze_map_graph():
     return maze_map
 
 
-def add_walls_graph(
-    maze_map: dict[int, list[int]],
-    robot_position: int,
-    robot_orientation: Direction,
-    detected_walls: dict[str, bool],
-):
-    """Substitute add_wall function for graphs.
-    Remove connected cells in robot position and respective neighboring cells according to detected walls.
+def add_walls_graph(maze_map: dict[int, list[int]], detected: DetectedWalls, state: RobotState):
+    """Update maze map.
+
+    Remove connected positions with robot position
+    and respective neighboring positions according to detected walls.
 
     Args:
         maze_map: Dictionary with current maze map with walls.
-        robot_position: Current robot position in maze.
-        robot_orientation: Current robot orientation in global directions.
-        detected_walls: Dictionary which indicates on which side of robot wall was detected.
-
-    Returns:
-        dict: Updated maze map.
+        detected: Information about which walls were detected by robot in current position.
+        state: Information about current robot state.
     """
 
     rows = world.maze.rows
 
-    # neighbors positions
-    up = robot_position + rows
-    down = robot_position - rows
-    left = robot_position - 1
-    right = robot_position + 1
+    neighbors = {
+        Direction.NORTH: state.pos + rows,
+        Direction.SOUTH: state.pos - rows,
+        Direction.EAST: state.pos + 1,
+        Direction.WEST: state.pos - 1,
+    }
 
-    # Checks if neighbors are in maze graph
-    up_in_maze = up in maze_map
-    down_in_maze = down in maze_map
-    right_in_maze = right in maze_map
-    left_in_maze = left in maze_map
+    # Only valid neighbors
+    valid_neighbors = [pos for pos in neighbors.values() if pos in maze_map]
 
-    walls = [up, down, left, right]
+    for rel_dir, wall in detected.items():
+        if not wall:
+            continue
 
-    for i in detected_walls.keys():
-        if detected_walls[
-            i
-        ]:  # wall present - remove connected cell in node and respective neighbor
-            match i:
-                case "front wall":
-                    if robot_orientation == Direction.NORTH:
-                        walls.remove(up)
+        global_dir = state.relative_to_global(rel_dir)
+        neighbor_with_wall = neighbors[global_dir]
 
-                        if up_in_maze and (robot_position in maze_map[up]):
-                            maze_map[up].remove(robot_position)
+        if neighbor_with_wall in valid_neighbors:
+            valid_neighbors.remove(neighbor_with_wall)
 
-                    elif robot_orientation == Direction.EAST:
-                        walls.remove(right)
+        if neighbor_with_wall in maze_map and state.pos in maze_map[neighbor_with_wall]:
+            maze_map[neighbor_with_wall].remove(state.pos)
 
-                        if right_in_maze and (robot_position in maze_map[right]):
-                            maze_map[right].remove(robot_position)
-
-                    elif robot_orientation == Direction.SOUTH:
-                        walls.remove(down)
-
-                        if down_in_maze and (robot_position in maze_map[down]):
-                            maze_map[down].remove(robot_position)
-
-                    elif robot_orientation == Direction.WEST:
-                        walls.remove(left)
-
-                        if left_in_maze and (robot_position in maze_map[left]):
-                            maze_map[left].remove(robot_position)
-
-                case "left wall":
-                    if robot_orientation == Direction.NORTH:
-                        walls.remove(left)
-
-                        if left_in_maze and (robot_position in maze_map[left]):
-                            maze_map[left].remove(robot_position)
-
-                    elif robot_orientation == Direction.EAST:
-                        walls.remove(up)
-
-                        if up_in_maze and (robot_position in maze_map[up]):
-                            maze_map[up].remove(robot_position)
-
-                    elif robot_orientation == Direction.SOUTH:
-                        walls.remove(right)
-
-                        if right_in_maze and (robot_position in maze_map[right]):
-                            maze_map[right].remove(robot_position)
-
-                    elif robot_orientation == Direction.WEST:
-                        walls.remove(down)
-
-                        if down_in_maze and (robot_position in maze_map[down]):
-                            maze_map[down].remove(robot_position)
-
-                case "right wall":
-                    if robot_orientation == Direction.NORTH:
-                        walls.remove(right)
-
-                        if right_in_maze and (robot_position in maze_map[right]):
-                            maze_map[right].remove(robot_position)
-
-                    elif robot_orientation == Direction.EAST:
-                        walls.remove(down)
-
-                        if down_in_maze and (robot_position in maze_map[down]):
-                            maze_map[down].remove(robot_position)
-
-                    elif robot_orientation == Direction.SOUTH:
-                        walls.remove(left)
-
-                        if left_in_maze and (robot_position in maze_map[left]):
-                            maze_map[left].remove(robot_position)
-
-                    elif robot_orientation == Direction.WEST:
-                        walls.remove(up)
-
-                        if up_in_maze and (robot_position in maze_map[up]):
-                            maze_map[up].remove(robot_position)
-
-                case "back wall":
-                    if robot_orientation == Direction.NORTH:
-                        walls.remove(down)
-
-                        if down_in_maze and (robot_position in maze_map[down]):
-                            maze_map[down].remove(robot_position)
-
-                    elif robot_orientation == Direction.EAST:
-                        walls.remove(left)
-
-                        if left_in_maze and (robot_position in maze_map[left]):
-                            maze_map[left].remove(robot_position)
-
-                    elif robot_orientation == Direction.SOUTH:
-                        walls.remove(up)
-
-                        if up_in_maze and (robot_position in maze_map[up]):
-                            maze_map[up].remove(robot_position)
-
-                    elif robot_orientation == Direction.WEST:
-                        walls.remove(right)
-
-                        if right_in_maze and (robot_position in maze_map[right]):
-                            maze_map[right].remove(robot_position)
-
-    maze_map[robot_position] = walls
-
-    return maze_map
+    maze_map[state.pos] = valid_neighbors
