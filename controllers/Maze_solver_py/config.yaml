@@ -14,7 +14,7 @@ robot:
 maze:
   rows: 16
   columns: 16
-  start_cell: 0
-  target_cell: 136
+  start_position: 0
+  target_position: 136
   tile_length: 0.12
   visited_flag: 64

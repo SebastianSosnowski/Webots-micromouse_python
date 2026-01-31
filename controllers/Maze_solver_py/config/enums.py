@@ -1,37 +1,37 @@
 from enum import Enum, IntEnum, StrEnum, auto
 
 
-class Mode(IntEnum):
+class Mode(str, Enum):
     """Run mode."""
 
-    SEARCH = 1
-    SPEEDRUN = 2
+    SEARCH = "SEARCH"
+    SPEEDRUN = "SPEEDRUN"
 
 
-class Algorithms(IntEnum):
+class Algorithms(str, Enum):
     """Algorithm to solve maze."""
 
-    KEYBOARD = 1
-    FLOODFILL = 2
-    DFS = 3
-    BFS = 4
-    A_STAR = 5
-    A_STAR_MOD = 6
+    KEYBOARD = "KEYBOARD"
+    FLOODFILL = "FLOODFILL"
+    DFS = "DFS"
+    BFS = "BFS"
+    A_STAR = "A_STAR"
+    A_STAR_MOD = "A_STAR_MOD"
 
 
-class MazeLayout(IntEnum):
+class MazeLayout(str, Enum):
     """Maze layout corresponding to simulation world."""
 
-    FORBOT = 1
-    TAIWAN_2015 = 2
-    APEC_2010 = 3
-    UK_2016 = 4
-    HIGASHI_2017 = 5
-    JAPAN_2013EQ = 6
-    KANKOU_2003 = 7
-    JAPAN_2011 = 8
-    JAPAN_1987 = 9
-    KOR_88 = 10
+    FORBOT = "FORBOT"
+    TAIWAN_2015 = "TAIWAN_2015"
+    APEC_2010 = "APEC_2010"
+    UK_2016 = "UK_2016"
+    HIGASHI_2017 = "HIGASHI_2017"
+    JAPAN_2013EQ = "JAPAN_2013EQ"
+    KANKOU_2003 = "KANKOU_2003"
+    JAPAN_2011 = "JAPAN_2011"
+    JAPAN_1987 = "JAPAN_1987"
+    KOR_88 = "KOR_88"
 
 
 class Direction(IntEnum):

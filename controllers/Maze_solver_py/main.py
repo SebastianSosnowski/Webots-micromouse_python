@@ -3,7 +3,7 @@
 from pathlib import Path
 
 from config.enums import Algorithms
-from config.loader import load_config
+from config.loader import load_config, load_configV2
 from config.world import world
 
 from utils.my_robot import MyRobot
@@ -38,11 +38,12 @@ def run_robot(robot: MyRobot):
 
 if __name__ == "__main__":
     config_path = Path("config.yaml")
-    config = load_config(config_path)
-    world.init(config["simulation"], config["maze"])
+    # config = load_config(config_path)
+    # world.init(config["simulation"], config["maze"])
 
-    robot = MyRobot(config["robot"])
-    run_robot(robot)
-    # maze_solver = MazeSolver(config["robot"], config["simulation"])
+    # robot = MyRobot(config["robot"])
+    # run_robot(robot)
+    config = load_configV2(config_path)
+    maze_solver = MazeSolver(config)
 
-    # main_f.interface_main(maze_solver)
+    main_f.interface_main(maze_solver)

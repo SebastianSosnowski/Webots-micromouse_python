@@ -3,12 +3,12 @@ from threading import Thread
 from turtle import done, setup, tracer, Turtle, update
 
 from config.enums import Algorithms, Direction, Mode
-from config.world import world
 from utils.params import DrawState
+from config.models import AppConfig
 
 
 class MazeDrawer(Thread):
-    def __init__(self, maze_map, distance, draw_queue: Queue) -> None:
+    def __init__(self, config: AppConfig, maze_map, distance, draw_queue: Queue) -> None:
         """Initialize the MazeDrawer thread.
 
         Args:
@@ -17,13 +17,14 @@ class MazeDrawer(Thread):
             draw_queue (Queue): Queue for drawing updates.
         """
         super().__init__(daemon=True)
+        self._cfg = config
         self.draw_queue = draw_queue
         self.maze_map = maze_map
         self.distance = distance
         self.size = 60
         self.last_x = 0
         self.last_y = 0
-        self.robot_pos = world.maze.start_cell
+        self.robot_pos = self._cfg.maze.start_position
         self.distance_update = False
         self.cost = {}
 
@@ -43,7 +44,7 @@ class MazeDrawer(Thread):
                 break
             self._update_state(msg)
 
-            if world.sim.mode == Mode.SEARCH:
+            if self._cfg.simulation.mode == Mode.SEARCH:
                 self._draw_search_frame()
             else:
                 self._draw_speedrun_frame()
@@ -102,7 +103,7 @@ class MazeDrawer(Thread):
         maze.width(5)
         # draw walls
         i = 0
-        if world.sim.algorithm == Algorithms.FLOODFILL:
+        if self._cfg.simulation.algorithm == Algorithms.FLOODFILL:
             for y in range(-480, 480, self.size):
                 for x in range(-480, 480, self.size):
                     write_distance(x, y, distance[i], text)  # write initial distance values
@@ -117,7 +118,7 @@ class MazeDrawer(Thread):
                     cell = graph_walls_convert(maze_map[i], i)
                     draw_wall(cell, x, y, self.size, maze)
                     i += 1
-        if world.sim.mode == Mode.SEARCH:
+        if self._cfg.simulation.mode == Mode.SEARCH:
             self._draw_position(self.robot_pos_canvas)
         return text, maze
 
@@ -149,7 +150,7 @@ class MazeDrawer(Thread):
         yy = self.robot_pos // 16
         yy = -480 + yy * self.size
 
-        if world.sim.algorithm == Algorithms.FLOODFILL:
+        if self._cfg.simulation.algorithm == Algorithms.FLOODFILL:
             draw_wall(self.maze_map[self.robot_pos] - 64, xx, yy, self.size, self.maze_canvas)
             if self.distance_update:
                 i = 0
@@ -164,8 +165,8 @@ class MazeDrawer(Thread):
             draw_wall(cell, xx, yy, self.size, self.maze_canvas)
 
             if (
-                world.sim.algorithm == Algorithms.A_STAR
-                or world.sim.algorithm == Algorithms.A_STAR_MOD
+                self._cfg.simulation.algorithm == Algorithms.A_STAR
+                or self._cfg.simulation.algorithm == Algorithms.A_STAR_MOD
             ):
                 self.text_canvas.clear()
                 for key in self.cost:
@@ -200,8 +201,10 @@ class MazeDrawer(Thread):
         """
         center = [119, 120, 135]
         for center_cell in center:
-            if world.sim.algorithm == Algorithms.FLOODFILL:
-                check = (self.maze_map[center_cell] & world.maze.visited) != world.maze.visited
+            if self._cfg.simulation.algorithm == Algorithms.FLOODFILL:
+                check = (
+                    self.maze_map[center_cell] & self._cfg.maze.visited_flag
+                ) != self._cfg.maze.visited_flag
             else:  # graphs Algorithm
                 cell = self.maze_map[center_cell]
                 if isinstance(cell, list):
@@ -229,8 +232,8 @@ class MazeDrawer(Thread):
         Returns:
             None
         """
-        x = self.robot_pos % world.maze.columns
-        y = int(self.robot_pos / world.maze.rows)
+        x = self.robot_pos % self._cfg.maze.columns
+        y = int(self.robot_pos / self._cfg.maze.rows)
         t.penup()
         t.goto(-450 + x * self.size, -450 + y * self.size - 6)  # last position
         t.pendown()

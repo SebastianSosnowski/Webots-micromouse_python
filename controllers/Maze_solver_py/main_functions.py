@@ -17,6 +17,7 @@ from utils.my_robot import MyRobot
 from maze_solver import MazeSolver
 
 from utils.params import DrawState
+from read_files.storage import read_results, save_results
 
 
 def interface_main(mz: MazeSolver):
@@ -25,12 +26,12 @@ def interface_main(mz: MazeSolver):
     path, maze_map, position_values = mz.init_drawer_values()
 
     draw_queue = Queue(maxsize=1)
-    drawer = MazeDrawer(maze_map, position_values, draw_queue)
+    drawer = MazeDrawer(mz._cfg, maze_map, position_values, draw_queue)
     drawer.start_drawing()
 
-    match world.sim.mode:
+    match mz._cfg.simulation.mode:
         case Mode.SEARCH:
-            while mz.robot.robot.step(world.sim.time_step) != -1:
+            while mz.robot.robot.step(mz._cfg.simulation.time_step) != -1:
                 detected = mz.robot.read_sensors()
                 targets = mz.algorithm.update(detected, mz.robot.state)
                 while targets:
@@ -48,10 +49,16 @@ def interface_main(mz: MazeSolver):
                     print("Target reached")
                     print("Searching time: %.2f" % mz.robot.robot.getTime(), "s")
                     path, maze_map, position_values = mz.algorithm.prepare_results()
-                    algorithm_f.save_results(path, maze_map, position_values)
+                    save_results(
+                        path,
+                        maze_map,
+                        position_values,
+                        mz._cfg.simulation.maze_layout,
+                        mz._cfg.simulation.algorithm,
+                    )
                     break
         case Mode.SPEEDRUN:
-            while mz.robot.robot.step(world.sim.time_step) != -1:
+            while mz.robot.robot.step(mz._cfg.simulation.time_step) != -1:
                 if not path:
                     break
                 draw_queue.put(
