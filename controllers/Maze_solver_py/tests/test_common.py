@@ -1,8 +1,3 @@
-import sys
-import os
-
-sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
-
 from algorithm.common import init_maze_map_graph, add_walls_graph
 from utils.params import RobotState, DetectedWalls, Direction
 

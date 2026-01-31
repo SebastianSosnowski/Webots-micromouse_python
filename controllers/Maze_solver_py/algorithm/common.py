@@ -44,9 +44,9 @@ def add_walls_graph(
     """
     neighbors = {
         Direction.NORTH: state.pos + rows,
-        Direction.SOUTH: state.pos - rows,
         Direction.EAST: state.pos + 1,
         Direction.WEST: state.pos - 1,
+        Direction.SOUTH: state.pos - rows,
     }
 
     # Only valid neighbors

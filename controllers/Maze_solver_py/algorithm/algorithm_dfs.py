@@ -18,15 +18,13 @@ class DFS(AlgorithmInterface):
     def init(self) -> None:
         self._maze_map = init_maze_map_graph(self._cfg.maze.rows, self._cfg.maze.columns)
         self._visited.append(self._pos)
-        self._stack.append(self._pos)
 
     def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
         targets = []
-        self._stack.pop()
         add_walls_graph(self._maze_map, self._cfg.maze.rows, detected, state)
         dead_end = self._check_fork(self._maze_map[state.pos], state.pos)
         if dead_end:
-            self._move_to_previous_fork(targets)
+            self._move_to_last_fork(targets)
         self._current_target = self._check_possible_routes(
             self._maze_map[self._pos], self._visited, self._stack
         )
@@ -54,7 +52,7 @@ class DFS(AlgorithmInterface):
     def pos(self) -> int:
         return 0
 
-    def _move_to_previous_fork(self, targets: list[int]):
+    def _move_to_last_fork(self, targets: list[int]):
         """
         Move to previous valid fork and extend targets path.
 
@@ -63,7 +61,7 @@ class DFS(AlgorithmInterface):
         """
         path_back = self._move_back_DFS()
         path_back.reverse()
-        targets.extend(path_back)
+        targets[:0] = path_back
         self._pos = targets[-1]
 
     def _remove_fork_and_move_back_further(self, targets: list[int]):
@@ -129,7 +127,7 @@ class DFS(AlgorithmInterface):
                 stack.append(cell)
                 if cell == self._cfg.maze.target_position:
                     break
-        current_destination = stack[-1]
+        current_destination = stack.pop()
 
         return current_destination
 
