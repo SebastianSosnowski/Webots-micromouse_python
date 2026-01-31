@@ -55,19 +55,24 @@ class Floodfill(AlgorithmInterface):
 
     def _init_maze_map(self):
         """Initialize maze map with external walls."""
-        self._maze_map[0] = self._maze_map[0] | world.maze.visited  # mark start as visited
+        rows = world.maze.rows
+        cols = world.maze.columns
 
-        for i in range(0, 16):
-            self._maze_map[i] = self._maze_map[i] | Direction.SOUTH
+        # mark start as visited
+        self._maze_map[0] |= world.maze.visited
 
-        for i in range(240, 256):
-            self._maze_map[i] = self._maze_map[i] | Direction.NORTH
+        for cell in range(rows * cols):
+            row = cell // cols
+            col = cell % cols
 
-        for i in range(0, 241, 16):
-            self._maze_map[i] = self._maze_map[i] | Direction.WEST
-
-        for i in range(15, 256, 16):
-            self._maze_map[i] = self._maze_map[i] | Direction.EAST
+            if row == 0:
+                self._maze_map[cell] |= Direction.SOUTH
+            if row == rows - 1:
+                self._maze_map[cell] |= Direction.NORTH
+            if col == 0:
+                self._maze_map[cell] |= Direction.WEST
+            if col == cols - 1:
+                self._maze_map[cell] |= Direction.EAST
 
     def _init_distance_map(self, distance: list[int], target: int):
         """Initialize distance map with max values and 0 as target.
