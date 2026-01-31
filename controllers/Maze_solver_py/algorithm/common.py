@@ -14,48 +14,21 @@ def init_maze_map_graph():
     maze_map = {}
     rows = world.maze.rows
     cols = world.maze.columns
-    size = rows * cols
-    left_down_corner = 0
-    right_down_corner = rows - 1
-    left_up_corner = rows * (cols - 1)
-    right_up_corner = size - 1
 
-    # corners
-    maze_map[left_down_corner] = [rows, 1]
-    maze_map[right_down_corner] = [right_down_corner + rows, right_down_corner - 1]
-    maze_map[left_up_corner] = [left_up_corner + 1, left_up_corner - rows]
-    maze_map[right_up_corner] = [right_up_corner - rows, right_up_corner - 1]
+    for row in range(rows):
+        for col in range(cols):
+            pos = row * cols + col
+            neighbors: list[int] = []
 
-    # down wall cells
-    for cell in range(left_down_corner + 1, right_down_corner):
-        maze_map[cell] = [cell + rows, cell + 1, cell - 1]
-    # up wall cells
-    for cell in range(left_up_corner + 1, right_up_corner):
-        maze_map[cell] = [cell + 1, cell - rows, cell - 1]
-    # left wall cells
-    for cell in range(left_down_corner + rows, left_up_corner, 16):
-        maze_map[cell] = [cell + rows, cell + 1, cell - rows]
-    # right wall cells
-    for cell in range(right_down_corner + rows, right_up_corner, 16):
-        maze_map[cell] = [cell + rows, cell - rows, cell - 1]
-
-    cell = 17
-    # inside cells
-    while True:
-
-        maze_map[cell] = [cell + rows, cell + 1, cell - rows, cell - 1]
-
-        end = cell == (right_up_corner - 1 - rows)
-        if end:
-            break
-
-        row_end = (cell % rows) == 14  # without border cells
-
-        if row_end:  # next row
-            cell += 3
-        else:  # next column
-            cell += 1
-
+            if row < rows - 1:  # NORTH
+                neighbors.append((row + 1) * cols + col)
+            if row > 0:  # SOUTH
+                neighbors.append((row - 1) * cols + col)
+            if col < cols - 1:  # EAST
+                neighbors.append(row * cols + (col + 1))
+            if col > 0:  # WEST
+                neighbors.append(row * cols + (col - 1))
+            maze_map[pos] = neighbors
     return maze_map
 
 
