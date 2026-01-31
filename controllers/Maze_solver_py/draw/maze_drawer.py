@@ -2,7 +2,7 @@ from queue import Queue
 from threading import Thread
 from turtle import done, setup, tracer, Turtle, update
 
-from config.enums import Algorithm, Direction, Mode
+from config.enums import Algorithms, Direction, Mode
 from config.world import world
 from utils.params import DrawState
 
@@ -102,7 +102,7 @@ class MazeDrawer(Thread):
         maze.width(5)
         # draw walls
         i = 0
-        if world.sim.algorithm == Algorithm.FLOODFILL:
+        if world.sim.algorithm == Algorithms.FLOODFILL:
             for y in range(-480, 480, self.size):
                 for x in range(-480, 480, self.size):
                     write_distance(x, y, distance[i], text)  # write initial distance values
@@ -149,7 +149,7 @@ class MazeDrawer(Thread):
         yy = self.robot_pos // 16
         yy = -480 + yy * self.size
 
-        if world.sim.algorithm == Algorithm.FLOODFILL:
+        if world.sim.algorithm == Algorithms.FLOODFILL:
             draw_wall(self.maze_map[self.robot_pos] - 64, xx, yy, self.size, self.maze_canvas)
             if self.distance_update:
                 i = 0
@@ -164,8 +164,8 @@ class MazeDrawer(Thread):
             draw_wall(cell, xx, yy, self.size, self.maze_canvas)
 
             if (
-                world.sim.algorithm == Algorithm.A_STAR
-                or world.sim.algorithm == Algorithm.A_STAR_MOD
+                world.sim.algorithm == Algorithms.A_STAR
+                or world.sim.algorithm == Algorithms.A_STAR_MOD
             ):
                 self.text_canvas.clear()
                 for key in self.cost:
@@ -200,7 +200,7 @@ class MazeDrawer(Thread):
         """
         center = [119, 120, 135]
         for center_cell in center:
-            if world.sim.algorithm == Algorithm.FLOODFILL:
+            if world.sim.algorithm == Algorithms.FLOODFILL:
                 check = (self.maze_map[center_cell] & world.maze.visited) != world.maze.visited
             else:  # graphs Algorithm
                 cell = self.maze_map[center_cell]

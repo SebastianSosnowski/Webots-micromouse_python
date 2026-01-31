@@ -2,7 +2,7 @@ from config.world import world
 from utils.params import RobotState, DetectedWalls, Direction
 
 
-def init_maze_map_graph():
+def init_maze_map_graph(rows: int, cols: int):
     """Initialize maze map with external walls as graph.
     Border cells are initialized with respective walls.
     Inside cells are initialized without any walls i.e. 4 connections.
@@ -10,10 +10,7 @@ def init_maze_map_graph():
     Returns:
         dict: Initialized maze map dictionary.
     """
-
     maze_map = {}
-    rows = world.maze.rows
-    cols = world.maze.columns
 
     for row in range(rows):
         for col in range(cols):

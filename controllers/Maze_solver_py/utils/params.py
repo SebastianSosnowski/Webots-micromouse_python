@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from config.enums import Algorithm, MazeLayout, Mode, Direction, RelativeDir
+from config.enums import Algorithms, MazeLayout, Mode, Direction, RelativeDir
 
 
 @dataclass
@@ -12,7 +12,7 @@ class RobotParams:
 @dataclass
 class SimulationParams:
     mode: Mode  # Python enum
-    algorithm: Algorithm  # Python enum
+    algorithm: Algorithms  # Python enum
     maze_layout: MazeLayout  # Python enum
     testing: bool
     time_step: int = 64

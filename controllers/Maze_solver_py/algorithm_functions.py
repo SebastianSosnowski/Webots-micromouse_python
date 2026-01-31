@@ -3,7 +3,7 @@ from collections import deque
 from pathlib import Path
 import pickle
 
-from config.enums import Algorithm, Direction, MazeLayout, Move
+from config.enums import Algorithms, Direction, MazeLayout, Move
 from config.world import world
 from map_functions import init_distance_map
 
@@ -797,7 +797,7 @@ def write_file(path: Path, values):
         pickle.dump(values, file)
 
 
-def create_files_directories(layout: MazeLayout, algorithm: Algorithm) -> tuple[Path, Path, Path]:
+def create_files_directories(layout: MazeLayout, algorithm: Algorithms) -> tuple[Path, Path, Path]:
     """Create appropriate directory and file name to save results.
 
     Args:

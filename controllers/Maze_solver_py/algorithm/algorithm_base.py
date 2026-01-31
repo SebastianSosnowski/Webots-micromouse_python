@@ -1,21 +1,21 @@
 from algorithm import AlgorithmInterface, Floodfill, Keyboard, DFS, BFS, AStar, AStarMod
 from utils.params import RobotState, DetectedWalls
-from config.enums import Algorithm
+from config.enums import Algorithms
 
 
 class AlgorithmV2(AlgorithmInterface):
     def __init__(self, sim_cfg: dict):
-        if sim_cfg["algorithm"] == Algorithm.FLOODFILL:
+        if sim_cfg["algorithm"] == Algorithms.FLOODFILL:
             self.impl = Floodfill(sim_cfg)
-        elif sim_cfg["algorithm"] == Algorithm.KEYBOARD:
+        elif sim_cfg["algorithm"] == Algorithms.KEYBOARD:
             self.impl = Keyboard(sim_cfg)
-        elif sim_cfg["algorithm"] == Algorithm.DFS:
+        elif sim_cfg["algorithm"] == Algorithms.DFS:
             self.impl = DFS(sim_cfg)
-        elif sim_cfg["algorithm"] == Algorithm.BFS:
+        elif sim_cfg["algorithm"] == Algorithms.BFS:
             self.impl = BFS(sim_cfg)
-        elif sim_cfg["algorithm"] == Algorithm.A_STAR:
+        elif sim_cfg["algorithm"] == Algorithms.A_STAR:
             self.impl = AStar(sim_cfg)
-        elif sim_cfg["algorithm"] == Algorithm.A_STAR_MOD:
+        elif sim_cfg["algorithm"] == Algorithms.A_STAR_MOD:
             self.impl = AStarMod(sim_cfg)
         else:
             raise ValueError(f"Unknown algorithm: {sim_cfg['algorithm']}")

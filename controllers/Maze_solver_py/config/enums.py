@@ -8,7 +8,7 @@ class Mode(IntEnum):
     SPEEDRUN = 2
 
 
-class Algorithm(IntEnum):
+class Algorithms(IntEnum):
     """Algorithm to solve maze."""
 
     KEYBOARD = 1

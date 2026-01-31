@@ -15,7 +15,7 @@ class DFS(AlgorithmInterface):
         self._current_target = world.maze.target_cell
 
     def init(self) -> None:
-        self._maze_map = init_maze_map_graph()
+        self._maze_map = init_maze_map_graph(world.maze.rows, world.maze.columns)
         self._visited.append(self._pos)
         self._stack.append(self._pos)
 

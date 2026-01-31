@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from config.enums import Algorithm
+from config.enums import Algorithms
 from config.loader import load_config
 from config.world import world
 
@@ -22,17 +22,17 @@ def run_robot(robot: MyRobot):
     """
 
     match world.sim.algorithm:
-        case Algorithm.KEYBOARD:
+        case Algorithms.KEYBOARD:
             main_f.keyboard_main(robot)
-        case Algorithm.FLOODFILL:
+        case Algorithms.FLOODFILL:
             main_f.floodfill_main(robot)
-        case Algorithm.DFS:
+        case Algorithms.DFS:
             main_f.DFS_main(robot)
-        case Algorithm.BFS:
+        case Algorithms.BFS:
             main_f.BFS_main(robot)
-        case Algorithm.A_STAR:
+        case Algorithms.A_STAR:
             main_f.A_star_main(robot)
-        case Algorithm.A_STAR_MOD:
+        case Algorithms.A_STAR_MOD:
             main_f.A_star_main_modified(robot)
 
 

@@ -3,7 +3,7 @@ import logging
 from pathlib import Path
 import yaml
 
-from config.enums import Algorithm, MazeLayout, Mode
+from config.enums import Algorithms, MazeLayout, Mode
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -22,7 +22,7 @@ def load_config(path: Path) -> dict:
         config: dict = yaml.safe_load(file)
     sim_cfg: dict = config.get("simulation", {})
     sim_cfg["mode"] = validate_simulation_parameter(sim_cfg.get("mode", ""), Mode)
-    sim_cfg["algorithm"] = validate_simulation_parameter(sim_cfg.get("algorithm", ""), Algorithm)
+    sim_cfg["algorithm"] = validate_simulation_parameter(sim_cfg.get("algorithm", ""), Algorithms)
     sim_cfg["maze_layout"] = validate_simulation_parameter(
         sim_cfg.get("maze_layout", ""), MazeLayout
     )
