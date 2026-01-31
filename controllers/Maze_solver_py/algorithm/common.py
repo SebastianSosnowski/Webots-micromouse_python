@@ -29,7 +29,9 @@ def init_maze_map_graph(rows: int, cols: int):
     return maze_map
 
 
-def add_walls_graph(maze_map: dict[int, list[int]], detected: DetectedWalls, state: RobotState):
+def add_walls_graph(
+    maze_map: dict[int, list[int]], rows: int, detected: DetectedWalls, state: RobotState
+):
     """Update maze map.
 
     Remove connected positions with robot position
@@ -40,9 +42,6 @@ def add_walls_graph(maze_map: dict[int, list[int]], detected: DetectedWalls, sta
         detected: Information about which walls were detected by robot in current position.
         state: Information about current robot state.
     """
-
-    rows = world.maze.rows
-
     neighbors = {
         Direction.NORTH: state.pos + rows,
         Direction.SOUTH: state.pos - rows,

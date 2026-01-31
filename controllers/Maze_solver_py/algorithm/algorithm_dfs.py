@@ -22,7 +22,7 @@ class DFS(AlgorithmInterface):
     def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
         targets = []
         self._stack.pop()
-        add_walls_graph(self._maze_map, detected, state)
+        add_walls_graph(self._maze_map, world.maze.rows, detected, state)
         dead_end = self._check_fork(self._maze_map[state.pos], state.pos)
         if dead_end:
             self._move_to_previous_fork(targets)
