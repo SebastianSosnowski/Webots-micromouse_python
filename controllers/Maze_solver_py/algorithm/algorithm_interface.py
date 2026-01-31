@@ -59,7 +59,7 @@ class AlgorithmInterface(ABC):
 
     @property
     @abstractmethod
-    def distance(self) -> list:
+    def position_values(self) -> list:
         """
         Return algorithm values, which some algorithms assign to each position.
 

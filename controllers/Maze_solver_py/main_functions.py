@@ -22,10 +22,10 @@ from utils.params import DrawState
 def interface_main(mz: MazeSolver):
     mz.algorithm.init()
 
-    path, maze_map, values = mz.init_drawer_values()
+    path, maze_map, position_values = mz.init_drawer_values()
 
     draw_queue = Queue(maxsize=1)
-    drawer = MazeDrawer(maze_map, values, draw_queue)
+    drawer = MazeDrawer(maze_map, position_values, draw_queue)
     drawer.start_drawing()
 
     match world.sim.mode:
@@ -36,7 +36,10 @@ def interface_main(mz: MazeSolver):
                 while targets:
                     draw_queue.put(
                         DrawState(
-                            mz.robot.state.pos, mz.algorithm.maze_map, mz.algorithm.distance, {}
+                            mz.robot.state.pos,
+                            mz.algorithm.maze_map,
+                            mz.algorithm.position_values,
+                            {},
                         )
                     )
                     mz.robot.move(targets.pop(0))
@@ -44,16 +47,20 @@ def interface_main(mz: MazeSolver):
                     draw_queue.put(None)
                     print("Target reached")
                     print("Searching time: %.2f" % mz.robot.robot.getTime(), "s")
-                    path, maze_map, values = mz.algorithm.prepare_results()
-                    algorithm_f.save_results(path, maze_map, values)
+                    path, maze_map, position_values = mz.algorithm.prepare_results()
+                    algorithm_f.save_results(path, maze_map, position_values)
                     break
         case Mode.SPEEDRUN:
             while mz.robot.robot.step(world.sim.time_step) != -1:
                 if not path:
                     break
-                draw_queue.put(DrawState(mz.robot.state.pos, mz.algorithm.maze_map, values, {}))
+                draw_queue.put(
+                    DrawState(mz.robot.state.pos, mz.algorithm.maze_map, position_values, {})
+                )
                 mz.robot.move(path.pop(0))
-            draw_queue.put(DrawState(mz.robot.state.pos, mz.algorithm.maze_map, values, {}))
+            draw_queue.put(
+                DrawState(mz.robot.state.pos, mz.algorithm.maze_map, position_values, {})
+            )
             draw_queue.put(None)
             print("Target reached")
             print("Speedrun time: %.2f" % mz.robot.robot.getTime(), "s")

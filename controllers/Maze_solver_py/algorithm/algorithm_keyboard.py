@@ -8,13 +8,25 @@ class Keyboard(AlgorithmInterface):
         pass
 
     def init(self):
-        return ([], [])
+        raise NotImplementedError()
 
     def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
-        pass
+        raise NotImplementedError()
 
     def finish(self):
-        pass
+        raise NotImplementedError()
 
-    def prepare_results(self) -> tuple[list | dict, list[int]]:
-        pass
+    def prepare_results(self) -> tuple[list[int], list | dict, list | dict]:
+        raise NotImplementedError()
+
+    @property
+    def maze_map(self) -> list[int] | dict[int, list[int]]:
+        raise NotImplementedError()
+
+    @property
+    def position_values(self) -> list:
+        raise NotImplementedError()
+
+    @property
+    def pos(self) -> int:
+        raise NotImplementedError()

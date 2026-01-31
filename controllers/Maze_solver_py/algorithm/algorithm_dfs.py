@@ -48,16 +48,16 @@ class DFS(AlgorithmInterface):
         return self._current_path, self._maze_map, []
 
     @property
-    def maze_map(self) -> list[int] | dict[int, list[int]]:
-        return []
+    def maze_map(self) -> dict[int, list[int]]:
+        return self._maze_map
 
     @property
-    def distance(self) -> list:
+    def position_values(self) -> list:
         return []
 
     @property
     def pos(self) -> int:
-        return 0
+        return self._pos
 
     def _move_to_last_fork(self, targets: list[int]):
         """
