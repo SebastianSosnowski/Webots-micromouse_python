@@ -1,24 +1,25 @@
 from algorithm import AlgorithmInterface, Floodfill, Keyboard, DFS, BFS, AStar, AStarMod
 from utils.params import RobotState, DetectedWalls
 from config.enums import Algorithms
+from config.models import AppConfig
 
 
 class AlgorithmV2(AlgorithmInterface):
-    def __init__(self, sim_cfg: dict):
-        if sim_cfg["algorithm"] == Algorithms.FLOODFILL:
-            self.impl = Floodfill(sim_cfg)
-        elif sim_cfg["algorithm"] == Algorithms.KEYBOARD:
-            self.impl = Keyboard(sim_cfg)
-        elif sim_cfg["algorithm"] == Algorithms.DFS:
-            self.impl = DFS(sim_cfg)
-        elif sim_cfg["algorithm"] == Algorithms.BFS:
-            self.impl = BFS(sim_cfg)
-        elif sim_cfg["algorithm"] == Algorithms.A_STAR:
-            self.impl = AStar(sim_cfg)
-        elif sim_cfg["algorithm"] == Algorithms.A_STAR_MOD:
-            self.impl = AStarMod(sim_cfg)
+    def __init__(self, cfg: AppConfig):
+        if cfg.simulation.algorithm == Algorithms.FLOODFILL:
+            self.impl = Floodfill(cfg)
+        elif cfg.simulation.algorithm == Algorithms.KEYBOARD:
+            self.impl = Keyboard(cfg)
+        elif cfg.simulation.algorithm == Algorithms.DFS:
+            self.impl = DFS(cfg)
+        elif cfg.simulation.algorithm == Algorithms.BFS:
+            self.impl = BFS(cfg)
+        elif cfg.simulation.algorithm == Algorithms.A_STAR:
+            self.impl = AStar(cfg)
+        elif cfg.simulation.algorithm == Algorithms.A_STAR_MOD:
+            self.impl = AStarMod(cfg)
         else:
-            raise ValueError(f"Unknown algorithm: {sim_cfg['algorithm']}")
+            raise ValueError(f"Unknown algorithm: {cfg.simulation.algorithm}")
 
     def init(self) -> None:
         return self.impl.init()

@@ -1,28 +1,29 @@
 from algorithm import AlgorithmInterface
 from utils.params import RobotState, DetectedWalls, Fork
-from config.world import world
 from algorithm.common import init_maze_map_graph, add_walls_graph
+from config.models import AppConfig
 
 
 class DFS(AlgorithmInterface):
-    def __init__(self, sim_cfg: dict):
+    def __init__(self, cfg: AppConfig):
+        self._cfg = cfg
         self._maze_map = {}
         self._fork: list[Fork] = []
         self._visited: list[int] = []
         self._stack: list[int] = []
         self._full_path: list[int] = []
-        self._pos = world.maze.start_cell
-        self._current_target = world.maze.target_cell
+        self._pos = cfg.maze.start_position
+        self._current_target = cfg.maze.target_position
 
     def init(self) -> None:
-        self._maze_map = init_maze_map_graph(world.maze.rows, world.maze.columns)
+        self._maze_map = init_maze_map_graph(self._cfg.maze.rows, self._cfg.maze.columns)
         self._visited.append(self._pos)
         self._stack.append(self._pos)
 
     def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
         targets = []
         self._stack.pop()
-        add_walls_graph(self._maze_map, world.maze.rows, detected, state)
+        add_walls_graph(self._maze_map, self._cfg.maze.rows, detected, state)
         dead_end = self._check_fork(self._maze_map[state.pos], state.pos)
         if dead_end:
             self._move_to_previous_fork(targets)
@@ -126,7 +127,7 @@ class DFS(AlgorithmInterface):
             if cell not in visited:
                 visited.append(cell)
                 stack.append(cell)
-                if cell == world.maze.target_cell:
+                if cell == self._cfg.maze.target_position:
                     break
         current_destination = stack[-1]
 

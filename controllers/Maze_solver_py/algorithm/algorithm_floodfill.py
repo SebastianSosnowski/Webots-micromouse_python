@@ -1,16 +1,18 @@
 from algorithm import AlgorithmInterface
-from config.world import world
 from config.enums import Direction
 from utils.params import RobotState, DetectedWalls
+from config.models import AppConfig
 
 
 class Floodfill(AlgorithmInterface):
-    def __init__(self, sim_cfg: dict):
-        self._maze_map = [0] * world.maze.size
-        self._distance = [255] * world.maze.size
+    def __init__(self, cfg: AppConfig):
+        self._cfg = cfg
+        size = cfg.maze.rows * cfg.maze.columns
+        self._maze_map = [0] * size
+        self._distance = [255] * size
         self.shortest_path = False
-        self._pos = world.maze.start_cell
-        self._current_target = world.maze.target_cell
+        self._pos = cfg.maze.start_position
+        self._current_target = cfg.maze.target_position
 
     def init(self) -> None:
         self._init_maze_map()
@@ -30,14 +32,19 @@ class Floodfill(AlgorithmInterface):
     def prepare_results(self) -> tuple[list[int], list | dict, list | dict]:
         maze_map = self._maze_map.copy()
         # to make sure path will use only visited cells
-        for i in range(0, world.maze.size):
-            if (maze_map[i] & world.maze.visited) != world.maze.visited:
+        size = self._cfg.maze.rows * self._cfg.maze.columns
+        for i in range(0, size):
+            if (maze_map[i] & self._cfg.maze.visited_flag) != self._cfg.maze.visited_flag:
                 maze_map[i] |= 15
-        self._current_target = world.maze.target_cell
+        self._current_target = self._cfg.maze.target_position
         self._distance = self._init_distance_map(self._distance, self._current_target)  # reset path
         self._floodfill(maze_map, self._distance)  # path
         path = Floodfill.extract_path(
-            self._maze_map, self._distance, world.maze.start_cell, world.maze.target_cell
+            self._maze_map,
+            self._distance,
+            self._cfg.maze.start_position,
+            self._cfg.maze.target_position,
+            self._cfg.maze.columns,
         )
         return path, self._maze_map, self._distance
 
@@ -55,11 +62,11 @@ class Floodfill(AlgorithmInterface):
 
     def _init_maze_map(self):
         """Initialize maze map with external walls."""
-        rows = world.maze.rows
-        cols = world.maze.columns
+        rows = self._cfg.maze.rows
+        cols = self._cfg.maze.columns
 
         # mark start as visited
-        self._maze_map[0] |= world.maze.visited
+        self._maze_map[0] |= self._cfg.maze.visited_flag
 
         for cell in range(rows * cols):
             row = cell // cols
@@ -85,7 +92,9 @@ class Floodfill(AlgorithmInterface):
         Returns:
             list: Initialized distance list.
         """
-        distance = [world.maze.size - 1] * world.maze.size
+        distance = [self._cfg.maze.rows * self._cfg.maze.columns - 1] * (
+            self._cfg.maze.rows * self._cfg.maze.columns
+        )
         distance[target] = 0
         return distance
 
@@ -104,15 +113,15 @@ class Floodfill(AlgorithmInterface):
         while search:
             search = False
 
-            for i in range(0, world.maze.size):
+            for i in range(len(distance)):
                 if distance[i] >= 255:
                     continue
                 if (maze_map[i] & Direction.NORTH) != Direction.NORTH:
-                    if distance[i + world.maze.columns] == 255 or (
-                        (distance[i] + 1) < distance[i + world.maze.columns]
+                    if distance[i + self._cfg.maze.columns] == 255 or (
+                        (distance[i] + 1) < distance[i + self._cfg.maze.columns]
                     ):
                         # update distance value on north tile
-                        distance[i + world.maze.columns] = distance[i] + 1
+                        distance[i + self._cfg.maze.columns] = distance[i] + 1
                         search = True
 
                 if (maze_map[i] & Direction.EAST) != Direction.EAST:
@@ -126,11 +135,11 @@ class Floodfill(AlgorithmInterface):
                         search = True
                 # prop unnecessary cuz robot doesn't move backward
                 if (maze_map[i] & Direction.SOUTH) != Direction.SOUTH:
-                    if distance[i - world.maze.columns] == 255 or (
-                        (distance[i] + 1) < distance[i - world.maze.columns]
+                    if distance[i - self._cfg.maze.columns] == 255 or (
+                        (distance[i] + 1) < distance[i - self._cfg.maze.columns]
                     ):
                         # update distance value on SOUTH tile
-                        distance[i - world.maze.columns] = distance[i] + 1
+                        distance[i - self._cfg.maze.columns] = distance[i] + 1
                         search = True
 
     def _where_to_move(self, state: RobotState, walls: int):
@@ -164,9 +173,9 @@ class Floodfill(AlgorithmInterface):
         orientation = state.orientation
 
         neighbors = {
-            Direction.NORTH: pos + world.maze.columns,
+            Direction.NORTH: pos + self._cfg.maze.columns,
             Direction.EAST: pos + 1,
-            Direction.SOUTH: pos - world.maze.columns,
+            Direction.SOUTH: pos - self._cfg.maze.columns,
             Direction.WEST: pos - 1,
         }
 
@@ -209,22 +218,22 @@ class Floodfill(AlgorithmInterface):
 
         shortest_path = self._is_shortest()
 
-        if self._pos == world.maze.target_cell:
+        if self._pos == self._cfg.maze.target_position:
             self._mark_center(self._maze_map)
 
             if shortest_path:
                 print("This is the shortest/ one of the shortest paths")
             else:
                 print("There might be a shorter path, keep going")
-                self._current_target = world.maze.start_cell
+                self._current_target = self._cfg.maze.start_position
 
-        elif self._pos == world.maze.start_cell:
+        elif self._pos == self._cfg.maze.start_position:
             if shortest_path:
                 print("This is the shortest/ one of the shortest paths")
             else:
                 print("There might be a shorter path, keep going")
 
-            self._current_target = world.maze.target_cell
+            self._current_target = self._cfg.maze.target_position
 
         return shortest_path
 
@@ -242,16 +251,24 @@ class Floodfill(AlgorithmInterface):
         distance_check = self._distance.copy()
         maze_map_check = self._maze_map.copy()
 
-        for i in range(0, world.maze.size):
-            if (maze_map_check[i] & world.maze.visited) != world.maze.visited:
-                maze_map_check[i] |= 15 | world.maze.visited
+        for i in range(len(maze_map_check)):
+            if (maze_map_check[i] & self._cfg.maze.visited_flag) != self._cfg.maze.visited_flag:
+                maze_map_check[i] |= 15 | self._cfg.maze.visited_flag
 
         distance_check = self._init_distance_map(distance_check, self._current_target)  # reset path
         self._floodfill(maze_map_check, distance_check)  # path
-        if self._current_target == world.maze.target_cell:
-            shortest_path = self._distance[0] >= distance_check[0]  # could be just equal'
-        elif self._current_target == world.maze.start_cell:
-            shortest_path = self._distance[136] >= distance_check[136]  # could be just equal'
+        if self._current_target == self._cfg.maze.target_position:
+            shortest_path = (
+                self._distance[self._cfg.maze.start_position]
+                >= distance_check[self._cfg.maze.start_position]
+            )  # could be just equal'
+        elif self._current_target == self._cfg.maze.start_position:
+            shortest_path = (
+                self._distance[self._cfg.maze.target_position]
+                >= distance_check[self._cfg.maze.target_position]
+            )  # could be just equal'
+
+        return shortest_path
 
         return shortest_path
 
@@ -260,7 +277,7 @@ class Floodfill(AlgorithmInterface):
         center = [119, 120, 135]
 
         for center_cell in center:
-            if (maze_map[center_cell] & world.maze.visited) != world.maze.visited:
+            if (maze_map[center_cell] & self._cfg.maze.visited_flag) != self._cfg.maze.visited_flag:
                 match center_cell:
                     case 119:
                         maze_map[center_cell] = 3
@@ -283,7 +300,7 @@ class Floodfill(AlgorithmInterface):
             detected: A dataclass with information about which walls were detected by robot in current position.
             state: A dataclass with information about current robot state.
         """
-        self._maze_map[state.pos] |= world.maze.visited
+        self._maze_map[state.pos] |= self._cfg.maze.visited_flag
         if detected.left_wall:
             self._add_wall(state, self._maze_map, Direction.WEST)
 
@@ -333,8 +350,8 @@ class Floodfill(AlgorithmInterface):
         # add wall in neighbor field
         if detected_wall == Direction.NORTH:
 
-            robot_position = robot_position + world.maze.columns  # upper field
-            check = robot_position in range(0, world.maze.size)
+            robot_position = robot_position + self._cfg.maze.columns  # upper field
+            check = robot_position in range(len(maze_map))
 
             if check:
                 maze_map[robot_position] = maze_map[robot_position] | Direction.SOUTH
@@ -342,15 +359,15 @@ class Floodfill(AlgorithmInterface):
         if detected_wall == Direction.EAST:
 
             robot_position = robot_position + 1  # left field
-            check = robot_position in range(0, world.maze.size)
+            check = robot_position in range(len(maze_map))
 
             if check:
                 maze_map[robot_position] = maze_map[robot_position] | Direction.WEST
 
         if detected_wall == Direction.SOUTH:
 
-            robot_position = robot_position - world.maze.columns  # lower field
-            check = robot_position in range(0, world.maze.size)
+            robot_position = robot_position - self._cfg.maze.columns  # lower field
+            check = robot_position in range(len(maze_map))
 
             if check:
                 maze_map[robot_position] = maze_map[robot_position] | Direction.NORTH
@@ -358,14 +375,14 @@ class Floodfill(AlgorithmInterface):
         if detected_wall == Direction.WEST:
 
             robot_position = robot_position - 1  # right field
-            check = robot_position in range(0, world.maze.size)
+            check = robot_position in range(len(maze_map))
 
             if check:
                 maze_map[robot_position] = maze_map[robot_position] | Direction.EAST
 
     @staticmethod
     def extract_path(
-        maze_map: list[int], distance: list[int], start: int, target: int
+        maze_map: list[int], distance: list[int], start: int, target: int, columns: int
     ) -> list[int]:
         """
         Extract shortest path from distance map.
@@ -385,7 +402,7 @@ class Floodfill(AlgorithmInterface):
         while current != target:
             d = distance[current]
 
-            for next_cell in Floodfill._neighbors(current, maze_map):
+            for next_cell in Floodfill._neighbors(current, maze_map, columns):
                 if distance[next_cell] == d - 1:
                     path.append(next_cell)
                     current = next_cell
@@ -396,13 +413,14 @@ class Floodfill(AlgorithmInterface):
         return path
 
     @staticmethod
-    def _neighbors(i: int, maze_map: list[int]) -> list[int]:
+    def _neighbors(i: int, maze_map: list[int], columns: int) -> list[int]:
         """
         Return neighboring positions, which are not blocked by wall.
 
         Args:
             i: Maze position
             maze_map: Maze map with walls.
+            columns: Number of columns in maze.
 
         Returns:
             List of reachable positions.
@@ -410,11 +428,11 @@ class Floodfill(AlgorithmInterface):
         n = []
 
         if (maze_map[i] & Direction.NORTH) != Direction.NORTH:
-            n.append(i + world.maze.columns)
+            n.append(i + columns)
         if (maze_map[i] & Direction.EAST) != Direction.EAST:
             n.append(i + 1)
         if (maze_map[i] & Direction.WEST) != Direction.WEST:
             n.append(i - 1)
         if (maze_map[i] & Direction.SOUTH) != Direction.SOUTH:
-            n.append(i - world.maze.columns)
+            n.append(i - columns)
         return n

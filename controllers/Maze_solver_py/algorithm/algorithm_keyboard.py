@@ -1,9 +1,10 @@
 from algorithm import AlgorithmInterface
 from utils.params import RobotState, DetectedWalls
+from config.models import AppConfig
 
 
 class Keyboard(AlgorithmInterface):
-    def __init__(self, sim_cfg: dict):
+    def __init__(self, cfg: AppConfig):
         pass
 
     def init(self):

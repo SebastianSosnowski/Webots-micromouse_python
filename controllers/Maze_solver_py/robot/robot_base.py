@@ -3,14 +3,15 @@ from robot import RobotInterface, Epuck
 from controller import Robot
 
 from utils.params import DetectedWalls, RobotState
+from config.models import AppConfig
 
 
 class MyRobot(RobotInterface):
-    def __init__(self, robot_cfg: dict):
-        if robot_cfg["model"] == "epuck":
-            self.impl = Epuck(robot_cfg)
+    def __init__(self, config: AppConfig):
+        if config.robot.model == "epuck":
+            self.impl = Epuck(config)
         else:
-            raise ValueError(f"Unknown robot: {robot_cfg['model']}")
+            raise ValueError(f"Unknown robot: {config.robot.model}")
 
     def read_sensors(self) -> DetectedWalls:
         """

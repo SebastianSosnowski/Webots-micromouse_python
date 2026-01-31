@@ -6,14 +6,17 @@ from controller import DistanceSensor, Motor, PositionSensor, Robot
 from robot import RobotInterface
 from utils.params import RobotParams, RobotState, Direction, SensorSnapshot, DetectedWalls
 from config.enums import Move
-from config.world import world
+from config.models import AppConfig
 
 
 class Epuck(RobotInterface):
-    def __init__(self, robot_cfg: dict):
+    def __init__(self, config: AppConfig):
+        self._cfg = config
         self._robot = Robot()
-        self.params = RobotParams(robot_cfg["axle"], robot_cfg["wheel"], robot_cfg["speed"])
-        self._state = RobotState(world.maze.start_cell, world.maze.target_cell)
+        self.params = RobotParams(
+            self._cfg.robot.axle, self._cfg.robot.wheel, self._cfg.robot.speed
+        )
+        self._state = RobotState(self._cfg.maze.start_position, self._cfg.maze.target_position)
         self._number_of_reads = 5
         self._front_obstacle = False
         self._init_devices()
@@ -44,7 +47,7 @@ class Epuck(RobotInterface):
 
         action = self._drive(move_direction)
         self._state.orientation = self.change_orientation(self._state.orientation, action)
-        self._state.pos = self.change_position(self._state.pos, self._state.orientation)
+        self._state.pos = self._change_position(self._state.pos, self._state.orientation)
 
     @property
     def robot(self) -> Robot:
@@ -62,19 +65,19 @@ class Epuck(RobotInterface):
         self.right_motor = cast(Motor, self._robot.getDevice("right wheel motor"))
         self.left_motor.setVelocity(self.params.speed)
         self.right_motor.setVelocity(self.params.speed)
-
+        self._cfg.simulation
         self.ps_left = cast(PositionSensor, self._robot.getDevice("left wheel sensor"))
-        self.ps_left.enable(world.sim.time_step)
+        self.ps_left.enable(self._cfg.simulation.time_step)
         self.ps_right = cast(PositionSensor, self._robot.getDevice("right wheel sensor"))
-        self.ps_right.enable(world.sim.time_step)
+        self.ps_right.enable(self._cfg.simulation.time_step)
 
         ps_names = ("ps0", "ps1", "ps2", "ps3", "ps4", "ps5", "ps6", "ps7")
         self.ps = [cast(DistanceSensor, self._robot.getDevice(n)) for n in ps_names]
         for sensor in self.ps:
-            sensor.enable(world.sim.time_step)
+            sensor.enable(self._cfg.simulation.time_step)
 
         self.tof = cast(DistanceSensor, self._robot.getDevice("tof"))
-        self.tof.enable(world.sim.time_step)
+        self.tof.enable(self._cfg.simulation.time_step)
 
     def _detect_walls(self, sensors: SensorSnapshot):
         """Read and process sensors to detect walls.
@@ -107,7 +110,7 @@ class Epuck(RobotInterface):
                 ps_values[i] += self.ps[i].getValue()
             tof_value += self.tof.getValue()
 
-            self._robot.step(world.sim.time_step)
+            self._robot.step(self._cfg.simulation.time_step)
 
         # average score of sensors measurements
         ps_avg = [v / reads for v in ps_values]
@@ -137,10 +140,10 @@ class Epuck(RobotInterface):
 
                 self.left_motor.setVelocity(self.params.speed * 0.1)
                 self.right_motor.setVelocity(self.params.speed * -0.1)
-                self._robot.step(world.sim.time_step)
+                self._robot.step(self._cfg.simulation.time_step)
                 left = self.ps[7].getValue()
                 right = self.ps[0].getValue()
-                if world.sim.testing:
+                if self._cfg.simulation.testing:
                     print("sensor angle %.2f" % left, "%.2f" % right)
 
         elif left > right:
@@ -148,10 +151,10 @@ class Epuck(RobotInterface):
 
                 self.left_motor.setVelocity(self.params.speed * -0.1)
                 self.right_motor.setVelocity(self.params.speed * 0.1)
-                self._robot.step(world.sim.time_step)
+                self._robot.step(self._cfg.simulation.time_step)
                 left = self.ps[7].getValue()
                 right = self.ps[0].getValue()
-                if world.sim.testing:
+                if self._cfg.simulation.testing:
                     print("sensor angle %.2f" % left, "%.2f" % right)
 
         front = self.tof.getValue()
@@ -163,11 +166,11 @@ class Epuck(RobotInterface):
                 self.left_motor.setVelocity(self.params.speed * 0.1)
                 self.right_motor.setVelocity(self.params.speed * 0.1)
 
-                self._robot.step(world.sim.time_step)
+                self._robot.step(self._cfg.simulation.time_step)
 
                 front = self.tof.getValue()
 
-                if world.sim.testing:
+                if self._cfg.simulation.testing:
                     print("sensor tof %.2f" % front)
 
         elif front < desired_distance:
@@ -176,11 +179,11 @@ class Epuck(RobotInterface):
                 self.left_motor.setVelocity(self.params.speed * -0.1)
                 self.right_motor.setVelocity(self.params.speed * -0.1)
 
-                self._robot.step(world.sim.time_step)
+                self._robot.step(self._cfg.simulation.time_step)
 
                 front = self.tof.getValue()
 
-                if world.sim.testing:
+                if self._cfg.simulation.testing:
                     print("sensor tof %.2f" % front)
 
         self.left_motor.setVelocity(0)
@@ -194,7 +197,7 @@ class Epuck(RobotInterface):
             Direction: Global direction of movement.
         """
         pos = self._state.pos
-        cols = world.maze.columns
+        cols = self._cfg.maze.columns
 
         diff = target_cell - pos
 
@@ -264,7 +267,7 @@ class Epuck(RobotInterface):
             None
         """
 
-        revolutions = world.maze.tile_length / self.params.wheel  # rev in radians
+        revolutions = self._cfg.maze.tile_length / self.params.wheel  # rev in radians
 
         left_wheel_revolutions = self.ps_left.getValue()
         right_wheel_revolutions = self.ps_right.getValue()
@@ -279,7 +282,7 @@ class Epuck(RobotInterface):
         self.right_motor.setPosition(right_wheel_revolutions)
         self._PID_correction()
 
-        if world.sim.testing:
+        if self._cfg.simulation.testing:
             print("forward")
 
     def _turn(self, move_direction: Move):
@@ -308,7 +311,7 @@ class Epuck(RobotInterface):
                 self.left_motor.setPosition(left_wheel_revolutions)
                 self.right_motor.setPosition(right_wheel_revolutions)
 
-                if world.sim.testing:
+                if self._cfg.simulation.testing:
                     print("right")
             case Move.LEFT:
                 left_wheel_revolutions -= revolutions
@@ -316,7 +319,7 @@ class Epuck(RobotInterface):
                 self.left_motor.setPosition(left_wheel_revolutions)
                 self.right_motor.setPosition(right_wheel_revolutions)
 
-                if world.sim.testing:
+                if self._cfg.simulation.testing:
                     print("left")
             case Move.BACK:
                 revolutions *= 2
@@ -325,7 +328,7 @@ class Epuck(RobotInterface):
                 self.left_motor.setPosition(left_wheel_revolutions)
                 self.right_motor.setPosition(right_wheel_revolutions)
 
-                if world.sim.testing:
+                if self._cfg.simulation.testing:
                     print("back")
 
         self._wait_move_end()
@@ -344,7 +347,7 @@ class Epuck(RobotInterface):
             distance_left_now = self.ps_left.getValue()
             distance_right_now = self.ps_right.getValue()
 
-            self._robot.step(world.sim.time_step)
+            self._robot.step(self._cfg.simulation.time_step)
 
             distance_left_later = self.ps_left.getValue()
             distance_right_later = self.ps_right.getValue()
@@ -384,7 +387,7 @@ class Epuck(RobotInterface):
 
                 error = left_angle_sensor - right_angle_sensor
 
-                if world.sim.testing:
+                if self._cfg.simulation.testing:
                     print("error %.3f" % error)
 
                 error_integral += error
@@ -396,7 +399,7 @@ class Epuck(RobotInterface):
                 elif MotorSpeed < -0.2:
                     MotorSpeed = -0.2
 
-                if world.sim.testing:
+                if self._cfg.simulation.testing:
                     print("speed %.3f" % MotorSpeed)
 
                 self.left_motor.setVelocity(self.params.speed + MotorSpeed)
@@ -404,7 +407,7 @@ class Epuck(RobotInterface):
             elif left_wall:
                 error = left_angle_sensor - Middle
 
-                if world.sim.testing:
+                if self._cfg.simulation.testing:
                     print("errorL %.3f" % error)
 
                 error_integral += error
@@ -416,7 +419,7 @@ class Epuck(RobotInterface):
                 elif MotorSpeed < -0.06:
                     MotorSpeed = -0.06
 
-                if world.sim.testing:
+                if self._cfg.simulation.testing:
                     print("speed %.3f" % MotorSpeed)
 
                 self.left_motor.setVelocity(self.params.speed + MotorSpeed)
@@ -424,7 +427,7 @@ class Epuck(RobotInterface):
             elif right_wall:
                 error = right_angle_sensor - Middle
 
-                if world.sim.testing:
+                if self._cfg.simulation.testing:
                     print("errorR %.3f" % error)
 
                 error_integral += error
@@ -436,7 +439,7 @@ class Epuck(RobotInterface):
                 elif MotorSpeed < -0.06:
                     MotorSpeed = -0.06
 
-                if world.sim.testing:
+                if self._cfg.simulation.testing:
                     print("speed %.3f" % MotorSpeed)
 
                 self.left_motor.setVelocity(self.params.speed - MotorSpeed)
@@ -479,13 +482,9 @@ class Epuck(RobotInterface):
                 else:
                     orientation_value *= 4
 
-        if world.sim.testing:
-            print("Orientation:", Direction(orientation_value))
-
         return Direction(orientation_value)
 
-    @staticmethod
-    def change_position(robot_position: int, robot_orientation: Direction):
+    def _change_position(self, robot_position: int, robot_orientation: Direction):
         """Update position of the robot basing on current orientation of the robot.
 
         Args:
@@ -497,12 +496,12 @@ class Epuck(RobotInterface):
         """
 
         if robot_orientation == Direction.NORTH:
-            robot_position = robot_position + world.maze.columns
+            robot_position = robot_position + self._cfg.maze.columns
 
         elif robot_orientation == Direction.EAST:
             robot_position = robot_position + 1
         elif robot_orientation == Direction.SOUTH:
-            robot_position = robot_position - world.maze.columns
+            robot_position = robot_position - self._cfg.maze.columns
 
         elif robot_orientation == Direction.WEST:
             robot_position = robot_position - 1
