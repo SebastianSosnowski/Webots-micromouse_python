@@ -99,5 +99,5 @@ class DetectedWalls:
 
 @dataclass
 class Fork:
-    path: list[int]  # Path to the fork between until next fork
+    position: int  # Path to the fork between until next fork
     unused_routes: int

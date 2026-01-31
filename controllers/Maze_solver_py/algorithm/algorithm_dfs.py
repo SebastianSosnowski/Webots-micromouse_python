@@ -7,10 +7,11 @@ from config.models import AppConfig
 class DFS(AlgorithmInterface):
     def __init__(self, cfg: AppConfig):
         self._cfg = cfg
-        self._maze_map = {}
+        self._maze_map: dict[int, list[int]] = {}
         self._fork: list[Fork] = []
         self._visited: list[int] = []
         self._stack: list[int] = []
+        self._current_path: list[int] = []
         self._full_path: list[int] = []
         self._pos = cfg.maze.start_position
         self._current_target = cfg.maze.target_position
@@ -18,27 +19,33 @@ class DFS(AlgorithmInterface):
     def init(self) -> None:
         self._maze_map = init_maze_map_graph(self._cfg.maze.rows, self._cfg.maze.columns)
         self._visited.append(self._pos)
+        self._current_path.append(self._pos)
 
     def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
         targets = []
+
         add_walls_graph(self._maze_map, self._cfg.maze.rows, detected, state)
-        dead_end = self._check_fork(self._maze_map[state.pos], state.pos)
+
+        dead_end = self._check_fork(self._maze_map[self._pos], self._pos, self._visited)
         if dead_end:
             self._move_to_last_fork(targets)
+
         self._current_target = self._check_possible_routes(
-            self._maze_map[self._pos], self._visited, self._stack
+            self._maze_map[state.pos], self._visited, self._stack
         )
-        if self._current_target not in self._maze_map[self._pos]:
-            self._remove_fork_and_move_back_further(targets)
+
         targets.append(self._current_target)
-        self._pos = targets[-1]
+        self._pos = self._current_target
+        self._visited.append(self._pos)
+        self._current_path.append(self._pos)
         return targets
 
-    def finish(self):
-        pass
+    def finish(self) -> bool:
+        return self._pos == self._cfg.maze.target_position
 
-    def prepare_results(self) -> tuple[list | dict, list[int]]:
-        return ([], [])
+    def prepare_results(self) -> tuple[list[int], dict, list]:
+        self._current_path.pop(0)
+        return self._current_path, self._maze_map, []
 
     @property
     def maze_map(self) -> list[int] | dict[int, list[int]]:
@@ -56,62 +63,52 @@ class DFS(AlgorithmInterface):
         """
         Move to previous valid fork and extend targets path.
 
-        Args:
-            targets: Path to target position for robot.
-        """
-        path_back = self._move_back_DFS()
-        path_back.reverse()
-        targets[:0] = path_back
-        self._pos = targets[-1]
-
-    def _remove_fork_and_move_back_further(self, targets: list[int]):
-        """
-        Remove last fork and extend targets path.
+        Use current_path to determine path to fork and trim it afterwards.
 
         Args:
             targets: Path to target position for robot.
         """
-        self._fork.pop()
-        path_back = self._move_back_DFS()
-        path_back.reverse()
+        fork = self._fork[-1]
+        fork_pos = fork.position
+
+        idx = self._current_path.index(fork_pos)
+
+        path_back = list(reversed(self._current_path[idx:-1]))
         targets.extend(path_back)
+        self._current_path = self._current_path[: idx + 1]
+        self._pos = fork_pos
 
-    def _check_fork(self, connections: list[int], robot_position: int) -> bool:
-        """Detect's fork, assign number to it and monitor possible
-        unused routes from each one which is used for DFS algorithm operation.
+        fork.unused_routes -= 1
+        if fork.unused_routes == 0:
+            self._fork.pop()
 
-        Also detect's dead-ends.
+    def _check_fork(self, connections: list[int], robot_position: int, visited: list[int]) -> bool:
+        """
+        Check whether position is corridor, fork or dead-end.
+
+        Add new Fork if found.
 
         Args:
             connections: List with positions available from current position.
             robot_position: Variable with current robot position in maze.
 
         Returns:
-            dead_end: True if current cell is dead-end. Otherwise False
+            True if current cell is dead-end. Otherwise False
         """
-        dead_end = False
+        unvisited = [c for c in connections if c not in visited]
 
-        routes = len(connections)
-        if routes >= 3:
-            self._fork.append(Fork([robot_position], routes - 2))
-        elif routes == 2:
-            if self._fork:
-                self._fork[-1].path.append(robot_position)
-        else:
-            dead_end = True
+        if not unvisited:
+            return True
 
-        return dead_end
+        if len(unvisited) >= 2:
+            self._fork.append(Fork(robot_position, len(unvisited) - 1))
 
-    def _move_back_DFS(self) -> list[int]:
-        """Moves back to previous valid fork."""
-        return self._fork[-1].path
+        return False
 
     def _check_possible_routes(
         self, adjacent_positions: list[int], visited: list[int], stack: list[int]
-    ):
-        """Add possible adjacent cells to stack and then decides to which cell move next.
-
-        Last item in stack is chosen.
+    ) -> int:
+        """Add possible adjacent positions to stack and then decides to which position move next.
 
         Args:
             adjacent_positions: Positions accessible from current robot position.
@@ -121,17 +118,9 @@ class DFS(AlgorithmInterface):
         Returns:
             current_destination: Position to which move next.
         """
-        for cell in reversed(adjacent_positions):
-            if cell not in visited:
-                visited.append(cell)
-                stack.append(cell)
-                if cell == self._cfg.maze.target_position:
+        for pos in reversed(adjacent_positions):
+            if pos not in visited and pos not in stack:
+                stack.append(pos)
+                if pos == self._cfg.maze.target_position:
                     break
-        current_destination = stack.pop()
-
-        return current_destination
-
-    def _create_full_path(self):
-        """Create full path from forks paths."""
-        for fork in self._fork:
-            self._full_path.extend(fork.path)
+        return stack.pop()

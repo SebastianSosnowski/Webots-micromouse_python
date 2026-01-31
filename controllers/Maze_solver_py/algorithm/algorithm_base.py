@@ -27,7 +27,7 @@ class AlgorithmV2(AlgorithmInterface):
     def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
         return self.impl.update(detected, state)
 
-    def finish(self):
+    def finish(self) -> bool:
         return self.impl.finish()
 
     def prepare_results(self) -> tuple[list[int], list | dict, list | dict]:

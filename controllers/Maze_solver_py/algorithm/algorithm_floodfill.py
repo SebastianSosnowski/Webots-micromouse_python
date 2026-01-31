@@ -24,12 +24,12 @@ class Floodfill(AlgorithmInterface):
         self._pos = self._where_to_move(state, self._maze_map[state.pos])
         return [self._pos]
 
-    def finish(self):
+    def finish(self) -> bool:
         if self._pos == self._current_target:
             return self._change_target()
         return False
 
-    def prepare_results(self) -> tuple[list[int], list | dict, list | dict]:
+    def prepare_results(self) -> tuple[list[int], list, list]:
         maze_map = self._maze_map.copy()
         # to make sure path will use only visited cells
         size = self._cfg.maze.rows * self._cfg.maze.columns

@@ -37,9 +37,17 @@ class AlgorithmInterface(ABC):
         """Prepare algorithm output for robot and visualization to use.
 
         Returns:
-            path: Positions list from start to target. Exclude robot start position.
-            map: A structure with scanned map during maze exploration to draw on maze.
-            values: Values of algorithm to draw on maze cells. Return empty list if none.
+            tuple:
+                - path (list[int])
+                    Sequence of maze cell indices from start to target.
+                    The start cell itself is excluded.
+                - maze_map (list | dict)
+                    Representation of the explored maze used for visualization.
+                    The concrete structure depends on the algorithm.
+                - values (list | dict)
+                    Algorithm-specific values associated with maze cells
+                    (e.g. distances, visit order, costs).
+                    Returns an empty list if not applicable.
         """
         pass
 
