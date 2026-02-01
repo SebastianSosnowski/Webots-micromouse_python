@@ -41,8 +41,8 @@ class Epuck(RobotInterface):
             None
         """
         move_direction = self._dir_to_move(target)
-
-        if self._front_obstacle:
+        front_wall = self._read_and_detect_front()
+        if front_wall:
             self._move_front_correct()
 
         action = self._drive(move_direction)
@@ -116,6 +116,19 @@ class Epuck(RobotInterface):
         ps_avg = [v / reads for v in ps_values]
         tof_avg = tof_value / reads
         return SensorSnapshot(ps_avg, tof_avg)
+
+    def _read_and_detect_front(self, reads: int = 1) -> bool:
+        """Detect front wall using tof sensor."""
+        # tof_value = 0
+        # for _ in range(reads):  # more scans for better accuracy
+        #     tof_value += self.tof.getValue()
+
+        #     self._robot.step(self._cfg.simulation.time_step)
+        # tof_avg = tof_value / reads
+        # front_wall = tof_avg < 55
+        tof_value = self.tof.getValue()
+        front_wall = tof_value < 55
+        return front_wall
 
     def _move_front_correct(self):
         """Corrects robot position in reference to front wall.
