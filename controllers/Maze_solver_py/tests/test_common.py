@@ -22,17 +22,16 @@ def test_init_maze_map_graph_internal_position():
 def test_add_walls_graph_orientation():
     """Test if walls are added correctly for different robot orientation"""
     rows = cols = 3
-
-    maze_map = init_maze_map_graph(rows, cols)
     internal_pos = 4
     no_front_wall = DetectedWalls(True, False, True, True)
     orientation_to_connected_pos = {
         Direction.NORTH: 7,
-        Direction.EAST: 5,
         Direction.SOUTH: 1,
+        Direction.EAST: 5,
         Direction.WEST: 3,
     }
     for orientation, connected_pos in orientation_to_connected_pos.items():
         state = RobotState(pos=internal_pos, orientation=orientation, current_target=0)
+        maze_map = init_maze_map_graph(rows, cols)
         add_walls_graph(maze_map, rows, no_front_wall, state)
         assert maze_map[state.pos] == [connected_pos], f"Orientation {orientation.name} failed"

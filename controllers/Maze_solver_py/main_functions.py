@@ -28,7 +28,6 @@ def interface_main(mz: MazeSolver):
     draw_queue = Queue(maxsize=1)
     drawer = MazeDrawer(mz._cfg, maze_map, position_values, draw_queue)
     drawer.start_drawing()
-
     match mz._cfg.simulation.mode:
         case Mode.SEARCH:
             while mz.robot.robot.step(mz._cfg.simulation.time_step) != -1:
@@ -45,6 +44,14 @@ def interface_main(mz: MazeSolver):
                     )
                     mz.robot.move(targets.pop(0))
                 if mz.algorithm.finish():
+                    draw_queue.put(
+                        DrawState(
+                            mz.robot.state.pos,
+                            mz.algorithm.maze_map,
+                            mz.algorithm.position_values,
+                            {},
+                        )
+                    )
                     draw_queue.put(None)
                     print("Target reached")
                     print("Searching time: %.2f" % mz.robot.robot.getTime(), "s")

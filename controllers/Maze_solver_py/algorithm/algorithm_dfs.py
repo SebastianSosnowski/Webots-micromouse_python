@@ -1,5 +1,5 @@
 from algorithm import AlgorithmInterface
-from utils.params import RobotState, DetectedWalls, Fork
+from utils.params import RobotState, DetectedWalls
 from algorithm.common import init_maze_map_graph, add_walls_graph
 from config.models import AppConfig
 
@@ -8,44 +8,32 @@ class DFS(AlgorithmInterface):
     def __init__(self, cfg: AppConfig):
         self._cfg = cfg
         self._maze_map: dict[int, list[int]] = {}
-        self._fork: list[Fork] = []
-        self._visited: list[int] = []
+        self._visited: set[int] = set()
+        self._parent: dict[int, int | None] = {}
         self._stack: list[int] = []
-        self._current_path: list[int] = []
-        self._full_path: list[int] = []
         self._pos = cfg.maze.start_position
         self._current_target = cfg.maze.target_position
 
     def init(self) -> None:
         self._maze_map = init_maze_map_graph(self._cfg.maze.rows, self._cfg.maze.columns)
-        self._visited.append(self._pos)
-        self._current_path.append(self._pos)
+        self._visited.add(self._pos)
+        self._stack.append(self._pos)
+        self._parent[self._pos] = None
 
     def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
-        targets = []
-
         add_walls_graph(self._maze_map, self._cfg.maze.rows, detected, state)
 
-        dead_end = self._check_fork(self._maze_map[self._pos], self._pos, self._visited)
-        if dead_end:
-            self._move_to_last_fork(targets)
-
-        self._current_target = self._check_possible_routes(
-            self._maze_map[state.pos], self._visited, self._stack
-        )
-
-        targets.append(self._current_target)
+        self._current_target = self._select_next_position()
+        path = self._build_path_to_next_target(self._current_target)
         self._pos = self._current_target
-        self._visited.append(self._pos)
-        self._current_path.append(self._pos)
-        return targets
+        return path
 
     def finish(self) -> bool:
         return self._pos == self._cfg.maze.target_position
 
     def prepare_results(self) -> tuple[list[int], dict, list]:
-        self._current_path.pop(0)
-        return self._current_path, self._maze_map, []
+        path = self._reconstruct_full_path(self._cfg.maze.target_position)
+        return path, self._maze_map, []
 
     @property
     def maze_map(self) -> dict[int, list[int]]:
@@ -59,68 +47,75 @@ class DFS(AlgorithmInterface):
     def pos(self) -> int:
         return self._pos
 
-    def _move_to_last_fork(self, targets: list[int]):
+    def _select_next_position(self) -> int:
         """
-        Move to previous valid fork and extend targets path.
+        Select next position to visit.
 
-        Use current_path to determine path to fork and trim it afterwards.
-
-        Args:
-            targets: Path to target position for robot.
-        """
-        fork = self._fork[-1]
-        fork_pos = fork.position
-
-        idx = self._current_path.index(fork_pos)
-
-        path_back = list(reversed(self._current_path[idx:-1]))
-        targets.extend(path_back)
-        self._current_path = self._current_path[: idx + 1]
-        self._pos = fork_pos
-
-        fork.unused_routes -= 1
-        if fork.unused_routes == 0:
-            self._fork.pop()
-
-    def _check_fork(self, connections: list[int], robot_position: int, visited: list[int]) -> bool:
-        """
-        Check whether position is corridor, fork or dead-end.
-
-        Add new Fork if found.
-
-        Args:
-            connections: List with positions available from current position.
-            robot_position: Variable with current robot position in maze.
+        The order of visiting neighbors is related to how neighbors
+        positions were initialized in init_maze_map_graph.
 
         Returns:
-            True if current cell is dead-end. Otherwise False
+            Next position to visit.
+
+        Raises:
+            RuntimeError: If stack is empty.
         """
-        unvisited = [c for c in connections if c not in visited]
+        if not self._stack:
+            raise RuntimeError("Stack should not be empty before reaching target!")
+        current = self._stack.pop()
+        for neighbor in reversed(self._maze_map[current]):
+            if neighbor not in self._visited:
+                self._visited.add(neighbor)
+                self._parent[neighbor] = current
+                self._stack.append(neighbor)
+        if not self._stack:
+            raise RuntimeError("Stack should not be empty before reaching target!")
 
-        if not unvisited:
-            return True
+        return self._stack[-1]
 
-        if len(unvisited) >= 2:
-            self._fork.append(Fork(robot_position, len(unvisited) - 1))
-
-        return False
-
-    def _check_possible_routes(
-        self, adjacent_positions: list[int], visited: list[int], stack: list[int]
-    ) -> int:
-        """Add possible adjacent positions to stack and then decides to which position move next.
+    def _build_path_to_next_target(self, target: int) -> list[int]:
+        """
+        Build path from current position to current target using parent map.
 
         Args:
-            adjacent_positions: Positions accessible from current robot position.
-            visited: Positions already added to stack.
-            stack: Positions which will be visited.
+            target: Target position
 
         Returns:
-            current_destination: Position to which move next.
+            path: Path to current target position for robot.
+
+        Raises:
+            ValueError: If reached start position parent.
         """
-        for pos in reversed(adjacent_positions):
-            if pos not in visited and pos not in stack:
-                stack.append(pos)
-                if pos == self._cfg.maze.target_position:
-                    break
-        return stack.pop()
+        if target in self._maze_map[self._pos]:
+            return [target]
+
+        path = []
+        cur = self._pos
+        while target not in self._maze_map[cur]:
+            cur = self._parent[cur]
+            if cur is None:
+                raise ValueError("DFS broken: target not reachable via parent chain")
+            path.append(cur)
+        path.append(target)
+
+        return path
+
+    def _reconstruct_full_path(self, target: int) -> list[int]:
+        """
+        Reconstruct full path from start to target using parent map.
+        Used after exploration is finished.
+
+        Args:
+            target: Target position
+
+        Returns:
+            path: Path to target position for robot.
+        """
+        path = []
+        cur = target
+
+        while cur is not None:
+            path.append(cur)
+            cur = self._parent[cur]
+        path.pop()  # remove start
+        return list(reversed(path))

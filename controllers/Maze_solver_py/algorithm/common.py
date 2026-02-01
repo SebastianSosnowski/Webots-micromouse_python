@@ -4,8 +4,11 @@ from utils.params import RobotState, DetectedWalls, Direction
 
 def init_maze_map_graph(rows: int, cols: int):
     """Initialize maze map with external walls as graph.
-    Border cells are initialized with respective walls.
-    Inside cells are initialized without any walls i.e. 4 connections.
+
+    Border positions are initialized with respective walls.
+    Inside positions are initialized without any walls i.e. 4 neighbors.
+    The order of neighbors is following: [N, S, E, W]
+
 
     Returns:
         dict: Initialized maze map dictionary.
@@ -26,6 +29,7 @@ def init_maze_map_graph(rows: int, cols: int):
             if col > 0:  # WEST
                 neighbors.append(row * cols + (col - 1))
             maze_map[pos] = neighbors
+            # print(f"maze_map[{pos}]= {maze_map[pos]}")
     return maze_map
 
 
@@ -44,14 +48,13 @@ def add_walls_graph(
     """
     neighbors = {
         Direction.NORTH: state.pos + rows,
+        Direction.SOUTH: state.pos - rows,
         Direction.EAST: state.pos + 1,
         Direction.WEST: state.pos - 1,
-        Direction.SOUTH: state.pos - rows,
     }
 
-    # Only valid neighbors
-    valid_neighbors = [pos for pos in neighbors.values() if pos in maze_map]
-
+    valid_neighbors = maze_map[state.pos]
+    # print(f"orientation ({state.orientation}), valid_neighbors ({valid_neighbors})")
     for rel_dir, wall in detected.items():
         if not wall:
             continue
@@ -64,5 +67,5 @@ def add_walls_graph(
 
         if neighbor_with_wall in maze_map and state.pos in maze_map[neighbor_with_wall]:
             maze_map[neighbor_with_wall].remove(state.pos)
-
+    # print(f"orientation ({state.orientation}), valid_neighbors after ({valid_neighbors})")
     maze_map[state.pos] = valid_neighbors

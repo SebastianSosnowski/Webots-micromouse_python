@@ -1,7 +1,7 @@
 import pytest
 from algorithm.common import init_maze_map_graph, add_walls_graph
 from algorithm.algorithm_dfs import DFS
-from utils.params import RobotState, DetectedWalls, Direction, Fork, Mode, Algorithms, MazeLayout
+from utils.params import RobotState, DetectedWalls, Direction, Mode, Algorithms, MazeLayout
 from config.models import AppConfig, MazeConfig, SimulationConfig, RobotConfig
 
 
@@ -72,112 +72,30 @@ def dfs_4x4_maze(maze_cfg_4x4: AppConfig) -> DFS:
     return dfs
 
 
-def test_check_fork_detects_dead_end(dfs_4x4_maze: DFS):
-    pos = 12
-    dfs_4x4_maze._current_path = [0, 4, 8, 12]
-    dfs_4x4_maze._visited = [0, 4, 8, 12]
-    connections = [8]
-
-    dead_end = dfs_4x4_maze._check_fork(connections, pos, dfs_4x4_maze._visited)
-
-    assert dead_end is True
-
-
-def test_check_fork_add_new_fork(dfs_4x4_maze: DFS):
-    pos = 8
-    dfs_4x4_maze._visited = [0, 4, 8]
-    connections = [4, 9, 12]
-
-    dead_end = dfs_4x4_maze._check_fork(connections, pos, dfs_4x4_maze._visited)
-
-    assert dead_end is False
-    assert len(dfs_4x4_maze._fork) == 1
-    fork = dfs_4x4_maze._fork[0]
-    assert fork.position == pos
-    assert fork.unused_routes == len(connections) - 2
-
-
-def test_check_fork_dont_add_new_fork(dfs_4x4_maze: DFS):
-    pos = 0
-    connections = [4]
-    dfs_4x4_maze._visited = [0]
-
-    dead_end = dfs_4x4_maze._check_fork(connections, pos, dfs_4x4_maze._visited)
-
-    assert dead_end is False
-    assert len(dfs_4x4_maze._fork) == 0
-
-
-def test_move_to_last_fork(dfs_4x4_maze: DFS):
+def test_select_next_position_corridor(dfs_4x4_maze: DFS):
     """
     Initial state as would algorithm traversed through positions
-    0->4->8->12
+    0->4.
     """
-    dfs_4x4_maze._current_path = [0, 4, 8, 12]
-    dfs_4x4_maze._visited = [0, 4, 8, 12]
-    fork_pos = 8
-    dfs_4x4_maze._fork.append(Fork(fork_pos, 1))
-    targets = []
-    dfs_4x4_maze._move_to_last_fork(targets)
-
-    assert targets == [fork_pos]
-
-
-def test_check_possible_routes_fork(dfs_4x4_maze: DFS):
-    """
-    Initial state as would algorithm traversed through positions
-    0->4->8->12->9->10
-    """
-    dfs_4x4_maze._visited = [0, 4, 8, 12, 9, 10]
-    dfs_4x4_maze._stack = []
-    pos = 10
-
-    target = dfs_4x4_maze._check_possible_routes(
-        dfs_4x4_maze._maze_map[pos], dfs_4x4_maze._visited, dfs_4x4_maze._stack
-    )
-    assert target == 14
-
-
-def test_check_possible_routes_dead_end(dfs_4x4_maze: DFS):
-    """
-    Initial state as would algorithm traversed through positions
-    0->4->8->12->9->10->14->15->13.
-    """
-    pos = 13
-    dfs_4x4_maze._visited = [0, 4, 8, 12, 9, 10, 14, 15, 13]
-    dfs_4x4_maze._stack = [6, 11]
-
-    target = dfs_4x4_maze._check_possible_routes(
-        dfs_4x4_maze._maze_map[pos], dfs_4x4_maze._visited, dfs_4x4_maze._stack
-    )
-    assert target == 11
-
-
-def test_check_possible_routes_found_target(dfs_4x4_maze: DFS):
-    """
-    Initial state as would algorithm traversed through positions
-    0->4->8->12->9->10->14.
-
-    Target should be 13 instead of 15.
-    """
-    pos = 14
-    global_target = dfs_4x4_maze._cfg.maze.target_position = 13
-    dfs_4x4_maze._visited = [0, 4, 8, 12, 9, 10, 14]
-    dfs_4x4_maze._stack = [6, 11]
-
-    target = dfs_4x4_maze._check_possible_routes(
-        dfs_4x4_maze._maze_map[pos], dfs_4x4_maze._visited, dfs_4x4_maze._stack
-    )
-    assert target == global_target
+    pos = 4
+    dfs_4x4_maze._visited.update([0, pos])
+    dfs_4x4_maze._stack = [pos]
+    dfs_4x4_maze._parent = {0: None, pos: 1}
+    dfs_4x4_maze._pos = pos
+    state = RobotState(pos=pos, orientation=Direction.NORTH, current_target=15)
+    walls = DetectedWalls(True, False, True, False)
+    add_walls_graph(dfs_4x4_maze._maze_map, 4, walls, state)
+    next = dfs_4x4_maze._select_next_position()
+    assert next == 8
 
 
 def test_update_start(dfs_4x4_maze: DFS):
     """
     Initial state as would algorithm start at position 0.
     """
-    dfs_4x4_maze._visited = [0]
-    dfs_4x4_maze._stack = []
-    dfs_4x4_maze._current_path = [0]
+    dfs_4x4_maze._visited.add(0)
+    dfs_4x4_maze._stack = [0]
+    dfs_4x4_maze._parent = {0: None}
     state = RobotState(pos=0, orientation=Direction.NORTH, current_target=15)
     detected = DetectedWalls(True, False, True, True)
 
@@ -191,9 +109,9 @@ def test_update_corridor(dfs_4x4_maze: DFS):
     Initial state as would algorithm traversed through positions
     0->4.
     """
-    dfs_4x4_maze._visited = [0, 4]
-    dfs_4x4_maze._stack = []
-    dfs_4x4_maze._current_path = [0, 4]
+    dfs_4x4_maze._visited.update([0, 4])
+    dfs_4x4_maze._stack = [4]
+    dfs_4x4_maze._parent = {0: None, 4: 1}
     dfs_4x4_maze._pos = 4
     state = RobotState(pos=4, orientation=Direction.NORTH, current_target=15)
     detected = DetectedWalls(True, False, True, False)
@@ -208,14 +126,25 @@ def test_update_dead_end(dfs_4x4_maze: DFS):
     0->4->8->12->9->10->14->15->13.
     """
     pos = 13
-    dfs_4x4_maze._visited = [0, 4, 8, 12, 9, 10, 14, 15, 13]
-    dfs_4x4_maze._stack = [6, 11]
-    dfs_4x4_maze._current_path = [0, 4, 8, 9, 10, 14, 13]
+    dfs_4x4_maze._visited.update([0, 4, 8, 12, 9, 10, 6, 11, 14, 15, 13])
+    dfs_4x4_maze._stack = [11, 6, 13]
+    dfs_4x4_maze._parent = {
+        0: None,
+        4: 1,
+        8: 4,
+        12: 8,
+        9: 8,
+        10: 9,
+        11: 10,
+        6: 10,
+        14: 10,
+        15: 14,
+        13: 14,
+    }
     dfs_4x4_maze._pos = pos
-    dfs_4x4_maze._fork.append(Fork(10, 2))
-    state = RobotState(pos=pos, orientation=Direction.NORTH, current_target=15)
-    detected = DetectedWalls(True, False, True, False)
+    state = RobotState(pos=pos, orientation=Direction.WEST, current_target=15)
+    detected = DetectedWalls(True, True, True, False)
 
     targets = dfs_4x4_maze.update(detected, state)
 
-    assert targets == [14, 10, 11]
+    assert targets == [14, 10, 6]
