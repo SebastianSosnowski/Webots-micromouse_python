@@ -1,4 +1,3 @@
-from config.world import world
 from utils.params import RobotState, DetectedWalls, Direction
 
 
@@ -69,3 +68,60 @@ def add_walls_graph(
             maze_map[neighbor_with_wall].remove(state.pos)
     # print(f"orientation ({state.orientation}), valid_neighbors after ({valid_neighbors})")
     maze_map[state.pos] = valid_neighbors
+
+
+def build_path_to_next_target(
+    maze_map: dict[int, list[int]], pos: int, parent: dict[int, int | None], target: int
+) -> list[int]:
+    if target in maze_map[pos]:
+        return [target]
+
+    # current pos parents list
+    ancestors = set()
+    cur = pos
+    while cur is not None:
+        ancestors.add(cur)
+        cur = parent[cur]
+
+    # find common parent
+    path_up = []
+    cur = target
+    while cur not in ancestors:
+        path_up.append(cur)
+        cur = parent[cur]
+        if cur is None:
+            raise ValueError("Target not reachable via parent chain")
+
+    common_ancestor = cur
+
+    # back from current pos to common ancestor
+    path_down = []
+    cur = pos
+    while cur != common_ancestor:
+        cur = parent[cur]
+        if cur is None:
+            raise ValueError("Target not reachable via parent chain")
+        path_down.append(cur)
+
+    return path_down + list(reversed(path_up))
+
+
+def reconstruct_full_path(parent: dict[int, int | None], target: int) -> list[int]:
+    """
+    Reconstruct full path from start to target using parent map.
+    Used after exploration is finished.
+
+    Args:
+        target: Target position
+
+    Returns:
+        path: Path to target position for robot.
+    """
+    path = []
+    cur = target
+
+    while cur is not None:
+        path.append(cur)
+        cur = parent[cur]
+    path.pop()  # remove start
+    return list(reversed(path))

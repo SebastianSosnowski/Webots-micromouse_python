@@ -1,6 +1,11 @@
 from algorithm import AlgorithmInterface
 from utils.params import RobotState, DetectedWalls
-from algorithm.common import init_maze_map_graph, add_walls_graph
+from algorithm.common import (
+    init_maze_map_graph,
+    add_walls_graph,
+    build_path_to_next_target,
+    reconstruct_full_path,
+)
 from config.models import AppConfig
 
 
@@ -24,7 +29,9 @@ class DFS(AlgorithmInterface):
         add_walls_graph(self._maze_map, self._cfg.maze.rows, detected, state)
 
         self._current_target = self._select_next_position()
-        path = self._build_path_to_next_target(self._current_target)
+        path = build_path_to_next_target(
+            self._maze_map, self._pos, self._parent, self._current_target
+        )
         self._pos = self._current_target
         return path
 
@@ -32,7 +39,7 @@ class DFS(AlgorithmInterface):
         return self._pos == self._cfg.maze.target_position
 
     def prepare_results(self) -> tuple[list[int], dict, list]:
-        path = self._reconstruct_full_path(self._cfg.maze.target_position)
+        path = reconstruct_full_path(self._parent, self._cfg.maze.target_position)
         return path, self._maze_map, []
 
     @property
@@ -72,50 +79,3 @@ class DFS(AlgorithmInterface):
             raise RuntimeError("Stack should not be empty before reaching target!")
 
         return self._stack[-1]
-
-    def _build_path_to_next_target(self, target: int) -> list[int]:
-        """
-        Build path from current position to current target using parent map.
-
-        Args:
-            target: Target position
-
-        Returns:
-            path: Path to current target position for robot.
-
-        Raises:
-            ValueError: If reached start position parent.
-        """
-        if target in self._maze_map[self._pos]:
-            return [target]
-
-        path = []
-        cur = self._pos
-        while target not in self._maze_map[cur]:
-            cur = self._parent[cur]
-            if cur is None:
-                raise ValueError("DFS broken: target not reachable via parent chain")
-            path.append(cur)
-        path.append(target)
-
-        return path
-
-    def _reconstruct_full_path(self, target: int) -> list[int]:
-        """
-        Reconstruct full path from start to target using parent map.
-        Used after exploration is finished.
-
-        Args:
-            target: Target position
-
-        Returns:
-            path: Path to target position for robot.
-        """
-        path = []
-        cur = target
-
-        while cur is not None:
-            path.append(cur)
-            cur = self._parent[cur]
-        path.pop()  # remove start
-        return list(reversed(path))
