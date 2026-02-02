@@ -35,7 +35,7 @@ class AStarMod(AlgorithmInterface):
         self._closed.append(state.pos)
         self._update_neighbors_costs(self._maze_map[state.pos], state.pos)
 
-        self._current_target = self._select_next_position(self._cost)
+        self._current_target = self._select_next_position(self._cost, state.pos)
 
         path = build_path_to_next_target(
             self._maze_map, self._pos, self._parent, self._current_target
@@ -62,7 +62,7 @@ class AStarMod(AlgorithmInterface):
     def pos(self) -> int:
         return self._pos
 
-    def _select_next_position(self, cost: dict[int, list[int]]):
+    def _select_next_position(self, cost: dict[int, list[int]], pos: int):
         """Decides to which cell move next. TODO Implement heap to make it much faster.
 
         Cell with the lowest overall cost (Fcost) is chosen. If more cells have equal
@@ -76,6 +76,8 @@ class AStarMod(AlgorithmInterface):
             int: Variable with a cell to which move next.
         """
         # if there are 2 cells with same Fcost and Hcost, pick last added to open i.e. neighbor
+        if self._is_corridor(pos):
+            return self._open[-1]
         current_destination = self._open[-1]
 
         for i in self._open:
@@ -153,3 +155,7 @@ class AStarMod(AlgorithmInterface):
             distance += absolute_difference
 
         return distance
+
+    def _is_corridor(self, pos: int) -> bool:
+        unvisited = [n for n in self._maze_map[pos] if n not in self._open]
+        return len(unvisited) == 1
