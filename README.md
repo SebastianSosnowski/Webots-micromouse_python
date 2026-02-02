@@ -1,84 +1,139 @@
 
 # Webots maze solver AKA MicroMouse
 
-This project was created as a part of diploma thesis, which goal was to compare a few path planning algorithms with a use of mobile robot in simulated environment. Principle of operation of the program is based on MicroMouse competition, so it can serve as a platform/base for testing other control algorithms for MicroMouse or to learn about those already implemented.
+This project was originally created as part of a diploma thesis, whose goal was to compare a few path planning algorithms with the use of a mobile robot in a simulated environment. The principle of operation of the program is based on MicroMouse competition, so it can serve as a platform/base for testing other control algorithms for MicroMouse or to learn about those already implemented.
+
 ![](Media/first.png)
-## How to run
 
-Before anything download and install Webots simulator in version R2023a (newer versions also should work) and Python3 on your PC. Optionally use VS Code editor.
-1. Configure Webots
-  
-    a) Without VS Code / any external code editor 
-    1. Open one of the worlds .wbt file from the project.
-    2. Change controller of e-puck robot in Webots project from extern to *Maze_solver_py*. For each world this operation must be done sepearately. **Webots controller module won’t be recognised and syntax suggestions won’t work in external editor.** 
-    
-    b) With VS Code (preferred)
-    1. Open a Webots/lib/controller folder in VS Code and create *setup.py* file (you may need to run VS code as admin).
-    2. Paste a following code into file:
-    ```python
-    from setuptools import setup
+## Table of Contents
 
-    setup(name='webots', version='1.0', packages=['controller', 'vehicle'])
-    ```
-    3. Run in terminal command *python setup.py sdist* . It will create a source distribution for python package in dist folder.
-    4. Run *pip install webots --no-index --find-links "file://C:\\path\\to\\dist"*. If there is an error about wrong version of *setuptools*, omit *--no-index* flag in command to allow pip to search for package outside of local directory.
-    5. Go back to the project. A controller module now should be recognised by editor.
-2. Add Results folder in *Maze_solver_py* directory with appropriate subfolders for each maze – They are not copied with repo. For example, if you want to use **Forbot** maze (listed in *Constants.py*) you need to create a *Forbot* directory in *Results* folder. Otherwise a ‘no such file or directory’ error will occur.
-3. Open terminal in Maze_solver_py directory. Go to Webots simulation and run it, then run *main.py*. A simulation should execute and a window with maze drawing should pop up.
-4. During a searching or speedrun information about the process is logged in terminal. After completing a course, the *run time* is printed and prompt to *press any key to end the program* appears.
+- [Features](#features)
+- [Implemented algorithms](#implemented-algorithms)
+- [How to run](#how-to-run)
+- [Configuration](#configuration)
+- [Code structure](#code-structure)
+- [License](#license)
 
 ## Features
 
 - Simulation made in Webots application which contains 10 worlds with 10 mazes which were used in MicroMouse competitions in a past.
 All mazes have start field in left down corner and goal fields in centre. Horizontal dimension of one field is 120 x 120 mm (not 180 x 180 which is a standard MicroMouse). That's because mobile robot Epuck2 was used and its IR distance sensors don't have enough range of operation.
 - Robot controller is written in Python and implements following algorithms: Floodfill, BFS (Breadth first search), DFS (Deep first search), A*. 
-From the level of program code we choose, which algorithm, maze layout and operation mode to use in next run.
-- Visualisation of algorithm operation progress by drawing a searched maze and values related to algorithms operation.
+From the config.yaml file we can choose which algorithm, maze layout, and operation mode to use in the next run.
+- Visualization of algorithm operation progress by drawing a searched maze and values related to the algorithms operation.
+
 ![](Media/search.gif)
 
 ![](Media/speedrun.gif)
 
-
-## Used Python modules
-
-- Controller – provided from Webots. Contains all classes and functions needed to control robot in the simulator.
-- Collections – contains data structures which extend or are the alternative for the ones built in the Python - used i.a. to implement queue.
-- Pickle – allows to data serialization to  e.g. save Python data structures, like dictionaries, to files.
-- Turtle – contains classes and functions used to draw basic graphics - used to draw maze and algorithm progress during the program operation.
-- Threading – allows to handle multi-threading in a program. Used to synchronize robot controller operation with a visualisation creation process and to not extend main loop execution time due to graphics drawing time.
-## Code structure
-Controller code responsible for robot control was divided in files based on the functionality to ease the navigation across the whole program.
-- File **Constants.py** - contains variables, which values are constant during the program operation. These are mainly  data structures responsible for code readability. Because the program doesn't have any interface added, from the level of this file variables responsible for choose of opertion mode, algorithm and maze layout are set:
-  - **MODE** - choose search run (maze exploration, path determination) or speedrun (drive straight to the goal by determined path)
-  - **ALGORITHM** - choose algorithm used to search maze and determine path.
-  - **MAZE_LAYOUT** - choose maze layout which is actually used in order to save drives results in adequate files.
-  - **TESTING** - print in console values read by sensors (testing).
-  - **WHOLE_SEARCH** -choose to search whole maze (only Floodfill algorithm). Unrecommended to use.
-![](Media/control.PNG)
-- Files **main.py** and **main_functions.py** - **main.py** is responsible to start chosen algorithm subprogram, which main loop is put into **main_functions.py** file.
-- File **algorithm_functions.py** - contains functions responsible for robot actions logic, like change of move direction, orientation, algorithm subfunction execution etc.
-- File **move_functions.py** - contains functions related to robot movement which are responsible for direct usage of robot peripherials like wheels turning, reading encoders values, position correction etc.
-- File **map_functions.py** - contains functions related with maze map creation, like walls detection and map update.
-- File **draw_maze.py** - contains functions responsible for robot operation visualisation. During simulation running while maze searching, currently explored maze layout is drawn in separate window. It is filled in with detected walls. Visited cells are marked with red dots. Additionally for Floodfill and A* algorithms, values assigned to individual fields, which are related to theirs operation, are written in each field. In speedrun, based on search run results, discovered maze layout is drawn with a path used to drive to the goal marked as red line as the robot progress.
-- File **var.py** - global variables used for synchronization between main loop and visualisation.
-- File **mazes_layouts.py** - contains text version of used mazes and lists with hex values representation.
 ## Implemented algorithms
 
-- Floodfill - 2 approaches are available:
-    1. Without searching whole maze - every cycle robot calculates shortest path to target and tries to go to it. When target is found it checks if it was the shrotest path by comparing paths for 2 mazes: actually discovered and discovered but cells which weren't visited are assumed with 4 walls. If path from actually discovered maze has same length as 2nd one - the shortest path was founded. If not robot makes second run - from target to start cell to search some of unvisited part of maze. Process reapeat's until shortest path is found.
-    2. With searching whole maze - WORKS only for mazes, where ALL cells are accessible. Unrecommended to use.
-- Deep first search DFS - Doesn't guarantee the shortest path but usually finds path very fast (micromouse mazes).
-- Breadth first search BFS modified - It was adjusted for robot movement. BFS is a horizontal searching through graph by going by each 'level' of nodes. To avoid unnnecesary back-tracking, only forks are treated as 'levels', which means that robot will go back only when it moves to new fork or dead-end. Because of that it doesn't guarantees shortest path as the unmodified verions does.
-- A* - Guarantees shortest path, but very long search time.
-- A* modified - Modification (similar to BFS) is that robot chooses where to go in 2 ways:
-    1. If current position is fork or dead-end - choose cell with lowest Fcost and/or Hcost (just like in normal A*).
-    2. If current cell is corridor - keep going until it's fork or dead-end.This approach makes searching much faster than normal A*, because robot doesn't need to keep moving across whole maze to just check one cell. The only drawback is that this approach might not guarantee the shortest path, although in micromouse mazes it usually should find it.
-## Software version
+- **Floodfill**: Every cycle, the robot calculates the shortest path to the target and attempts to follow it. When the target is reached, it checks if the path is the shortest by comparing it to the path in a maze where unvisited cells are assumed to have four walls. If the paths match in length, the shortest path is confirmed. Otherwise, the robot performs a second run from the target back to the start to explore unvisited areas. This process repeats until the shortest path is found.
+- **Depth-first search (DFS)**: Does not guarantee the shortest path but usually finds a path very quickly in MicroMouse mazes.
+- **Breadth-first search (BFS) modified**: Adjusted for robot movement. BFS searches horizontally through the graph by levels of nodes. To avoid unnecessary backtracking, only forks are treated as levels, meaning the robot only backtracks when reaching a new fork or dead-end. As a result, it does not guarantee the shortest path like the unmodified version.
+- **A***: Guarantees the shortest path but has a very long search time.
+- **A* modified**: A modification similar to BFS where the robot chooses its path in two ways:
+  - If the current position is a fork or dead-end, choose the cell with the lowest F-cost and/or H-cost (just like standard A*).
+  - If the current cell is a corridor, keep going until reaching a fork or dead-end. This approach makes searching much faster than the standard A* algorithm, as the robot does not need to traverse the entire maze just to check one cell. The only drawback is that it might not guarantee the shortest path, although in MicroMouse mazes it usually finds it.
 
-Software versions used in the project:
-- Webots R2023a
-- Python 3.11.3
-  - pip 22.3.1
+## How to run
+
+Before anything, download and install Webots simulator in version R2023a (newer versions also should work) and Python3 on your PC. Optionally use an IDE of your choice.
+1. Configure Webots
+  
+    a) Without an IDE 
+    1. Open one of the worlds .wbt file from the project.
+    2. Change controller of e-puck robot in Webots project from extern to *Maze_solver_py*. For each world this operation must be done separately. **Webots controller module won’t be recognised and syntax suggestions won’t work in external editor.** 
+    
+    b) With an IDE (e.g., VS Code)
+    1. Open a Webots/lib/controller folder in your IDE and create *setup.py* file (you may need to run your IDE as admin).
+    2. Paste the following code into file:
+    ```python
+    from setuptools import setup
+
+    setup(name='webots', version='1.0', packages=['controller', 'vehicle'])
+    ```
+    3. Run the following command in the terminal: *python setup.py sdist* . It will create a source distribution for Python package in dist folder.
+    4. Run the following command to install the Webots package:
+       ```bash
+       # On Windows
+       pip install webots --no-index --find-links "file://C:\path\to\dist"
+       
+       # On Linux
+       pip install webots --no-index --find-links "file:///path/to/dist"
+       ```
+       If there is an error about the wrong version of *setuptools*, omit the *--no-index* flag in the command to allow pip to search for the package outside of the local directory.
+    5. Go back to the project. A controller module now should be recognised by the editor.
+2. Open terminal in Maze_solver_py directory. Go to Webots simulation and run it, then run *main.py*. A simulation should execute and a window with maze drawing should pop up.
+3. During searching or speedrun, information about the process is logged in the terminal. After completing a course, the run time is printed and a prompt to press any key to end the program appears.
+## Configuration
+
+The project uses a YAML configuration file `config.yaml` located in the `controllers/Maze_solver_py/` directory to set simulation parameters without modifying the code.
+
+Here is an example of the `config.yaml` file:
+
+```yaml
+simulation:
+  mode: SEARCH          # Python enum
+  algorithm: FLOODFILL  # Python enum
+  maze_layout: JAPAN_2011  # Python enum
+  testing: false
+  time_step: 64
+
+robot:
+  model: epuck
+  axle: 0.0568
+  wheel: 0.02002
+  speed: 4
+
+maze:
+  rows: 16
+  columns: 16
+  start_position: 0
+  target_position: 136
+  tile_length: 0.12
+  visited_flag: 64
+```
+
+Key settings:
+
+- **simulation.mode**: Choose the operation mode - `SEARCH` for maze exploration and path finding, or `SPEEDRUN` for running the pre-computed path.
+- **simulation.algorithm**: Select the algorithm to use, e.g., `FLOODFILL`, `BFS`, `DFS`, `A_STAR`, `A_STAR_MOD`.
+- **simulation.maze_layout**: Choose the maze layout, e.g., `JAPAN_2011`, `UK2016`, etc.
+- **simulation.testing**: Enable/disable sensor testing output (boolean).
+- **simulation.time_step**: Time step for the simulation (in milliseconds).
+- **robot.model**: Robot model, currently `epuck`.
+- Other robot and maze parameters can be adjusted as needed.
+
+Edit `config.yaml` to change these settings before running the simulation.
+
+## Code structure
+
+The controller code is organized into modules for better maintainability and navigation.
+
+- **main.py**: The entry point of the application. It loads the configuration from `config.yaml`, initializes the `MazeSolver` class, and runs the robot simulation.
+- **config/**: Contains configuration-related modules.
+  - **loader.py**: Loads and parses the `config.yaml` file.
+  - **models.py**: Defines data models for configuration using Pydantic.
+  - **enums.py**: Defines enumerations for modes, algorithms, and maze layouts.
+- **algorithm/**: Implements various pathfinding algorithms.
+  - **algorithm_interface.py**: Defines the interface for algorithms.
+  - **algorithm_base.py**: Base class for algorithms.
+  - Specific algorithm files like `algorithm_floodfill.py`, `algorithm_bfs.py`, `algorithm_dfs.py`, `algorithm_a_star.py`, `algorithm_a_star_mod.py`, etc.
+- **robot/**: Handles robot control.
+  - **robot_interface.py**: Defines the robot interface.
+  - **robot_base.py**: Base robot class.
+  - **robot_epuck.py**: Implementation for the e-puck robot.
+- **draw/**: Visualization module.
+  - **maze_drawer.py**: Handles drawing the maze, walls, and robot position using Turtle graphics.
+- **read_files/**: Data storage.
+  - **storage.py**: Saves simulation results to files.
+- **utils/**: Utility modules.
+  - **params.py**: Contains parameters and constants.
+- **mazes_layouts.py**: Defines maze layouts and their representations.
+- **tests/**: Contains unit tests for the algorithms and common functions.
+- **config.yaml**: Configuration file (see Configuration section).
+
 ## License
 
 Apache-2.0
