@@ -1,5 +1,5 @@
 from robot.robot_base import MyRobot
-from algorithm.algorithm_base import AlgorithmV2
+from algorithm.algorithm_base import Algorithm
 from config.enums import Mode
 from config.models import AppConfig
 from read_files.storage import read_results
@@ -9,7 +9,7 @@ class MazeSolver:
     def __init__(self, config: AppConfig) -> None:
         self._cfg = config
         self.robot = MyRobot(self._cfg)
-        self.algorithm = AlgorithmV2(self._cfg)
+        self.algorithm = Algorithm(self._cfg)
 
     def init_drawer_values(self) -> tuple[list[int], list | dict, list | dict]:
         if self._cfg.simulation.mode == Mode.SEARCH:

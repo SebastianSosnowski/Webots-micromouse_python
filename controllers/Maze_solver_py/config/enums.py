@@ -11,7 +11,7 @@ class Mode(str, Enum):
 class Algorithms(str, Enum):
     """Algorithm to solve maze."""
 
-    KEYBOARD = "KEYBOARD"
+    MANUAL = "MANUAL"
     FLOODFILL = "FLOODFILL"
     DFS = "DFS"
     BFS = "BFS"

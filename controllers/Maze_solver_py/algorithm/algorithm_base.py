@@ -1,15 +1,15 @@
-from algorithm import AlgorithmInterface, Floodfill, Keyboard, DFS, BFS, AStar, AStarMod
+from algorithm import AlgorithmInterface, Floodfill, Manual, DFS, BFS, AStar, AStarMod
 from utils.params import RobotState, DetectedWalls
 from config.enums import Algorithms
 from config.models import AppConfig
 
 
-class AlgorithmV2(AlgorithmInterface):
+class Algorithm(AlgorithmInterface):
     def __init__(self, cfg: AppConfig):
         if cfg.simulation.algorithm == Algorithms.FLOODFILL:
             self.impl = Floodfill(cfg)
-        elif cfg.simulation.algorithm == Algorithms.KEYBOARD:
-            self.impl = Keyboard(cfg)
+        elif cfg.simulation.algorithm == Algorithms.MANUAL:
+            self.impl = Manual(cfg)
         elif cfg.simulation.algorithm == Algorithms.DFS:
             self.impl = DFS(cfg)
         elif cfg.simulation.algorithm == Algorithms.BFS:
