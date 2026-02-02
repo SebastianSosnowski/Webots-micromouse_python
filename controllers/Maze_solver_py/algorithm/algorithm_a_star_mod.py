@@ -1,6 +1,4 @@
 from algorithm import AStar
-from utils.params import RobotState, DetectedWalls
-from config.models import AppConfig
 from algorithm.common import (
     init_maze_map_graph,
     add_walls_graph,

@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+
 from config.enums import Algorithms, MazeLayout, Mode
 
 

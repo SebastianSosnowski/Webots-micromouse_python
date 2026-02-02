@@ -1,4 +1,5 @@
 from controller import Keyboard
+
 from algorithm import AlgorithmInterface
 from utils.params import RobotState, DetectedWalls
 from config.models import AppConfig

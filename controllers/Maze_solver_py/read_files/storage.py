@@ -1,5 +1,6 @@
 from pathlib import Path
 import pickle
+
 from config.enums import MazeLayout, Algorithms
 
 

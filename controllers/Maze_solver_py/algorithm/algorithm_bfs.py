@@ -1,3 +1,5 @@
+from collections import deque
+
 from algorithm import AlgorithmInterface
 from utils.params import RobotState, DetectedWalls
 from config.models import AppConfig
@@ -7,7 +9,6 @@ from algorithm.common import (
     build_path_to_next_target,
     reconstruct_full_path,
 )
-from collections import deque
 
 
 class BFS(AlgorithmInterface):
