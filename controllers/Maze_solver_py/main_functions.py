@@ -1,5 +1,6 @@
 from collections import deque
 from queue import Queue
+from copy import deepcopy
 
 from controller import Keyboard
 
@@ -17,7 +18,7 @@ from utils.my_robot import MyRobot
 from maze_solver import MazeSolver
 
 from utils.params import DrawState
-from read_files.storage import read_results, save_results
+from read_files.storage import save_results
 
 
 def interface_main(mz: MazeSolver):
@@ -26,7 +27,7 @@ def interface_main(mz: MazeSolver):
     path, maze_map, position_values = mz.init_drawer_values()
 
     draw_queue = Queue(maxsize=1)
-    drawer = MazeDrawer(mz._cfg, maze_map, position_values, draw_queue)
+    drawer = MazeDrawer(mz._cfg, deepcopy(maze_map), deepcopy(position_values), draw_queue)
     drawer.start_drawing()
     match mz._cfg.simulation.mode:
         case Mode.SEARCH:
@@ -36,14 +37,18 @@ def interface_main(mz: MazeSolver):
                 while targets:
                     draw_queue.put(
                         DrawState(
-                            mz.robot.state.pos, mz.algorithm.maze_map, mz.algorithm.position_values
+                            mz.robot.state.pos,
+                            deepcopy(mz.algorithm.maze_map),
+                            deepcopy(mz.algorithm.position_values),
                         )
                     )
                     mz.robot.move(targets.pop(0))
                 if mz.algorithm.finish():
                     draw_queue.put(
                         DrawState(
-                            mz.robot.state.pos, mz.algorithm.maze_map, mz.algorithm.position_values
+                            mz.robot.state.pos,
+                            deepcopy(mz.algorithm.maze_map),
+                            deepcopy(mz.algorithm.position_values),
                         )
                     )
                     draw_queue.put(None)
@@ -62,11 +67,9 @@ def interface_main(mz: MazeSolver):
             while mz.robot.robot.step(mz._cfg.simulation.time_step) != -1:
                 if not path:
                     break
-                draw_queue.put(
-                    DrawState(mz.robot.state.pos, mz.algorithm.maze_map, position_values)
-                )
+                draw_queue.put(DrawState(mz.robot.state.pos, maze_map, position_values))
                 mz.robot.move(path.pop(0))
-            draw_queue.put(DrawState(mz.robot.state.pos, mz.algorithm.maze_map, position_values))
+            draw_queue.put(DrawState(mz.robot.state.pos, maze_map, position_values))
             draw_queue.put(None)
             print("Target reached")
             print("Speedrun time: %.2f" % mz.robot.robot.getTime(), "s")
