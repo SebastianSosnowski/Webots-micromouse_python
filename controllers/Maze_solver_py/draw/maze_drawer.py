@@ -8,7 +8,13 @@ from config.models import AppConfig
 
 
 class MazeDrawer(Thread):
-    def __init__(self, config: AppConfig, maze_map, distance, draw_queue: Queue) -> None:
+    def __init__(
+        self,
+        config: AppConfig,
+        maze_map: list | dict,
+        position_values: list | dict,
+        draw_queue: Queue,
+    ) -> None:
         """Initialize the MazeDrawer thread.
 
         Args:
@@ -20,13 +26,12 @@ class MazeDrawer(Thread):
         self._cfg = config
         self.draw_queue = draw_queue
         self.maze_map = maze_map
-        self.distance = distance
+        self.position_values = position_values
         self.size = 60
         self.last_x = 0
         self.last_y = 0
         self.robot_pos = self._cfg.maze.start_position
         self.distance_update = False
-        self.cost = {}
 
     def start_drawing(self):
         """Start the drawing thread."""
@@ -35,7 +40,7 @@ class MazeDrawer(Thread):
     def run(self):
         """Run the drawing loop, processing updates from the queue."""
         self.robot_pos_canvas, self.path_canvas = self._init_canvas()
-        self.text_canvas, self.maze_canvas = self._init_maze(self.maze_map, self.distance)
+        self.text_canvas, self.maze_canvas = self._init_maze(self.maze_map, self.position_values)
 
         while True:
             msg: DrawState = self.draw_queue.get()
@@ -128,11 +133,10 @@ class MazeDrawer(Thread):
         Args:
             msg (DrawState): The draw state message.
         """
-        if msg.distance != self.distance:
+        if msg.position_values != self.position_values:
             self.distance_update = True
-            self.distance = msg.distance
+            self.position_values = msg.position_values
         self.maze_map = msg.maze_map
-        self.cost = msg.cost
         self.robot_pos = msg.robot_pos
 
     def _draw_search_frame(self):
@@ -157,7 +161,7 @@ class MazeDrawer(Thread):
                 self.text_canvas.clear()
                 for y in range(-480, 480, self.size):
                     for x in range(-480, 480, self.size):
-                        write_distance(x, y, self.distance[i], self.text_canvas)
+                        write_distance(x, y, self.position_values[i], self.text_canvas)
                         i += 1
                 self.distance_update = False
         else:  # graphs
@@ -169,12 +173,12 @@ class MazeDrawer(Thread):
                 or self._cfg.simulation.algorithm == Algorithms.A_STAR_MOD
             ):
                 self.text_canvas.clear()
-                for key in self.cost:
+                for key in self.position_values:
                     x = key % 16
                     x = -480 + x * self.size
                     y = key // 16
                     y = -480 + y * self.size
-                    write_cost(x, y, self.cost[key], self.text_canvas)
+                    write_cost(x, y, self.position_values[key], self.text_canvas)
 
         if self.robot_pos == 136:
             self._draw_center()

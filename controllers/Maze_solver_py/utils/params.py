@@ -71,8 +71,7 @@ class RobotState:
 class DrawState:
     robot_pos: int
     maze_map: list | dict
-    distance: list | dict
-    cost: dict
+    position_values: list | dict
 
 
 @dataclass
