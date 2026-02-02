@@ -36,20 +36,14 @@ def interface_main(mz: MazeSolver):
                 while targets:
                     draw_queue.put(
                         DrawState(
-                            mz.robot.state.pos,
-                            mz.algorithm.maze_map,
-                            mz.algorithm.position_values,
-                            {},
+                            mz.robot.state.pos, mz.algorithm.maze_map, mz.algorithm.position_values
                         )
                     )
                     mz.robot.move(targets.pop(0))
                 if mz.algorithm.finish():
                     draw_queue.put(
                         DrawState(
-                            mz.robot.state.pos,
-                            mz.algorithm.maze_map,
-                            mz.algorithm.position_values,
-                            {},
+                            mz.robot.state.pos, mz.algorithm.maze_map, mz.algorithm.position_values
                         )
                     )
                     draw_queue.put(None)
@@ -69,12 +63,10 @@ def interface_main(mz: MazeSolver):
                 if not path:
                     break
                 draw_queue.put(
-                    DrawState(mz.robot.state.pos, mz.algorithm.maze_map, position_values, {})
+                    DrawState(mz.robot.state.pos, mz.algorithm.maze_map, position_values)
                 )
                 mz.robot.move(path.pop(0))
-            draw_queue.put(
-                DrawState(mz.robot.state.pos, mz.algorithm.maze_map, position_values, {})
-            )
+            draw_queue.put(DrawState(mz.robot.state.pos, mz.algorithm.maze_map, position_values))
             draw_queue.put(None)
             print("Target reached")
             print("Speedrun time: %.2f" % mz.robot.robot.getTime(), "s")

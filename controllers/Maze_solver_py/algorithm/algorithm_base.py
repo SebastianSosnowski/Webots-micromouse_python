@@ -38,7 +38,7 @@ class AlgorithmV2(AlgorithmInterface):
         return self.impl.maze_map
 
     @property
-    def position_values(self) -> list:
+    def position_values(self) -> list | dict:
         return self.impl.position_values
 
     @property

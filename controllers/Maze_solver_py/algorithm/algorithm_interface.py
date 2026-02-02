@@ -59,7 +59,7 @@ class AlgorithmInterface(ABC):
 
     @property
     @abstractmethod
-    def position_values(self) -> list:
+    def position_values(self) -> list | dict:
         """
         Return algorithm values, which some algorithms assign to each position.
 

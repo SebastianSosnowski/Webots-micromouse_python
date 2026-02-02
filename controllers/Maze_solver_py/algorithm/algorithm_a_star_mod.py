@@ -26,13 +26,17 @@ class AStarMod(AlgorithmInterface):
         self._maze_map = init_maze_map_graph(self._cfg.maze.rows, self._cfg.maze.columns)
         self._open.append(self._pos)
         self._cost[0] = [0, 0]
+        self._parent[self._pos] = None
 
     def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
         add_walls_graph(self._maze_map, self._cfg.maze.rows, detected, state)
 
         self._open.remove(state.pos)
         self._closed.append(state.pos)
+        self._update_neighbors_costs(self._maze_map[state.pos], state.pos)
+
         self._current_target = self._select_next_position(self._cost)
+
         path = build_path_to_next_target(
             self._maze_map, self._pos, self._parent, self._current_target
         )
@@ -40,18 +44,19 @@ class AStarMod(AlgorithmInterface):
         return path
 
     def finish(self):
-        raise NotImplementedError()
+        return self._pos == self._cfg.maze.target_position
 
-    def prepare_results(self) -> tuple[list[int], list | dict, list | dict]:
-        raise NotImplementedError()
+    def prepare_results(self) -> tuple[list[int], dict[int, list[int]], dict[int, list[int]]]:
+        path = reconstruct_full_path(self._parent, self._cfg.maze.target_position)
+        return path, self._maze_map, self._cost
 
     @property
     def maze_map(self) -> dict[int, list[int]]:
         return self._maze_map
 
     @property
-    def position_values(self) -> list:
-        raise NotImplementedError()
+    def position_values(self) -> dict:
+        return self._cost
 
     @property
     def pos(self) -> int:
@@ -125,8 +130,6 @@ class AStarMod(AlgorithmInterface):
                 if neighbor == self._cfg.maze.target_position:
                     break
 
-        return self._open, self._parent, self._cost
-
     @staticmethod
     def _calc_cost(start: int, target: int):
         """Calculates Manhattan's distance which is used as cost in A* algorithm.
@@ -150,48 +153,3 @@ class AStarMod(AlgorithmInterface):
             distance += absolute_difference
 
         return distance
-
-    # def _build_path_to_next_target_A_star(self, start: int, target: int):
-    #     """A* algorithm function which is used to create path between 2 cells.
-
-    #     It is used to determine final path as well as paths between current position
-    #     and current destination in main program.
-
-    #     Args:
-    #         maze_map: Dictionary with discovered maze map (or any graph).
-    #         start: Variable with starting cell number.
-    #         target: Variable with targeted cell number.
-
-    #     Returns:
-    #         list: Path from start to target.
-    #     """
-    #     # A* vars
-    #     open = []  # list of unvisited nodes
-    #     closed = []  # list of visited nodes
-    #     cost = {}
-    #     parent = {}
-    #     path = []
-    #     current_position = start
-    #     cost[start] = [0, self._calc_cost(start, target)]
-    #     parent[start] = start
-    #     open.append(start)
-
-    #     while open:
-
-    #         open.remove(current_position)
-    #         closed.append(current_position)
-
-    #         open, parent, cost = self._update_neighbors_costs(
-    #             self._maze_map[current_position], open, closed, parent, cost, current_position
-    #         )
-
-    #         if current_position == target:
-    #             while current_position != start:
-    #                 path.append(current_position)
-    #                 current_position = parent[current_position]
-    #             path.reverse()
-    #             return path
-
-    #         current_position = check_possible_routes_A_star(open, cost)
-
-    #     return []
