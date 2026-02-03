@@ -133,8 +133,3 @@ The controller code is organized into modules for better maintainability and nav
 - **mazes_layouts.py**: Defines maze layouts and their representations.
 - **tests/**: Contains unit tests for the algorithms and common functions.
 - **config.yaml**: Configuration file (see Configuration section).
-
-## License
-
-Apache-2.0
-
