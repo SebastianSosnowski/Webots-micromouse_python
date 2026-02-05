@@ -6,13 +6,15 @@ from utils.params import DetectedWalls, RobotState
 
 
 class RobotInterface(ABC):
+    """Interface class for robot implementation."""
+
     @abstractmethod
     def read_sensors(self) -> DetectedWalls:
         """
         Read and process sensors to detect walls.
 
         Returns:
-            tuple[bool, bool, bool, bool]: Variables which indicate respective walls presence (left_wall, front_wall, right_wall, back_wall).
+            DetectedWalls: Respective walls presence (left_wall, front_wall, right_wall, back_wall).
         """
         pass
 
@@ -20,8 +22,9 @@ class RobotInterface(ABC):
     def move(self, target: int):
         """
         Move robot to target position.
+
         Args:
-            target: list of positions to travel through.
+            target: index of the position to move.
 
         Returns:
             None
@@ -31,11 +34,11 @@ class RobotInterface(ABC):
     @property
     @abstractmethod
     def robot(self) -> Robot:
-        """return Robot() instance"""
+        """return Robot() instance."""
         pass
 
     @property
     @abstractmethod
     def state(self) -> RobotState:
-        """return Robot() instance"""
+        """return RobotState data."""
         pass

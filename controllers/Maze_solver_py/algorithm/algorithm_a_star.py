@@ -10,6 +10,8 @@ from algorithm.common import (
 
 
 class AStar(AlgorithmInterface):
+    """A* algorithm implementation."""
+
     def __init__(self, cfg: AppConfig):
         self._cfg = cfg
         self._maze_map: dict[int, list[int]] = {}
@@ -18,7 +20,7 @@ class AStar(AlgorithmInterface):
         self._closed: list[int] = []  # list of visited nodes
         self._cost: dict[int, list[int]] = {}
         self._parent = {}  # probably not needed anymore
-        self._path = []
+
         self._pos = cfg.maze.start_position
         self._current_target = cfg.maze.target_position
 

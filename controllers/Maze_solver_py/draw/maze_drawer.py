@@ -8,6 +8,8 @@ from config.models import AppConfig
 
 
 class MazeDrawer(Thread):
+    """Maze drawer GUI application using Turtle graphics."""
+
     def __init__(
         self,
         config: AppConfig,

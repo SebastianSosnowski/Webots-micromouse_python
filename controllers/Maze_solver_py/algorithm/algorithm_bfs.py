@@ -12,6 +12,14 @@ from algorithm.common import (
 
 
 class BFS(AlgorithmInterface):
+    """Breadth first search algorithm implementation.
+
+    To avoid unnecessary backtracking, only forks are treated as levels,
+    meaning the robot only backtracks when reaching a new fork or dead-end.
+    As a result, it does not guarantee the shortest path like the pure BFS algorithm,
+    but is much faster to search the maze.
+    """
+
     def __init__(self, cfg: AppConfig):
         self._cfg = cfg
         self._maze_map: dict[int, list[int]] = {}

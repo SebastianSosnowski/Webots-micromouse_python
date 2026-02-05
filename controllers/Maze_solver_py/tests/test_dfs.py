@@ -1,3 +1,5 @@
+"""Tests for algorithm_dfs.py."""
+
 import pytest
 from algorithm.common import init_maze_map_graph, add_walls_graph
 from algorithm.algorithm_dfs import DFS

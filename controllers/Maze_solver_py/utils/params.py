@@ -1,3 +1,5 @@
+"""Custom data classes used across the project."""
+
 from dataclasses import dataclass
 from config.enums import Algorithms, MazeLayout, Mode, Direction, RelativeDir
 
@@ -11,9 +13,9 @@ class RobotParams:
 
 @dataclass
 class SimulationParams:
-    mode: Mode  # Python enum
-    algorithm: Algorithms  # Python enum
-    maze_layout: MazeLayout  # Python enum
+    mode: Mode
+    algorithm: Algorithms
+    maze_layout: MazeLayout
     testing: bool
     time_step: int = 64
 
@@ -33,7 +35,6 @@ class MazeParams:
 class RobotState:
     pos: int
     current_target: int
-    start: bool = True
     orientation: Direction = Direction.NORTH
 
     _REL_TO_GLOBAL = {
@@ -94,9 +95,3 @@ class DetectedWalls:
             RelativeDir.RIGHT: self.right_wall,
             RelativeDir.BACK: self.back_wall,
         }.items()
-
-
-@dataclass
-class Fork:
-    position: int  # Path to the fork between until next fork
-    unused_routes: int

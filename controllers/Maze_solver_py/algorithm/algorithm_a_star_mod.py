@@ -1,13 +1,17 @@
 from algorithm import AStar
-from algorithm.common import (
-    init_maze_map_graph,
-    add_walls_graph,
-    build_path_to_next_target,
-    reconstruct_full_path,
-)
 
 
 class AStarMod(AStar):
+    """Modified A* algorithm implementation.
+
+    If the current position is a corridor, keep going with the corridor.
+    If the current position is a fork of dead-end, choose target like A*.
+    This approach makes searching much faster than the standard A* algorithm,
+    as the robot does not need to traverse the entire maze just to check one cell.
+    The only drawback is that it might not guarantee the shortest path,
+    although in MicroMouse mazes it usually finds it.
+    """
+
     def _select_next_position(self, cost: dict[int, list[int]]):
         """Decides to which cell move next. TODO Implement heap to make it much faster.
 

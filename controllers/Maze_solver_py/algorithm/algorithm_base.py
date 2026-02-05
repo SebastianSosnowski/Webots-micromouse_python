@@ -5,6 +5,12 @@ from config.models import AppConfig
 
 
 class Algorithm(AlgorithmInterface):
+    """Base class for algorithm interface, working as a wrapper to use.
+
+    The class chooses correct algorithm implementation based on provided algorithm name.
+    To add new algorithm, update __init__ if statement and implement corresponding class.
+    """
+
     def __init__(self, cfg: AppConfig):
         if cfg.simulation.algorithm == Algorithms.FLOODFILL:
             self.impl = Floodfill(cfg)

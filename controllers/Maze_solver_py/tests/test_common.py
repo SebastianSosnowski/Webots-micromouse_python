@@ -1,3 +1,5 @@
+"""Tests for functions in algorithm/common.py"""
+
 from algorithm.common import init_maze_map_graph, add_walls_graph
 from utils.params import RobotState, DetectedWalls, Direction
 

@@ -5,6 +5,8 @@ from config.models import AppConfig
 
 
 class Floodfill(AlgorithmInterface):
+    """Floodfill algorithm implementation."""
+
     def __init__(self, cfg: AppConfig):
         self._cfg = cfg
         size = cfg.maze.rows * cfg.maze.columns

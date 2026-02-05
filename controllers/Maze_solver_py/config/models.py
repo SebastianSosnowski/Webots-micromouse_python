@@ -1,3 +1,5 @@
+"""Pydantic models used for config validation."""
+
 from pydantic import BaseModel
 
 from config.enums import Algorithms, MazeLayout, Mode

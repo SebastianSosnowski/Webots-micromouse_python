@@ -10,6 +10,8 @@ from config.models import AppConfig
 
 
 class DFS(AlgorithmInterface):
+    """Deep first search algorithm implementation."""
+
     def __init__(self, cfg: AppConfig):
         self._cfg = cfg
         self._maze_map: dict[int, list[int]] = {}

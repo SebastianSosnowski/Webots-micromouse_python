@@ -10,6 +10,8 @@ from config.models import AppConfig
 
 
 class Epuck(RobotInterface):
+    """Epuck robot implementation."""
+
     def __init__(self, config: AppConfig):
         self._cfg = config
         self._robot = Robot()
@@ -22,20 +24,19 @@ class Epuck(RobotInterface):
         self._init_devices()
 
     def read_sensors(self) -> DetectedWalls:
-        """
-        Read and process sensors to detect walls.
-
-        Returns:
-            tuple[bool, bool, bool, bool]: Variables which indicate respective walls presence (left_wall, front_wall, right_wall, back_wall).
-        """
         sensors = self._read_sensors_avg(self._number_of_reads)
         return self._detect_walls(sensors)
 
     def move(self, target: int):
         """
-        Move robot to target position.
+        Move robot to target position and update its state.
+
+        Relative position to the walls is corrected:
+            1. During the movement using the PID regulator.
+            2. After detecting front wall.
+
         Args:
-            target: list of positions to travel through.
+            target: index of the position to move.
 
         Returns:
             None
@@ -51,12 +52,10 @@ class Epuck(RobotInterface):
 
     @property
     def robot(self) -> Robot:
-        """return Robot() instance"""
         return self._robot
 
     @property
     def state(self) -> RobotState:
-        """return Robot() instance"""
         return self._state
 
     def _init_devices(self):

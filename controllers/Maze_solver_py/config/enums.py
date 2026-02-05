@@ -1,3 +1,5 @@
+"""Enum classes."""
+
 from enum import Enum, IntEnum, StrEnum, auto
 
 

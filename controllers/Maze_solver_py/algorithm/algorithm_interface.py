@@ -3,6 +3,8 @@ from utils.params import RobotState, DetectedWalls
 
 
 class AlgorithmInterface(ABC):
+    """Interface class for algorithm implementation."""
+
     @abstractmethod
     def init(self) -> None:
         """Initialize all algorithm-related and simulation parameters."""

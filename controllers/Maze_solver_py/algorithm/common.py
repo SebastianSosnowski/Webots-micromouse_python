@@ -1,9 +1,12 @@
+"""Common functions that can be used in different algorithms."""
+
 from utils.params import RobotState, DetectedWalls, Direction
 
 
 def init_maze_map_graph(rows: int, cols: int):
     """Initialize maze map with external walls as graph.
 
+    Each position is a list of neighboring positions, that are connected with it.
     Border positions are initialized with respective walls.
     Inside positions are initialized without any walls i.e. 4 neighbors.
     The order of neighbors is following: [N, S, E, W]

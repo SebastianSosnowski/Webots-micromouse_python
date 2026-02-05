@@ -8,6 +8,12 @@ from config.enums import Direction, Move, RelativeDir
 
 
 class Manual(AlgorithmInterface):
+    """Manual algorithm implementation.
+
+    Uses Webots Keyboard() class to manual movement using the keyboard WSAD keys.
+    A webots app window must be the active one (i.e. 'clicked') to properly read keys.
+    """
+
     def __init__(self, cfg: AppConfig):
         self._cfg = cfg
         self._maze_map: dict[int, list[int]] = {}

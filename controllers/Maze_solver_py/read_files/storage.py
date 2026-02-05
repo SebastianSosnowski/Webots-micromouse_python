@@ -1,3 +1,5 @@
+"""Functions executing files-related operations."""
+
 from pathlib import Path
 import pickle
 
