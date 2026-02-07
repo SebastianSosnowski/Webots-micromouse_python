@@ -1,19 +1,22 @@
 """Maze Solver controller."""
 
+from config.logging_config import setup_logging
+
+setup_logging()
 import logging
+
+logger = logging.getLogger(__name__)
+
 from pathlib import Path
 from queue import Queue
 from copy import deepcopy
 
-from config.loader import load_config, setup_logging
+from config.loader import load_config
 from config.enums import Mode
 from maze_solver import MazeSolver
 from draw.maze_drawer import MazeDrawer
 from utils.params import DrawState
 from read_files.storage import save_results
-
-setup_logging()
-logger = logging.getLogger(__name__)
 
 
 def run_robot(mz: MazeSolver):

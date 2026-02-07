@@ -8,6 +8,11 @@ from utils.params import RobotParams, RobotState, Direction, SensorSnapshot, Det
 from config.enums import Move
 from config.models import AppConfig
 
+import logging
+
+logger = logging.getLogger(__name__)
+print("robot handlers:", logger.handlers)
+
 
 class Epuck(RobotInterface):
     """Epuck robot implementation."""
@@ -155,8 +160,7 @@ class Epuck(RobotInterface):
                 self._robot.step(self._cfg.simulation.time_step)
                 left = self.ps[7].getValue()
                 right = self.ps[0].getValue()
-                if self._cfg.simulation.testing:
-                    print("sensor angle %.2f" % left, "%.2f" % right)
+                logger.debug("Correct angle to front wall %.2f %.2f", left, right)
 
         elif left > right:
             while left > right:
@@ -166,8 +170,7 @@ class Epuck(RobotInterface):
                 self._robot.step(self._cfg.simulation.time_step)
                 left = self.ps[7].getValue()
                 right = self.ps[0].getValue()
-                if self._cfg.simulation.testing:
-                    print("sensor angle %.2f" % left, "%.2f" % right)
+                logger.debug("Correct angle to front wall %.2f %.2f", left, right)
 
         front = self.tof.getValue()
         desired_distance = 40.0
@@ -181,9 +184,7 @@ class Epuck(RobotInterface):
                 self._robot.step(self._cfg.simulation.time_step)
 
                 front = self.tof.getValue()
-
-                if self._cfg.simulation.testing:
-                    print("sensor tof %.2f" % front)
+                logger.debug("Correct distance to front wall (Tof) %.2f", front)
 
         elif front < desired_distance:
             while front < desired_distance:
@@ -194,9 +195,7 @@ class Epuck(RobotInterface):
                 self._robot.step(self._cfg.simulation.time_step)
 
                 front = self.tof.getValue()
-
-                if self._cfg.simulation.testing:
-                    print("sensor tof %.2f" % front)
+                logger.debug("Correct distance to front wall (Tof) %.2f", front)
 
         self.left_motor.setVelocity(0)
         self.right_motor.setVelocity(0)
@@ -294,8 +293,7 @@ class Epuck(RobotInterface):
         self.right_motor.setPosition(right_wheel_revolutions)
         self._PID_correction()
 
-        if self._cfg.simulation.testing:
-            print("forward")
+        logger.debug("Move forward")
 
     def _turn(self, move_direction: Move):
         """Drive robot motors and set encoders position to turn by exactly 90 or 180 degrees.
@@ -322,26 +320,20 @@ class Epuck(RobotInterface):
                 right_wheel_revolutions -= revolutions
                 self.left_motor.setPosition(left_wheel_revolutions)
                 self.right_motor.setPosition(right_wheel_revolutions)
-
-                if self._cfg.simulation.testing:
-                    print("right")
+                logger.debug("Turn right")
             case Move.LEFT:
                 left_wheel_revolutions -= revolutions
                 right_wheel_revolutions += revolutions
                 self.left_motor.setPosition(left_wheel_revolutions)
                 self.right_motor.setPosition(right_wheel_revolutions)
-
-                if self._cfg.simulation.testing:
-                    print("left")
+                logger.debug("Turn left")
             case Move.BACK:
                 revolutions *= 2
                 left_wheel_revolutions += revolutions
                 right_wheel_revolutions -= revolutions
                 self.left_motor.setPosition(left_wheel_revolutions)
                 self.right_motor.setPosition(right_wheel_revolutions)
-
-                if self._cfg.simulation.testing:
-                    print("back")
+                logger.debug("Move back")
 
         self._wait_move_end()
 
@@ -398,9 +390,7 @@ class Epuck(RobotInterface):
             if left_wall and right_wall:
 
                 error = left_angle_sensor - right_angle_sensor
-
-                if self._cfg.simulation.testing:
-                    print("error %.3f" % error)
+                logger.debug("PID error both walls %.3f", error)
 
                 error_integral += error
                 error_derivative = previous_error - error
@@ -411,16 +401,13 @@ class Epuck(RobotInterface):
                 elif MotorSpeed < -0.2:
                     MotorSpeed = -0.2
 
-                if self._cfg.simulation.testing:
-                    print("speed %.3f" % MotorSpeed)
+                logger.debug("PID motor speed %.3f", MotorSpeed)
 
                 self.left_motor.setVelocity(self.params.speed + MotorSpeed)
                 self.right_motor.setVelocity(self.params.speed - MotorSpeed)
             elif left_wall:
                 error = left_angle_sensor - Middle
-
-                if self._cfg.simulation.testing:
-                    print("errorL %.3f" % error)
+                logger.debug("PID error left wall %.3f", error)
 
                 error_integral += error
                 error_derivative = previous_error - error
@@ -431,16 +418,13 @@ class Epuck(RobotInterface):
                 elif MotorSpeed < -0.06:
                     MotorSpeed = -0.06
 
-                if self._cfg.simulation.testing:
-                    print("speed %.3f" % MotorSpeed)
+                logger.debug("PID motor speed %.3f", MotorSpeed)
 
                 self.left_motor.setVelocity(self.params.speed + MotorSpeed)
                 self.right_motor.setVelocity(self.params.speed - MotorSpeed)
             elif right_wall:
                 error = right_angle_sensor - Middle
-
-                if self._cfg.simulation.testing:
-                    print("errorR %.3f" % error)
+                logger.debug("PID error right wall %.3f", error)
 
                 error_integral += error
                 error_derivative = previous_error - error
@@ -451,8 +435,7 @@ class Epuck(RobotInterface):
                 elif MotorSpeed < -0.06:
                     MotorSpeed = -0.06
 
-                if self._cfg.simulation.testing:
-                    print("speed %.3f" % MotorSpeed)
+                logger.debug("PID motor speed %.3f", MotorSpeed)
 
                 self.left_motor.setVelocity(self.params.speed - MotorSpeed)
                 self.right_motor.setVelocity(self.params.speed + MotorSpeed)

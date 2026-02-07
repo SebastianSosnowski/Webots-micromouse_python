@@ -27,7 +27,7 @@ loggers:
     propagate: false
 
   robot:
-    level: INFO
+    level: DEBUG
     handlers: [console]
     propagate: false
 
