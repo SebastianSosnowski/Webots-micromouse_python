@@ -1,15 +1,19 @@
 """Maze Solver controller."""
 
+import logging
 from pathlib import Path
 from queue import Queue
 from copy import deepcopy
 
-from config.loader import load_config
+from config.loader import load_config, setup_logging
 from config.enums import Mode
 from maze_solver import MazeSolver
 from draw.maze_drawer import MazeDrawer
 from utils.params import DrawState
 from read_files.storage import save_results
+
+setup_logging()
+logger = logging.getLogger(__name__)
 
 
 def run_robot(mz: MazeSolver):
@@ -48,8 +52,8 @@ def run_robot(mz: MazeSolver):
                         )
                     )
                     draw_queue.put(None)
-                    print("Target reached")
-                    print("Searching time: %.2f" % mz.robot.robot.getTime(), "s")
+                    logger.info("Target reached")
+                    logger.info("Searching time: %.2f s", mz.robot.robot.getTime())
                     path, maze_map, position_values = mz.algorithm.prepare_results()
                     save_results(
                         path,
@@ -67,8 +71,8 @@ def run_robot(mz: MazeSolver):
                 mz.robot.move(path.pop(0))
             draw_queue.put(DrawState(mz.robot.state.pos, maze_map, position_values))
             draw_queue.put(None)
-            print("Target reached")
-            print("Speedrun time: %.2f" % mz.robot.robot.getTime(), "s")
+            logger.info("Target reached")
+            logger.info("Speedrun time: %.2f s", mz.robot.robot.getTime())
 
     input("press any key to end")
     exit(0)
