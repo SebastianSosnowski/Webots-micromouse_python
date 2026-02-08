@@ -49,6 +49,15 @@ class Direction(IntEnum):
     # WEST = 8  #  00001000
 
 
+class DrawerDirection(IntEnum):
+    """Wall presence according to its global direction for GUI."""
+
+    NORTH = auto()
+    SOUTH = auto()
+    EAST = auto()
+    WEST = auto()
+
+
 class RelativeDir(Enum):
     FRONT = auto()
     LEFT = auto()
