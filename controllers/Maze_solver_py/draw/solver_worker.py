@@ -44,6 +44,7 @@ class SolverWorker(QThread):
                         self.mz.robot.move(targets.pop(0))
 
                     if self.mz.algorithm.finish():
+                        self.mz.visited.add(self.mz.robot.state.pos)
                         self.draw_state.emit(
                             DrawState(
                                 self.mz.robot.state.pos,

@@ -32,6 +32,7 @@ class Floodfill(AlgorithmInterface):
 
     def finish(self) -> bool:
         if self._pos == self._current_target:
+            self._maze_map[self._pos] |= self._cfg.maze.visited_flag
             return self._change_target()
         return False
 

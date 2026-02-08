@@ -5,6 +5,7 @@ from PySide6.QtWidgets import (
     QGraphicsRectItem,
     QGraphicsLineItem,
     QMainWindow,
+    QGraphicsEllipseItem,
 )
 from PySide6.QtGui import QPainter, QPen, QFont, QBrush, QColor, QKeyEvent
 from PySide6.QtCore import QRectF, Qt
@@ -54,9 +55,9 @@ class MazeScene(QGraphicsScene):
     Z_VISITED = 0
     Z_GRID = 1
     Z_WALLS = 2
-    Z_TEXT = 3
+    Z_ROBOT = 3
     Z_PATH = 4
-    Z_ROBOT = 5
+    Z_TEXT = 5
 
     def __init__(
         self, config: AppConfig, maze_map: list | dict, position_values: list | dict, cell_size=60
@@ -72,6 +73,7 @@ class MazeScene(QGraphicsScene):
         self._algorithm = self._cfg.simulation.algorithm
         self._visited_items: list[QGraphicsRectItem] = []
         self._path_items: list[QGraphicsLineItem] = []
+        self._robot_item: QGraphicsEllipseItem | None = None
 
         self._grid_items = []
         self._cells = []
@@ -84,6 +86,7 @@ class MazeScene(QGraphicsScene):
         self._init_visited_layer()
         self._init_grid_layer()
         self._init_cell_layer()
+        self._init_robot_item()
 
     def update_from_state(self, state: DrawState):
         """
@@ -97,6 +100,7 @@ class MazeScene(QGraphicsScene):
             self._update_text_layer(formatted_values)
         if state.prev_pos is not None:
             self._append_path_segment(state.prev_pos, state.pos)
+        self._update_robot(state.pos)
 
     def _init_visited_layer(self):
         for row in range(self._rows):
@@ -147,6 +151,19 @@ class MazeScene(QGraphicsScene):
                 cell.setZValue(self.Z_WALLS)
                 self.addItem(cell)
                 self._cells.append(cell)
+
+    def _init_robot_item(self):
+        radius = self._cell_size * 0.2
+        diameter = radius * 2
+
+        robot = QGraphicsEllipseItem(0, 0, diameter, diameter)
+        robot.setBrush(QBrush(QColor(50, 50, 255)))
+        robot.setPen(Qt.PenStyle.NoPen)
+        robot.setZValue(self.Z_ROBOT)
+
+        self.addItem(robot)
+        self._robot_item = robot
+        self._update_robot(self._cfg.maze.start_position)
 
     def _update_walls_layer(self, maze_map: list | dict):
         for i, cell in enumerate(self._cells):
@@ -266,6 +283,18 @@ class MazeScene(QGraphicsScene):
         hx = cell_x + self._cell_size - h_rect.width() - padding
         hy = cell_y + padding
         h_item.setPos(hx, hy)
+
+    def _update_robot(self, pos: int):
+        if self._robot_item is None:
+            return
+
+        cx, cy = self._cell_center(pos)
+
+        rect = self._robot_item.rect()
+        x = cx - rect.width() / 2
+        y = cy - rect.height() / 2
+
+        self._robot_item.setPos(x, y)
 
     def _append_path_segment(self, a: int, b: int):
         pen = QPen(QColor(255, 140, 0), 4)

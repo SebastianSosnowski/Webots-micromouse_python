@@ -54,7 +54,7 @@ def format_position_values(values, algorithm):
         for i, distance in enumerate(values):
             result[i] = [str(distance)]
 
-    elif algorithm == Algorithms.A_STAR or Algorithms.A_STAR_MOD:
+    elif algorithm == Algorithms.A_STAR or algorithm == Algorithms.A_STAR_MOD:
         values = cast(dict[int, Cost], values)
         for i, cost in values.items():
             result[i] = [str(cost.g + cost.h), str(cost.g), str(cost.h)]
