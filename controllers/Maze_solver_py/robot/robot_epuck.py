@@ -11,7 +11,6 @@ from config.models import AppConfig
 import logging
 
 logger = logging.getLogger(__name__)
-print("robot handlers:", logger.handlers)
 
 
 class Epuck(RobotInterface):

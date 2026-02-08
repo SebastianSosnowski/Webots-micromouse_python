@@ -3,6 +3,10 @@ from config.enums import Direction
 from utils.params import RobotState, DetectedWalls
 from config.models import AppConfig
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 class Floodfill(AlgorithmInterface):
     """Floodfill algorithm implementation."""
@@ -218,28 +222,36 @@ class Floodfill(AlgorithmInterface):
         self._distance = self._init_distance_map(self._distance, self._current_target)  # reset path
         self._floodfill(self._maze_map, self._distance)  # path
 
-        shortest_path = self._is_shortest()
+        shortest_path, possible_path, actual_path = self._is_shortest()
 
         if self._pos == self._cfg.maze.target_position:
             self._mark_center(self._maze_map)
 
             if shortest_path:
-                print("This is the shortest/ one of the shortest paths")
+                logger.debug("This is the shortest/ one of the shortest paths")
             else:
-                print("There might be a shorter path, keep going")
+                logger.debug(
+                    "There might be a shorter path (%d vs %d), keep going",
+                    possible_path,
+                    actual_path,
+                )
                 self._current_target = self._cfg.maze.start_position
 
         elif self._pos == self._cfg.maze.start_position:
             if shortest_path:
-                print("This is the shortest/ one of the shortest paths")
+                logger.debug("This is the shortest/ one of the shortest paths")
             else:
-                print("There might be a shorter path, keep going")
+                logger.debug(
+                    "There might be a shorter path (%d vs %d), keep going",
+                    possible_path,
+                    actual_path,
+                )
 
             self._current_target = self._cfg.maze.target_position
 
         return shortest_path
 
-    def _is_shortest(self) -> bool:
+    def _is_shortest(self) -> tuple[bool, int, int]:
         """Determine whether shortest path was found. on currently discovered maze map.
 
         Use currently discovered part of maze and
@@ -248,6 +260,9 @@ class Floodfill(AlgorithmInterface):
 
         Returns:
             bool: True if found the shortest/ one of the shortest paths. Otherwise False.
+
+        Raises:
+            RuntimeError: If current target is invalid.
         """
 
         distance_check = self._distance.copy()
@@ -260,19 +275,17 @@ class Floodfill(AlgorithmInterface):
         distance_check = self._init_distance_map(distance_check, self._current_target)  # reset path
         self._floodfill(maze_map_check, distance_check)  # path
         if self._current_target == self._cfg.maze.target_position:
-            shortest_path = (
-                self._distance[self._cfg.maze.start_position]
-                >= distance_check[self._cfg.maze.start_position]
-            )  # could be just equal'
+            path_length = self._distance[self._cfg.maze.start_position]
+            path_length_check = distance_check[self._cfg.maze.start_position]
         elif self._current_target == self._cfg.maze.start_position:
-            shortest_path = (
-                self._distance[self._cfg.maze.target_position]
-                >= distance_check[self._cfg.maze.target_position]
-            )  # could be just equal'
+            path_length = self._distance[self._cfg.maze.target_position]
+            path_length_check = distance_check[self._cfg.maze.target_position]
+        else:
+            raise RuntimeError("Invalid current target")
 
-        return shortest_path
+        is_shortest = path_length >= path_length_check
 
-        return shortest_path
+        return (is_shortest, path_length, path_length_check)
 
     def _mark_center(self, maze_map: list[int]):
         """Adds walls to unvisited positions in center in maze map."""

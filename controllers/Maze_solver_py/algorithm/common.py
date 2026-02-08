@@ -2,6 +2,10 @@
 
 from utils.params import RobotState, DetectedWalls, Direction
 
+import logging
+
+logger = logging.getLogger(__name__)
+
 
 def init_maze_map_graph(rows: int, cols: int):
     """Initialize maze map with external walls as graph.
@@ -31,7 +35,7 @@ def init_maze_map_graph(rows: int, cols: int):
             if col > 0:  # WEST
                 neighbors.append(row * cols + (col - 1))
             maze_map[pos] = neighbors
-            # print(f"maze_map[{pos}]= {maze_map[pos]}")
+
     return maze_map
 
 
@@ -56,7 +60,6 @@ def add_walls_graph(
     }
 
     valid_neighbors = maze_map[state.pos]
-    # print(f"orientation ({state.orientation}), valid_neighbors ({valid_neighbors})")
     for rel_dir, wall in detected.items():
         if not wall:
             continue
@@ -69,7 +72,7 @@ def add_walls_graph(
 
         if neighbor_with_wall in maze_map and state.pos in maze_map[neighbor_with_wall]:
             maze_map[neighbor_with_wall].remove(state.pos)
-    # print(f"orientation ({state.orientation}), valid_neighbors after ({valid_neighbors})")
+
     maze_map[state.pos] = valid_neighbors
 
 

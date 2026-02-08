@@ -1,18 +1,6 @@
 version: 1
 disable_existing_loggers: false
 
-formatters:
-  colored:
-    class: colorlog.ColoredFormatter
-    format: "%(log_color)s%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
-    datefmt: "%H:%M:%S"
-    log_colors:
-      DEBUG: cyan
-      INFO: green
-      WARNING: yellow
-      ERROR: red
-      CRITICAL: bold_red
-
 handlers:
   console:
     class: logging.StreamHandler
@@ -27,10 +15,22 @@ loggers:
     propagate: false
 
   robot:
-    level: DEBUG
+    level: INFO
     handlers: [console]
     propagate: false
 
 root:
   level: INFO
   handlers: [console]
+
+formatters:
+  colored:
+    class: colorlog.ColoredFormatter
+    format: "%(log_color)s%(asctime)s | %(levelname)-8s | %(name)s | %(message)s"
+    datefmt: "%H:%M:%S"
+    log_colors:
+      DEBUG: cyan
+      INFO: green
+      WARNING: yellow
+      ERROR: red
+      CRITICAL: bold_red
