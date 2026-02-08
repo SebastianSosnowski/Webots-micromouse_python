@@ -6,26 +6,14 @@ setup_logging()
 import logging
 
 from PySide6.QtWidgets import QApplication, QGraphicsView, QMainWindow
-from PySide6.QtCore import QObject, Qt
+from PySide6.QtCore import Qt
 
 from config.loader import load_config
 from maze_solver import MazeSolver
 from draw.solver_worker import SolverWorker
-from draw.qt_maze_drawer import MazeScene
-from utils.types import DrawState
+from draw.qt_maze_drawer import MazeScene, MainWindow
 
 logger = logging.getLogger(__name__)
-
-
-class DrawStatePrinter(QObject):
-    """Temp receiver – only print DrawState."""
-
-    def on_draw_state(self, state: DrawState):
-        logger.info("=== DrawState received ===")
-        logger.info("Position: %s", state.robot_pos)
-        logger.info("Maze map: %s", state.maze_map)
-        logger.info("Position values: %s", state.position_values)
-        logger.info("==========================\n")
 
 
 def main():
@@ -53,7 +41,7 @@ def main():
     view.setVerticalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
 
     # --- main window ---
-    window = QMainWindow()
+    window = MainWindow()
     window.setWindowTitle("Micromouse Maze")
     window.setCentralWidget(view)
 
@@ -70,20 +58,10 @@ def main():
     # --- worker ---
     worker = SolverWorker(maze_solver)
     worker.draw_state.connect(scene.update_from_state)
-    worker.finished.connect(app.quit)
 
     worker.start()
 
     sys.exit(app.exec())
-    # # --- receiver ---
-    # printer = DrawStatePrinter()
-
-    # worker.draw_state.connect(printer.on_draw_state)
-    # worker.finished.connect(app.quit)
-
-    # worker.start()
-
-    # sys.exit(app.exec())
 
 
 if __name__ == "__main__":

@@ -139,7 +139,7 @@ class MazeDrawer(Thread):
             self.distance_update = True
             self.position_values = msg.position_values
         self.maze_map = msg.maze_map
-        self.robot_pos = msg.robot_pos
+        self.robot_pos = msg.pos
 
     def _draw_search_frame(self):
         """Update maze visualization with visited cells and discovered walls and distance values.

@@ -1,5 +1,12 @@
-from PySide6.QtWidgets import QGraphicsScene, QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem
-from PySide6.QtGui import QPainter, QPen, QFont, QBrush, QColor
+from PySide6.QtWidgets import (
+    QGraphicsScene,
+    QGraphicsItem,
+    QGraphicsTextItem,
+    QGraphicsRectItem,
+    QGraphicsLineItem,
+    QMainWindow,
+)
+from PySide6.QtGui import QPainter, QPen, QFont, QBrush, QColor, QKeyEvent
 from PySide6.QtCore import QRectF, Qt
 
 from draw.common import walls_from_bitmask, walls_from_graph, format_position_values
@@ -64,6 +71,7 @@ class MazeScene(QGraphicsScene):
         self._cols = self._cfg.maze.columns
         self._algorithm = self._cfg.simulation.algorithm
         self._visited_items: list[QGraphicsRectItem] = []
+        self._path_items: list[QGraphicsLineItem] = []
 
         self._grid_items = []
         self._cells = []
@@ -87,6 +95,8 @@ class MazeScene(QGraphicsScene):
         if state.position_values is not None:
             formatted_values = format_position_values(state.position_values, self._algorithm)
             self._update_text_layer(formatted_values)
+        if state.prev_pos is not None:
+            self._append_path_segment(state.prev_pos, state.pos)
 
     def _init_visited_layer(self):
         for row in range(self._rows):
@@ -257,6 +267,29 @@ class MazeScene(QGraphicsScene):
         hy = cell_y + padding
         h_item.setPos(hx, hy)
 
+    def _append_path_segment(self, a: int, b: int):
+        pen = QPen(QColor(255, 140, 0), 4)
+        pen.setCapStyle(Qt.PenCapStyle.RoundCap)
+
+        x1, y1 = self._cell_center(a)
+        x2, y2 = self._cell_center(b)
+
+        line = QGraphicsLineItem(x1, y1, x2, y2)
+        line.setPen(pen)
+        line.setZValue(self.Z_PATH)
+
+        self.addItem(line)
+        self._path_items.append(line)
+
+    def _cell_center(self, idx: int) -> tuple[float, float]:
+        row_sim = idx // self._cols
+        col = idx % self._cols
+        qt_row = self._sim_row_to_qt_row(row_sim)
+
+        x = col * self._cell_size + self._cell_size / 2
+        y = qt_row * self._cell_size + self._cell_size / 2
+        return x, y
+
     def _ensure_text_items_for_cell(self, i: int):
         while i >= len(self._cell_text_items):
             self._cell_text_items.append({})
@@ -265,3 +298,8 @@ class MazeScene(QGraphicsScene):
 
     def _sim_row_to_qt_row(self, row: int) -> int:
         return (self._rows - 1) - row
+
+
+class MainWindow(QMainWindow):
+    def keyPressEvent(self, event: QKeyEvent):
+        self.close()

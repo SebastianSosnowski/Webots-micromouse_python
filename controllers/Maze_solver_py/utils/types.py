@@ -50,7 +50,8 @@ class RobotState:
 
 @dataclass(frozen=True)
 class DrawState:
-    robot_pos: int
+    pos: int
+    prev_pos: int | None
     maze_map: list | dict
     position_values: list | dict
     visited: set[int]

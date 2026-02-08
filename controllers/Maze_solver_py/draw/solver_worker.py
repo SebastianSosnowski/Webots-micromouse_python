@@ -35,6 +35,7 @@ class SolverWorker(QThread):
                         self.draw_state.emit(
                             DrawState(
                                 self.mz.robot.state.pos,
+                                self.mz.prev_pos,
                                 deepcopy(self.mz.algorithm.maze_map),
                                 deepcopy(self.mz.algorithm.position_values),
                                 set(self.mz.visited),
@@ -46,6 +47,7 @@ class SolverWorker(QThread):
                         self.draw_state.emit(
                             DrawState(
                                 self.mz.robot.state.pos,
+                                self.mz.prev_pos,
                                 deepcopy(self.mz.algorithm.maze_map),
                                 deepcopy(self.mz.algorithm.position_values),
                                 set(self.mz.visited),
@@ -67,7 +69,7 @@ class SolverWorker(QThread):
                             self.mz._cfg.simulation.maze_layout,
                             self.mz._cfg.simulation.algorithm,
                         )
-
+                        logger.info("Press any key to end")
                         self.finished.emit()
                         return
 
@@ -75,24 +77,23 @@ class SolverWorker(QThread):
                 while self.mz.robot.robot.step(self.mz._cfg.simulation.time_step) != -1:
                     if not path:
                         break
-
+                    self.mz.prev_pos = self.mz.robot.state.pos
+                    self.mz.robot.move(path.pop(0))
                     self.draw_state.emit(
                         DrawState(
-                            self.mz.robot.state.pos, maze_map, position_values, set(self.mz.visited)
+                            self.mz.robot.state.pos,
+                            self.mz.prev_pos,
+                            maze_map,
+                            position_values,
+                            set(self.mz.visited),
                         )
                     )
-                    self.mz.robot.move(path.pop(0))
-
-                self.draw_state.emit(
-                    DrawState(
-                        self.mz.robot.state.pos, maze_map, position_values, set(self.mz.visited)
-                    )
-                )
 
                 logger.info("Target reached")
                 logger.info(
                     "Speedrun time: %.2f s",
                     self.mz.robot.robot.getTime(),
                 )
+                logger.info("Press any key to end")
 
                 self.finished.emit()
