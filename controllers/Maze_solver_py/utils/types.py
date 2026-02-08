@@ -75,3 +75,9 @@ class DetectedWalls:
             RelativeDir.RIGHT: self.right_wall,
             RelativeDir.BACK: self.back_wall,
         }.items()
+
+
+@dataclass
+class Cost:
+    g: int
+    h: int

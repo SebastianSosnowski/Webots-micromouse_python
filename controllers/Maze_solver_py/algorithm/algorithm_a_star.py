@@ -1,5 +1,5 @@
 from algorithm import AlgorithmInterface
-from utils.types import RobotState, DetectedWalls
+from utils.types import RobotState, DetectedWalls, Cost
 from config.models import AppConfig
 from algorithm.common import (
     init_maze_map_graph,
@@ -18,7 +18,7 @@ class AStar(AlgorithmInterface):
         # A* vars
         self._open: list[int] = []  # list of unvisited nodes
         self._closed: list[int] = []  # list of visited nodes
-        self._cost: dict[int, list[int]] = {}
+        self._cost: dict[int, Cost] = {}
         self._parent = {}  # probably not needed anymore
 
         self._pos = cfg.maze.start_position
@@ -27,7 +27,7 @@ class AStar(AlgorithmInterface):
     def init(self):
         self._maze_map = init_maze_map_graph(self._cfg.maze.rows, self._cfg.maze.columns)
         self._open.append(self._pos)
-        self._cost[0] = [0, 0]
+        self._cost[0] = Cost(0, 0)
         self._parent[self._pos] = None
 
     def update(self, detected: DetectedWalls, state: RobotState) -> list[int]:
@@ -48,7 +48,7 @@ class AStar(AlgorithmInterface):
     def finish(self):
         return self._pos == self._cfg.maze.target_position
 
-    def prepare_results(self) -> tuple[list[int], dict[int, list[int]], dict[int, list[int]]]:
+    def prepare_results(self) -> tuple[list[int], dict[int, list[int]], dict[int, Cost]]:
         path = reconstruct_full_path(self._parent, self._cfg.maze.target_position)
         return path, self._maze_map, self._cost
 
@@ -64,7 +64,7 @@ class AStar(AlgorithmInterface):
     def pos(self) -> int:
         return self._pos
 
-    def _select_next_position(self, cost: dict[int, list[int]]):
+    def _select_next_position(self, cost: dict[int, Cost]):
         """Decides to which cell move next. TODO Implement heap to make it much faster.
 
         Cell with the lowest overall cost (Fcost) is chosen. If more cells have equal
@@ -82,10 +82,10 @@ class AStar(AlgorithmInterface):
         current_destination = self._open[-1]
 
         for i in self._open:
-            Fcost_i = cost[i][0] + cost[i][1]
-            Fcost_curr = cost[current_destination][0] + cost[current_destination][1]
+            Fcost_i = cost[i].g + cost[i].h
+            Fcost_curr = cost[current_destination].g + cost[current_destination].h
             if (Fcost_i < Fcost_curr) or (
-                Fcost_i == Fcost_curr and cost[i][1] < cost[current_destination][1]
+                Fcost_i == Fcost_curr and cost[i].h < cost[current_destination].h
             ):
                 current_destination = i
 
@@ -116,15 +116,15 @@ class AStar(AlgorithmInterface):
             if neighbor in self._closed:
                 continue
 
-            new_move_to_neighbor_cost = self._cost[current_position][0] + self._calc_cost(
+            new_move_to_neighbor_cost = self._cost[current_position].g + self._calc_cost(
                 current_position, neighbor
             )
 
             # if (neighbor not in open) or new_cost < (cost[neighbor][0] + cost[neighbor][1]):
-            if (neighbor not in self._open) or new_move_to_neighbor_cost < self._cost[neighbor][0]:
+            if (neighbor not in self._open) or new_move_to_neighbor_cost < self._cost[neighbor].g:
                 neighbor_Gcost = new_move_to_neighbor_cost
                 neighbor_Hcost = self._calc_cost(neighbor, self._cfg.maze.target_position)
-                self._cost[neighbor] = [neighbor_Gcost, neighbor_Hcost]
+                self._cost[neighbor] = Cost(neighbor_Gcost, neighbor_Hcost)
                 self._parent[neighbor] = current_position
 
                 if neighbor not in self._open:

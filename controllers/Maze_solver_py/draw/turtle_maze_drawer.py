@@ -3,7 +3,7 @@ from threading import Thread
 from turtle import done, setup, tracer, Turtle, update
 
 from config.enums import Algorithms, Direction, Mode
-from utils.types import DrawState
+from utils.types import DrawState, Cost
 from config.models import AppConfig
 
 
@@ -406,7 +406,7 @@ def graph_walls_convert(maze_field: list[int], position: int):
     return cell_value
 
 
-def write_cost(x: float, y: float, cost: list[int], t: Turtle):
+def write_cost(x: float, y: float, cost: Cost, t: Turtle):
     """Write cost values in maze cell. Used in A* algorithm.
 
     Args:
@@ -418,8 +418,8 @@ def write_cost(x: float, y: float, cost: list[int], t: Turtle):
     Returns:
         None
     """
-    Gcost = cost[0]
-    Hcost = cost[1]
+    Gcost = cost.g
+    Hcost = cost.h
     Fcost = Gcost + Hcost
     t.penup()
     t.goto(x + 16, y + 8)
