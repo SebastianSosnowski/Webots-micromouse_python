@@ -1,7 +1,7 @@
 from controller import Keyboard
 
 from algorithm import AlgorithmInterface
-from utils.params import RobotState, DetectedWalls
+from utils.types import RobotState, DetectedWalls
 from config.models import AppConfig
 from algorithm.common import init_maze_map_graph, add_walls_graph, reconstruct_full_path
 from config.enums import Direction, Move, RelativeDir

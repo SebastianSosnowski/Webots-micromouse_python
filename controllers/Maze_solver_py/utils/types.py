@@ -1,7 +1,7 @@
 """Custom data classes used across the project."""
 
 from dataclasses import dataclass
-from config.enums import Algorithms, MazeLayout, Mode, Direction, RelativeDir
+from config.enums import Direction, RelativeDir
 
 
 @dataclass
@@ -9,26 +9,6 @@ class RobotParams:
     axle: float
     wheel: float
     speed: float = 4.0
-
-
-@dataclass
-class SimulationParams:
-    mode: Mode
-    algorithm: Algorithms
-    maze_layout: MazeLayout
-    testing: bool
-    time_step: int = 64
-
-
-@dataclass
-class MazeParams:
-    rows: int
-    columns: int
-    size: int
-    start_cell: int
-    target_cell: int
-    tile_length: float
-    visited: int
 
 
 @dataclass

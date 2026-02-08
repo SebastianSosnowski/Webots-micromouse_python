@@ -1,6 +1,7 @@
 """Common functions that can be used in different algorithms."""
 
-from utils.params import RobotState, DetectedWalls, Direction
+from config.enums import Direction
+from utils.types import RobotState, DetectedWalls
 
 import logging
 

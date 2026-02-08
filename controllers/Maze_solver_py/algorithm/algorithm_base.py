@@ -1,5 +1,5 @@
 from algorithm import AlgorithmInterface, Floodfill, Manual, DFS, BFS, AStar, AStarMod
-from utils.params import RobotState, DetectedWalls
+from utils.types import RobotState, DetectedWalls
 from config.enums import Algorithms
 from config.models import AppConfig
 

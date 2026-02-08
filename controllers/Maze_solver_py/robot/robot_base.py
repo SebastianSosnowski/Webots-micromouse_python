@@ -1,7 +1,7 @@
 from controller import Robot
 
 from robot import RobotInterface, Epuck
-from utils.params import DetectedWalls, RobotState
+from utils.types import DetectedWalls, RobotState
 from config.models import AppConfig
 
 

@@ -25,7 +25,6 @@ class SimulationConfig(BaseModel):
     mode: Mode
     algorithm: Algorithms
     maze_layout: MazeLayout
-    testing: bool
     time_step: int
 
 

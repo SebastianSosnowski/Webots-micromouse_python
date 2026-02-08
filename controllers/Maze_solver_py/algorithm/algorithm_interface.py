@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from utils.params import RobotState, DetectedWalls
+from utils.types import RobotState, DetectedWalls
 
 
 class AlgorithmInterface(ABC):

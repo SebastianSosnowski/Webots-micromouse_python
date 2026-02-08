@@ -1,5 +1,5 @@
 from algorithm import AlgorithmInterface
-from utils.params import RobotState, DetectedWalls
+from utils.types import RobotState, DetectedWalls
 from config.models import AppConfig
 from algorithm.common import (
     init_maze_map_graph,

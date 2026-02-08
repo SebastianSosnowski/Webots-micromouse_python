@@ -1,6 +1,6 @@
 from algorithm import AlgorithmInterface
 from config.enums import Direction
-from utils.params import RobotState, DetectedWalls
+from utils.types import RobotState, DetectedWalls
 from config.models import AppConfig
 
 import logging

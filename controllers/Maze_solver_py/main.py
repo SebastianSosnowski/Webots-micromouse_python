@@ -15,7 +15,7 @@ from config.loader import load_config
 from config.enums import Mode
 from maze_solver import MazeSolver
 from draw.maze_drawer import MazeDrawer
-from utils.params import DrawState
+from utils.types import DrawState
 from read_files.storage import save_results
 
 

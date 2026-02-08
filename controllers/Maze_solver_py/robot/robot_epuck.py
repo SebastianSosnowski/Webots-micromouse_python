@@ -3,10 +3,10 @@ from math import pi
 
 from controller import DistanceSensor, Motor, PositionSensor, Robot
 
-from robot import RobotInterface
-from utils.params import RobotParams, RobotState, Direction, SensorSnapshot, DetectedWalls
-from config.enums import Move
+from config.enums import Move, Direction
 from config.models import AppConfig
+from robot import RobotInterface
+from utils.types import RobotParams, RobotState, SensorSnapshot, DetectedWalls
 
 import logging
 

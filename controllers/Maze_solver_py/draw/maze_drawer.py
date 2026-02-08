@@ -3,7 +3,7 @@ from threading import Thread
 from turtle import done, setup, tracer, Turtle, update
 
 from config.enums import Algorithms, Direction, Mode
-from utils.params import DrawState
+from utils.types import DrawState
 from config.models import AppConfig
 
 

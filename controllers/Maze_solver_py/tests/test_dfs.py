@@ -3,7 +3,8 @@
 import pytest
 from algorithm.common import init_maze_map_graph, add_walls_graph
 from algorithm.algorithm_dfs import DFS
-from utils.params import RobotState, DetectedWalls, Direction, Mode, Algorithms, MazeLayout
+from config.enums import Mode, Algorithms, MazeLayout, Direction
+from utils.types import RobotState, DetectedWalls
 from config.models import AppConfig, MazeConfig, SimulationConfig, RobotConfig
 
 
@@ -13,7 +14,6 @@ def maze_cfg_4x4() -> AppConfig:
         mode=Mode.SEARCH,
         algorithm=Algorithms.DFS,
         maze_layout=MazeLayout.APEC_2010,
-        testing=True,
         time_step=64,
     )
     robot_cfg = RobotConfig(model="", axle=0, wheel=0, speed=0)

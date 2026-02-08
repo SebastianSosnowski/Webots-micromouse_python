@@ -2,7 +2,6 @@ simulation:
   mode: SEARCH          # Python enum
   algorithm: FLOODFILL  # Python enum
   maze_layout: JAPAN_2011  # Python enum
-  testing: false
   time_step: 64
 
 robot:

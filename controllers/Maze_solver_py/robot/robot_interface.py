@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from controller import Robot
 
-from utils.params import DetectedWalls, RobotState
+from utils.types import DetectedWalls, RobotState
 
 
 class RobotInterface(ABC):
