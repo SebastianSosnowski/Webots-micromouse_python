@@ -2,7 +2,7 @@ from PySide6.QtWidgets import QGraphicsScene, QGraphicsItem, QGraphicsTextItem
 from PySide6.QtGui import QPainter, QPen
 from PySide6.QtCore import QRectF, Qt
 
-from draw.common import walls_from_bitmask, walls_from_graph
+from draw.common import walls_from_bitmask, walls_from_graph, format_position_values
 from utils.types import DrawState
 from config.enums import Algorithms, Direction
 from config.models import AppConfig
@@ -102,22 +102,35 @@ class MazeScene(QGraphicsScene):
                 self.addItem(cell)
                 self._cells.append(cell)
 
-    def _update_text_layer(self, values):
-        for i, value in enumerate(values):
-            if i >= len(self._text_items):
-                text = QGraphicsTextItem()
-                text.setZValue(self.Z_TEXT)
-                self.addItem(text)
-                self._text_items.append(text)
+    def _update_text_layer(self, values: dict[int, list[str]]):
+        total_cells = self._rows * self._cols
 
-            text = self._text_items[i]
-            text.setPlainText(str(value))
-            row = i // self._cols
+        for i in range(total_cells):
+            # ensure text item exists
+            if i >= len(self._text_items):
+                text_item = QGraphicsTextItem()
+                text_item.setZValue(self.Z_TEXT)
+                self.addItem(text_item)
+                self._text_items.append(text_item)
+
+            text_item = self._text_items[i]
+
+            # no values for this cell → clear text
+            if i not in values:
+                text_item.setPlainText("")
+                continue
+
+            # set multiline text
+            text_item.setPlainText("\n".join(values[i]))
+
+            # position (simulation → Qt coords)
+            row_sim = i // self._cols
             col = i % self._cols
-            qt_row = self._sim_row_to_qt_row(row)
-            text.setPos(
-                col * self._cell_size + self._cell_size * 0.3,
-                qt_row * self._cell_size + self._cell_size * 0.3,
+            qt_row = self._sim_row_to_qt_row(row_sim)
+
+            text_item.setPos(
+                col * self._cell_size + self._cell_size * 0.15,
+                qt_row * self._cell_size + self._cell_size * 0.1,
             )
 
     def update_from_state(self, state: DrawState):
@@ -141,7 +154,8 @@ class MazeScene(QGraphicsScene):
 
         # --- update text / values ---
         if state.position_values is not None:
-            self._update_text_layer(state.position_values)
+            formatted_values = format_position_values(state.position_values, self._algorithm)
+            self._update_text_layer(formatted_values)
 
     def _sim_row_to_qt_row(self, row: int) -> int:
         return (self._rows - 1) - row

@@ -1,4 +1,7 @@
-from config.enums import Direction
+from typing import cast
+
+from config.enums import Direction, Algorithms
+from utils.types import Cost
 
 
 def walls_from_bitmask(mask: int) -> dict[Direction, bool]:
@@ -35,3 +38,25 @@ def walls_from_graph(pos: int, neighbors: list[int], rows: int, cols: int) -> di
         walls[Direction.WEST] = False
 
     return walls
+
+
+def format_position_values(values, algorithm):
+    """
+    Convert algorithm-specific position_values into GUI-friendly format.
+
+    Returns:
+        dict[int, list[str]]
+        e.g. {42: ["F: 12", "G: 7", "H: 5"]}
+    """
+    result = {}
+
+    if algorithm == Algorithms.FLOODFILL:
+        for i, distance in enumerate(values):
+            result[i] = [f"D: {distance}"]
+
+    elif algorithm == Algorithms.A_STAR or Algorithms.A_STAR_MOD:
+        values = cast(dict[int, Cost], values)
+        for i, cost in values.items():
+            result[i] = [f"F: {cost.g+cost.h}", f"G: {cost.g}", f"H: {cost.h}"]
+
+    return result
