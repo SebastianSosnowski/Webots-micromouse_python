@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 
 class DrawStatePrinter(QObject):
-    """Tymczasowy receiver – tylko printuje DrawState."""
+    """Temp receiver – only print DrawState."""
 
     def on_draw_state(self, state: DrawState):
         logger.info("=== DrawState received ===")

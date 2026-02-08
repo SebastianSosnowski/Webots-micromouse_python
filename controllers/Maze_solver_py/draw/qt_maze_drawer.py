@@ -1,5 +1,5 @@
 from PySide6.QtWidgets import QGraphicsScene, QGraphicsItem, QGraphicsTextItem
-from PySide6.QtGui import QPainter, QPen
+from PySide6.QtGui import QPainter, QPen, QFont
 from PySide6.QtCore import QRectF, Qt
 
 from draw.common import walls_from_bitmask, walls_from_graph, format_position_values
@@ -65,7 +65,10 @@ class MazeScene(QGraphicsScene):
 
         self._grid_items = []
         self._cells = []
-        self._text_items = []
+        self._cell_text_items: list[dict[str, QGraphicsTextItem]] = []
+        self._font_f = QFont("Arial", 16, QFont.Weight.DemiBold)
+        self._font_gh = QFont("Arial", 12)
+        self._font_floodfill = QFont("Arial", 16, QFont.Weight.Medium)
 
         self._init_scene()
         self._init_grid_layer()
@@ -106,32 +109,110 @@ class MazeScene(QGraphicsScene):
         total_cells = self._rows * self._cols
 
         for i in range(total_cells):
-            # ensure text item exists
-            if i >= len(self._text_items):
-                text_item = QGraphicsTextItem()
-                text_item.setZValue(self.Z_TEXT)
-                self.addItem(text_item)
-                self._text_items.append(text_item)
+            # --- ensure dict for this cell ---
+            if i >= len(self._cell_text_items):
+                self._cell_text_items.append({})
 
-            text_item = self._text_items[i]
+            texts = self._cell_text_items[i]
 
-            # no values for this cell → clear text
+            # --- clear previous texts ---
+            for item in texts.values():
+                item.setPlainText("")
+
             if i not in values:
-                text_item.setPlainText("")
                 continue
-
-            # set multiline text
-            text_item.setPlainText("\n".join(values[i]))
-
-            # position (simulation → Qt coords)
+            # --- compute cell position (simulation -> Qt) ---
             row_sim = i // self._cols
             col = i % self._cols
             qt_row = self._sim_row_to_qt_row(row_sim)
 
-            text_item.setPos(
-                col * self._cell_size + self._cell_size * 0.15,
-                qt_row * self._cell_size + self._cell_size * 0.1,
-            )
+            cell_x = col * self._cell_size
+            cell_y = qt_row * self._cell_size
+
+            lines = values[i]
+
+            if self._algorithm == Algorithms.FLOODFILL:
+                self._update_text_floodfill(cell_x, cell_y, lines, texts)
+            elif self._algorithm == Algorithms.A_STAR or self._algorithm == Algorithms.A_STAR_MOD:
+                self._update_text_a_star(cell_x, cell_y, lines, texts)
+
+    def _update_text_floodfill(
+        self, cell_x: int, cell_y: int, text_line: list[str], texts: dict[str, QGraphicsTextItem]
+    ):
+        text = texts.get("d")
+        if text is None:
+            text = QGraphicsTextItem()
+            text.setFont(self._font_floodfill)
+            text.setZValue(self.Z_TEXT)
+            self.addItem(text)
+            texts["d"] = text
+
+        text.setPlainText(text_line[0])
+        rect = text.boundingRect()
+
+        x = cell_x + (self._cell_size - rect.width()) / 2
+        y = cell_y + (self._cell_size - rect.height()) / 2
+        text.setPos(x, y)
+
+    def _update_text_a_star(
+        self, cell_x: int, cell_y: int, text_lines: list[str], texts: dict[str, QGraphicsTextItem]
+    ):
+        f_text, g_text, h_text = text_lines
+        padding = 2
+
+        # ---------- F (center, big) ----------
+        f_item = texts.get("f")
+        if f_item is None:
+            f_item = QGraphicsTextItem()
+            f_item.setFont(self._font_f)
+            f_item.setZValue(self.Z_TEXT)
+            self.addItem(f_item)
+            texts["f"] = f_item
+
+        f_item.setPlainText(f_text)
+        f_rect = f_item.boundingRect()
+
+        fx = cell_x + (self._cell_size - f_rect.width()) / 2
+        fy = cell_y + (self._cell_size - f_rect.height()) / 2 + self._cell_size * 0.15
+        f_item.setPos(fx, fy)
+
+        # ---------- G (top-left, small) ----------
+        g_item = texts.get("g")
+        if g_item is None:
+            g_item = QGraphicsTextItem()
+            g_item.setFont(self._font_gh)
+            g_item.setZValue(self.Z_TEXT)
+            self.addItem(g_item)
+            texts["g"] = g_item
+
+        g_item.setPlainText(g_text)
+        g_rect = g_item.boundingRect()
+
+        gx = cell_x + padding
+        gy = cell_y + padding
+        g_item.setPos(gx, gy)
+
+        # ---------- H (top-right, small) ----------
+        h_item = texts.get("h")
+        if h_item is None:
+            h_item = QGraphicsTextItem()
+            h_item.setFont(self._font_gh)
+            h_item.setZValue(self.Z_TEXT)
+            self.addItem(h_item)
+            texts["h"] = h_item
+
+        h_item.setPlainText(h_text)
+        h_rect = h_item.boundingRect()
+
+        hx = cell_x + self._cell_size - h_rect.width() - padding
+        hy = cell_y + padding
+        h_item.setPos(hx, hy)
+
+    def _ensure_text_items_for_cell(self, i: int):
+        while i >= len(self._cell_text_items):
+            self._cell_text_items.append({})
+
+        return self._cell_text_items[i]
 
     def update_from_state(self, state: DrawState):
         """

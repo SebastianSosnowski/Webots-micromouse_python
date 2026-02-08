@@ -46,17 +46,17 @@ def format_position_values(values, algorithm):
 
     Returns:
         dict[int, list[str]]
-        e.g. {42: ["F: 12", "G: 7", "H: 5"]}
+        e.g. {42: ["12", "7", "5"]}
     """
     result = {}
 
     if algorithm == Algorithms.FLOODFILL:
         for i, distance in enumerate(values):
-            result[i] = [f"D: {distance}"]
+            result[i] = [str(distance)]
 
     elif algorithm == Algorithms.A_STAR or Algorithms.A_STAR_MOD:
         values = cast(dict[int, Cost], values)
         for i, cost in values.items():
-            result[i] = [f"F: {cost.g+cost.h}", f"G: {cost.g}", f"H: {cost.h}"]
+            result[i] = [str(cost.g + cost.h), str(cost.g), str(cost.h)]
 
     return result
