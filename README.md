@@ -68,7 +68,7 @@ Before anything, download and install Webots simulator in version R2023a (newer 
 3. During searching or speedrun, information about the process is logged in the terminal. After completing a course, the run time is printed and a prompt to press any key to end the program appears.
 ## Configuration
 
-The project uses a YAML configuration file `config.yaml` located in the `controllers/Maze_solver_py/` directory to set simulation parameters without modifying the code.
+The project uses YAML configuration files `config.yaml` and `logging.yaml` located in the `controllers/Maze_solver_py/` directory to set simulation and logging parameters without modifying the code.
 
 Here is an example of the `config.yaml` file:
 
@@ -77,7 +77,6 @@ simulation:
   mode: SEARCH          # Python enum
   algorithm: FLOODFILL  # Python enum
   maze_layout: JAPAN_2011  # Python enum
-  testing: false
   time_step: 64
 
 robot:
@@ -100,12 +99,23 @@ Key settings:
 - **simulation.mode**: Choose the operation mode - `SEARCH` for maze exploration and path finding, or `SPEEDRUN` for running the pre-computed path.
 - **simulation.algorithm**: Select the algorithm to use, e.g., `FLOODFILL`, `BFS`, `DFS`, `A_STAR`, `A_STAR_MOD`.
 - **simulation.maze_layout**: Choose the maze layout, e.g., `JAPAN_2011`, `UK2016`, etc.
-- **simulation.testing**: Enable/disable sensor testing output (boolean).
 - **simulation.time_step**: Time step for the simulation (in milliseconds).
 - **robot.model**: Robot model, currently `epuck`.
 - Other robot and maze parameters can be adjusted as needed.
 
-Edit `config.yaml` to change these settings before running the simulation.
+Logging configuration (`logging.yaml`):
+
+- **algorithm logger (`algorithm`)**: Logs algorithm flow, decisions, and intermediate values.
+- **robot logger (`robot`)**: Logs robot movement, control, and sensor-related runtime events.
+- **root logger (`root`)**: Logs general application messages not tied to a specific module.
+
+Logger levels are independent, so you can filter debug output per module:
+
+- To debug only robot behavior: set `robot` to `DEBUG` and `algorithm` to `INFO`.
+- To debug only algorithm behavior: set `algorithm` to `DEBUG` and `robot` to `INFO`.
+- To debug both modules: set both `robot` and `algorithm` to `DEBUG`.
+
+Edit `config.yaml` to change simulation settings and `logging.yaml` to adjust logging behavior before running the simulation.
 
 ## Code structure
 
@@ -114,6 +124,7 @@ The controller code is organized into modules for better maintainability and nav
 - **main.py**: The entry point of the application. It loads the configuration from `config.yaml`, initializes the `MazeSolver` class, and runs the robot simulation.
 - **config/**: Contains configuration-related modules.
   - **loader.py**: Loads and parses the `config.yaml` file.
+  - **logging_config.py**: Loads and applies logging settings from `logging.yaml`.
   - **models.py**: Defines data models for configuration using Pydantic.
   - **enums.py**: Defines enumerations for modes, algorithms, and maze layouts.
 - **algorithm/**: Implements various pathfinding algorithms.
@@ -129,7 +140,8 @@ The controller code is organized into modules for better maintainability and nav
 - **read_files/**: Data storage.
   - **storage.py**: Saves simulation results to files.
 - **utils/**: Utility modules.
-  - **params.py**: Contains parameters and constants.
+  - **types.py**: Contains shared dataclasses and types used across modules.
 - **mazes_layouts.py**: Defines maze layouts and their representations.
 - **tests/**: Contains unit tests for the algorithms and common functions.
 - **config.yaml**: Configuration file (see Configuration section).
+- **logging.yaml**: Logging configuration file used by the logging module.
