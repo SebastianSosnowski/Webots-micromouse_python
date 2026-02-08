@@ -43,7 +43,7 @@ Before anything, download and install Webots simulator in version R2023a (newer 
   
     a) Without an IDE 
     1. Open one of the worlds .wbt file from the project.
-    2. Change controller of e-puck robot in Webots project from extern to *Maze_solver_py*. For each world this operation must be done separately. **Webots controller module won’t be recognised and syntax suggestions won’t work in external editor.** 
+    2. Change controller of e-puck robot in Webots project from extern to *Maze_solver_py*. For each world this operation must be done separately. **Webots controller module won’t be recognized and syntax suggestions won’t work in external editor.** 
     
     b) With an IDE (e.g., VS Code)
     1. Open a Webots/lib/controller folder in your IDE and create *setup.py* file (you may need to run your IDE as admin).
@@ -63,7 +63,7 @@ Before anything, download and install Webots simulator in version R2023a (newer 
        pip install webots --no-index --find-links "file:///path/to/dist"
        ```
        If there is an error about the wrong version of *setuptools*, omit the *--no-index* flag in the command to allow pip to search for the package outside of the local directory.
-    5. Go back to the project. A controller module now should be recognised by the editor.
+    5. Go back to the project. A controller module now should be recognized by the editor.
 2. Open terminal in Maze_solver_py directory. Go to Webots simulation and run it, then run *main.py*. A simulation should execute and a window with maze drawing should pop up.
 3. During searching or speedrun, information about the process is logged in the terminal. After completing a course, the run time is printed and a prompt to press any key to end the program appears.
 ## Configuration
@@ -135,8 +135,10 @@ The controller code is organized into modules for better maintainability and nav
   - **robot_interface.py**: Defines the robot interface.
   - **robot_base.py**: Base robot class.
   - **robot_epuck.py**: Implementation for the e-puck robot.
-- **draw/**: Visualization module.
-  - **maze_drawer.py**: Handles drawing the maze, walls, and robot position using Turtle graphics.
+- **draw/**: Visualization module built with PySide6.
+  - **qt_maze_drawer.py**: Main Qt-based maze visualization window and rendering logic.
+  - **solver_worker.py**: Background worker thread that runs solver steps and emits draw updates to UI.
+  - **common.py**: Shared drawing helpers and data formatting utilities for the Qt UI.
 - **read_files/**: Data storage.
   - **storage.py**: Saves simulation results to files.
 - **utils/**: Utility modules.

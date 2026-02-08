@@ -6,7 +6,7 @@ setup_logging()
 import logging
 
 from PySide6.QtWidgets import QApplication, QGraphicsView
-from PySide6.QtCore import Qt
+from PySide6.QtCore import Qt, QSettings
 
 from config.loader import load_config
 from maze_solver import MazeSolver
@@ -48,9 +48,8 @@ def main():
     scene_rect = scene.sceneRect()
     EXTRA_MARGIN = 8
 
-    window.setFixedSize(
-        int(scene_rect.width()) + EXTRA_MARGIN,
-        int(scene_rect.height()) + EXTRA_MARGIN,
+    window.setMinimumSize(
+        int(scene_rect.width()) + EXTRA_MARGIN, int(scene_rect.height()) + EXTRA_MARGIN
     )
 
     window.show()
