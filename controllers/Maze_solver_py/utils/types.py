@@ -53,6 +53,7 @@ class DrawState:
     robot_pos: int
     maze_map: list | dict
     position_values: list | dict
+    visited: set[int]
 
 
 @dataclass

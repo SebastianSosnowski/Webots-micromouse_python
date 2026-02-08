@@ -1,5 +1,5 @@
-from PySide6.QtWidgets import QGraphicsScene, QGraphicsItem, QGraphicsTextItem
-from PySide6.QtGui import QPainter, QPen, QFont
+from PySide6.QtWidgets import QGraphicsScene, QGraphicsItem, QGraphicsTextItem, QGraphicsRectItem
+from PySide6.QtGui import QPainter, QPen, QFont, QBrush, QColor
 from PySide6.QtCore import QRectF, Qt
 
 from draw.common import walls_from_bitmask, walls_from_graph, format_position_values
@@ -44,11 +44,12 @@ class CellItem(QGraphicsItem):
 
 
 class MazeScene(QGraphicsScene):
-    Z_GRID = 0
-    Z_WALLS = 1
-    Z_TEXT = 2
-    Z_PATH = 3
-    Z_ROBOT = 4
+    Z_VISITED = 0
+    Z_GRID = 1
+    Z_WALLS = 2
+    Z_TEXT = 3
+    Z_PATH = 4
+    Z_ROBOT = 5
 
     def __init__(
         self, config: AppConfig, maze_map: list | dict, position_values: list | dict, cell_size=60
@@ -62,6 +63,7 @@ class MazeScene(QGraphicsScene):
         self._rows = self._cfg.maze.rows
         self._cols = self._cfg.maze.columns
         self._algorithm = self._cfg.simulation.algorithm
+        self._visited_items: list[QGraphicsRectItem] = []
 
         self._grid_items = []
         self._cells = []
@@ -71,8 +73,39 @@ class MazeScene(QGraphicsScene):
         self._font_floodfill = QFont("Arial", 16, QFont.Weight.Medium)
 
         self._init_scene()
+        self._init_visited_layer()
         self._init_grid_layer()
         self._init_cell_layer()
+
+    def update_from_state(self, state: DrawState):
+        """
+        Update maze visualization from DrawState.
+        Called from Qt main thread via signal from SolverWorker.
+        """
+        self._update_visited_layer(state.visited)
+        self._update_walls_layer(state.maze_map)
+        if state.position_values is not None:
+            formatted_values = format_position_values(state.position_values, self._algorithm)
+            self._update_text_layer(formatted_values)
+
+    def _init_visited_layer(self):
+        for row in range(self._rows):
+            for col in range(self._cols):
+                qt_row = self._sim_row_to_qt_row(row)
+
+                rect = QGraphicsRectItem(
+                    col * self._cell_size,
+                    qt_row * self._cell_size,
+                    self._cell_size,
+                    self._cell_size,
+                )
+
+                rect.setBrush(QBrush(Qt.GlobalColor.transparent))
+                rect.setPen(Qt.PenStyle.NoPen)
+                rect.setZValue(self.Z_VISITED)
+
+                self.addItem(rect)
+                self._visited_items.append(rect)
 
     def _init_scene(self):
         width = self._cols * self._cell_size
@@ -104,6 +137,22 @@ class MazeScene(QGraphicsScene):
                 cell.setZValue(self.Z_WALLS)
                 self.addItem(cell)
                 self._cells.append(cell)
+
+    def _update_walls_layer(self, maze_map: list | dict):
+        for i, cell in enumerate(self._cells):
+            if self._algorithm == Algorithms.FLOODFILL:
+                walls = walls_from_bitmask(maze_map[i])
+            else:
+                walls = walls_from_graph(i, maze_map[i], self._rows, self._cols)
+
+            cell.set_walls(walls)
+
+    def _update_visited_layer(self, visited: set[int]):
+        visited_brush = QBrush(QColor(180, 255, 180))
+
+        for idx in visited:
+            if 0 <= idx < len(self._visited_items):
+                self._visited_items[idx].setBrush(visited_brush)
 
     def _update_text_layer(self, values: dict[int, list[str]]):
         total_cells = self._rows * self._cols
@@ -213,30 +262,6 @@ class MazeScene(QGraphicsScene):
             self._cell_text_items.append({})
 
         return self._cell_text_items[i]
-
-    def update_from_state(self, state: DrawState):
-        """
-        Update maze visualization from DrawState.
-        Called from Qt main thread via signal from SolverWorker.
-        """
-        # --- update walls ---
-        for i, cell in enumerate(self._cells):
-            if self._algorithm == Algorithms.FLOODFILL:
-                walls = walls_from_bitmask(state.maze_map[i])
-            else:
-                walls = walls_from_graph(
-                    i,
-                    state.maze_map[i],
-                    self._rows,
-                    self._cols,
-                )
-
-            cell.set_walls(walls)
-
-        # --- update text / values ---
-        if state.position_values is not None:
-            formatted_values = format_position_values(state.position_values, self._algorithm)
-            self._update_text_layer(formatted_values)
 
     def _sim_row_to_qt_row(self, row: int) -> int:
         return (self._rows - 1) - row

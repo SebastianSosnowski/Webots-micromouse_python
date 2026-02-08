@@ -1,4 +1,5 @@
 from algorithm import AStar
+from utils.types import Cost
 
 
 class AStarMod(AStar):
@@ -12,7 +13,7 @@ class AStarMod(AStar):
     although in MicroMouse mazes it usually finds it.
     """
 
-    def _select_next_position(self, cost: dict[int, list[int]]):
+    def _select_next_position(self, cost: dict[int, Cost]):
         """Decides to which cell move next. TODO Implement heap to make it much faster.
 
         Cell with the lowest overall cost (Fcost) is chosen. If more cells have equal
@@ -31,10 +32,10 @@ class AStarMod(AStar):
         current_destination = self._open[-1]
 
         for i in self._open:
-            Fcost_i = cost[i][0] + cost[i][1]
-            Fcost_curr = cost[current_destination][0] + cost[current_destination][1]
+            Fcost_i = cost[i].g + cost[i].h
+            Fcost_curr = cost[current_destination].g + cost[current_destination].h
             if (Fcost_i < Fcost_curr) or (
-                Fcost_i == Fcost_curr and cost[i][1] < cost[current_destination][1]
+                Fcost_i == Fcost_curr and cost[i].g < cost[current_destination].h
             ):
                 current_destination = i
 

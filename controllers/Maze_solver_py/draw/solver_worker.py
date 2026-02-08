@@ -31,11 +31,13 @@ class SolverWorker(QThread):
                     targets = self.mz.algorithm.update(detected, self.mz.robot.state)
 
                     while targets:
+                        self.mz.visited.add(self.mz.robot.state.pos)
                         self.draw_state.emit(
                             DrawState(
                                 self.mz.robot.state.pos,
                                 deepcopy(self.mz.algorithm.maze_map),
                                 deepcopy(self.mz.algorithm.position_values),
+                                set(self.mz.visited),
                             )
                         )
                         self.mz.robot.move(targets.pop(0))
@@ -46,6 +48,7 @@ class SolverWorker(QThread):
                                 self.mz.robot.state.pos,
                                 deepcopy(self.mz.algorithm.maze_map),
                                 deepcopy(self.mz.algorithm.position_values),
+                                set(self.mz.visited),
                             )
                         )
 
@@ -75,18 +78,14 @@ class SolverWorker(QThread):
 
                     self.draw_state.emit(
                         DrawState(
-                            self.mz.robot.state.pos,
-                            maze_map,
-                            position_values,
+                            self.mz.robot.state.pos, maze_map, position_values, set(self.mz.visited)
                         )
                     )
                     self.mz.robot.move(path.pop(0))
 
                 self.draw_state.emit(
                     DrawState(
-                        self.mz.robot.state.pos,
-                        maze_map,
-                        position_values,
+                        self.mz.robot.state.pos, maze_map, position_values, set(self.mz.visited)
                     )
                 )
 

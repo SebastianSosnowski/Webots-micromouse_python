@@ -10,6 +10,8 @@ class MazeSolver:
         self._cfg = config
         self.robot = MyRobot(self._cfg)
         self.algorithm = Algorithm(self._cfg)
+        self.visited: set[int] = set()
+        self.visited.add(self.robot.state.pos)
 
     def init_drawer_values(self) -> tuple[list[int], list | dict, list | dict]:
         if self._cfg.simulation.mode == Mode.SEARCH:
